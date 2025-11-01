@@ -1,0 +1,1 @@
+\copy cities(county_id, city_name) FROM 'C:\Adatok\13d\vizsgaremek\varos_megye_elol.csv' DELIMITER ',' CSV HEADER;
