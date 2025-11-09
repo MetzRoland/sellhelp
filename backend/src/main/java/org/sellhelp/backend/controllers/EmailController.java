@@ -7,15 +7,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 public class EmailController {
+
+    private final EmailService emailService;
+
     @Autowired
-    private EmailService emailService;
+    public EmailController(EmailService emailService){
+        this.emailService = emailService;
+    }
 
     @GetMapping("/send-email")
     public String sendEmail() {
         emailService.sendSimpleEmail(
                 "metzroland1111@gmail.com",
                 "Test Subject",
-                "Hello! This is a plain text email from Spring Boot."
+                "Hello!!! This is a plain text email from Spring Boot."
         );
         return "Email sent successfully!";
     }
