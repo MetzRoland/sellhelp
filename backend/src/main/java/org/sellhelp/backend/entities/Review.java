@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CurrentTimestamp;
 
 @Entity
 @Table(name = "reviews")
@@ -30,5 +31,6 @@ class Review {
     private String comment;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    @CurrentTimestamp
+    private LocalDateTime createdAt;
 }

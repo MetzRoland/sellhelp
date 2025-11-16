@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
@@ -36,19 +37,22 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
-    @Column(name = "city_id", nullable = false)
-    private int city_id;
+    @ManyToOne
+    @JoinColumn(name = "city_id")
+    private City city;
 
     @Column(name = "google_id")
     private String google_id;
 
-    @Column(name = "role_id", nullable = false)
-    private byte role_id;
+    @ManyToOne
+    @JoinColumn(name = "role_id")
+    private Role role;
 
     @Column(name = "is_banned")
     private boolean is_banned;
 
     @Column(name = "created_at")
-    private LocalDateTime created_at;
+    @CurrentTimestamp
+    private LocalDateTime createdAt;
 }
 

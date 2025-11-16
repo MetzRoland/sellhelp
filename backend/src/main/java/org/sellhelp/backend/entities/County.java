@@ -1,4 +1,4 @@
-package org.sellhelp.backend.models;
+package org.sellhelp.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import java.util.List;
 
 @Entity
-@Table(name = "counites")
+@Table(name = "counties")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -23,6 +23,4 @@ public class County {
     @Column(name = "county_name", nullable = false, unique = true)
     private String countyName;
 
-    @OneToMany(mappedBy = "county")
-    private List<City> cities;
 }
