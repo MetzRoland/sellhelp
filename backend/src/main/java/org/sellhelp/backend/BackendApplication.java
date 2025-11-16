@@ -1,5 +1,7 @@
 package org.sellhelp.backend;
 
+import org.sellhelp.backend.models.City;
+import org.sellhelp.backend.models.County;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
