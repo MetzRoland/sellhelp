@@ -155,7 +155,7 @@ CREATE TABLE "user_secrets" (
       REFERENCES "users"("id")
 );
 
-CREATE TABLE "rewievs" (
+CREATE TABLE "reviews" (
   "id" SERIAL,
   "user_id" INT,
   "rating" SMALLINT NOT NULL,
@@ -266,6 +266,51 @@ FOR EACH ROW
 EXECUTE FUNCTION update_last_used_pass();
 
 
+-- Enable FDW
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- Enable pg_cron
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+CREATE SERVER sellhelpdb_server
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host 'sellhelp-database.cj2eg666q0kr.eu-north-1.rds.amazonaws.com', dbname 'sellhelp', port '5432');
+
+CREATE USER MAPPING FOR sandbox
+SERVER sellhelpdb_server
+OPTIONS (user 'sandbox', password 'SandBoxPassword1111.');
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (posts, post_files)
+FROM SERVER sellhelpdb_server
+INTO public;
+
+DELETE FROM posts
+WHERE created_at < NOW() - INTERVAL '30 days';
+
+SELECT cron.schedule(
+    'daily_delete_expired_posts',
+    '0 0 * * *',
+$$
+DELETE FROM post_files
+WHERE post_id IN (
+    SELECT id FROM posts
+    WHERE created_at < NOW() - INTERVAL '30 days'
+      AND status_id <> (
+            SELECT id FROM post_status 
+            WHERE status_name = 'closed'
+          )
+);
+DELETE FROM posts
+WHERE created_at < NOW() - INTERVAL '30 days'
+  AND status_id <> (
+        SELECT id FROM post_status 
+        WHERE status_name = 'closed'
+      );
+$$
+);
+
+DROP SERVER IF EXISTS sellhelpdb_server CASCADE;
 
 DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;

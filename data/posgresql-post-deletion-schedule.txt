@@ -1,0 +1,40 @@
+in AWS:
+add parameter_group
+shared_preload_libraries = 'pg_cron'
+
+in postgresql database:
+
+-- Enable FDW
+CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+
+-- Enable pg_cron
+CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+CREATE SERVER sellhelpdb_server
+FOREIGN DATA WRAPPER postgres_fdw
+OPTIONS (host 'sellhelp-database.cj2eg666q0kr.eu-north-1.rds.amazonaws.com', dbname 'sellhelp', port '5432');
+
+CREATE USER MAPPING FOR sandbox
+SERVER sellhelpdb_server
+OPTIONS (user 'sandbox', password 'SandBoxPassword1111.');
+
+IMPORT FOREIGN SCHEMA public
+LIMIT TO (posts)
+FROM SERVER sellhelpdb_server
+INTO public;
+
+DELETE FROM posts
+WHERE created_at < NOW() - INTERVAL '30 days';
+
+SELECT cron.schedule(
+    'daily_delete_expired_posts',      -- job name
+    '0 0 * * *',                       -- run at 00:00 every day (CRON syntax)
+$$
+DELETE FROM posts
+WHERE created_at < NOW() - INTERVAL '30 days'
+  AND status_id <> (
+        SELECT id FROM post_status 
+        WHERE status_name = 'closed'
+      );
+$$
+);
