@@ -281,7 +281,7 @@ SERVER sellhelpdb_server
 OPTIONS (user 'sandbox', password 'SandBoxPassword1111.');
 
 IMPORT FOREIGN SCHEMA public
-LIMIT TO (posts, post_files)
+LIMIT TO (posts, post_files, post_status)
 FROM SERVER sellhelpdb_server
 INTO public;
 

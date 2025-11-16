@@ -1,4 +1,4 @@
-package org.sellhelp.backend.models;
+package org.sellhelp.backend.entities;
 
 import java.time.LocalDateTime;
 import jakarta.persistence.*;
@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class Reviews {
+class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

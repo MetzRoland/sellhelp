@@ -1,7 +1,4 @@
-package org.sellhelp.backend.models;
-
-import java.time.LocalDateTime;
-import java.util.Date;
+package org.sellhelp.backend.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -9,13 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 @Entity
 @Table(name = "users")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class Users {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
@@ -51,3 +51,4 @@ class Users {
     @Column(name = "created_at")
     private LocalDateTime created_at;
 }
+
