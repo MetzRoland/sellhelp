@@ -22,5 +22,4 @@ public class County {
 
     @Column(name = "county_name", nullable = false, unique = true)
     private String countyName;
-
 }

@@ -7,24 +7,29 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
-@Table(name = "user_roles")
+@Table(name = "user_secrets")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class UserSecret {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "role_name", nullable = false, unique = true)
-    private String roleName;
+    @Column(name = "password", nullable = false)
+    private String password;
+
+    @Column(name = "last_used_pass")
+    private String lastUsedPassword;
+
+    @Column(name = "pass_update_token")
+    private String passUpdateToken;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "role")
-    private List<User> users;
+    @OneToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

@@ -7,24 +7,23 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Entity
-@Table(name = "user_roles")
+@Table(name = "post_files")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Role {
+public class PostFile {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "role_name", nullable = false, unique = true)
-    private String roleName;
+    @Column(name = "file_path", nullable = false)
+    private String postFilePath;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "role")
-    private List<User> users;
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
 }

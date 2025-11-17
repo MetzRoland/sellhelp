@@ -21,8 +21,9 @@ class Review {
     @Column(name = "id")
     private int id;
 
-    @Column(name = "user_id")
-    private int user_id;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User reviewWriter;
 
     @Column(name = "rating", nullable = false)
     private byte rating;
@@ -30,7 +31,7 @@ class Review {
     @Column(name = "comment")
     private String comment;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     @CurrentTimestamp
     private LocalDateTime createdAt;
 }

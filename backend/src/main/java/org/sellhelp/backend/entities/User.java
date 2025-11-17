@@ -1,5 +1,6 @@
 package org.sellhelp.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +10,7 @@ import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -51,8 +53,15 @@ public class User {
     @Column(name = "is_banned")
     private boolean is_banned;
 
-    @Column(name = "created_at")
+    @Column(name = "created_at", nullable = false)
     @CurrentTimestamp
     private LocalDateTime createdAt;
+
+    @OneToOne(mappedBy = "user")
+    private UserSecret userSecret;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "reviewWriter")
+    private List<Review> reviews;
 }
 
