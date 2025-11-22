@@ -161,13 +161,17 @@ CREATE TABLE "user_secrets" (
 
 CREATE TABLE "reviews" (
   "id" SERIAL,
-  "user_id" INT,
+  "sender_user_id" INT,
+  "reviewed_user_id" INT,
   "rating" SMALLINT NOT NULL,
   "comment" VARCHAR(2000),
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
-  CONSTRAINT "FK_rewievs_user_id"
-    FOREIGN KEY ("user_id")
+  CONSTRAINT "FK_reviews_sender_user_id"
+    FOREIGN KEY ("sender_user_id")
+      REFERENCES "users"("id")
+  CONSTRAINT "FK_reviews_reviewed_user_id"
+    FOREIGN KEY ("reviewed_user_id")
       REFERENCES "users"("id")
 );
 

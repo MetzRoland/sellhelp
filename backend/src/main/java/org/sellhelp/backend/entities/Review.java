@@ -22,8 +22,12 @@ public class Review {
     private int id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User reviewWriter;
+    @JoinColumn(name = "sender_user_id")
+    private User senderUser;
+
+    @ManyToOne
+    @JoinColumn(name = "reviewed_user_id")
+    private User reviewedUser;
 
     @Column(name = "rating", nullable = false)
     private byte rating;
