@@ -22,13 +22,13 @@ public class Comment {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private User commentPublisher;
 
     @Column(name = "message", nullable = false)
     private String message;

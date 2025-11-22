@@ -22,13 +22,13 @@ public class ChatMessage {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "chat_id")
     private Chat chat;
 
-    @ManyToOne()
-    @JoinColumn(name = "user")
-    private User user;
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User messageSender;
 
     @Column(name = "message", nullable = false)
     private String message;

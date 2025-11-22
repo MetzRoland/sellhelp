@@ -18,11 +18,11 @@ public class Chat {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "host_id")
     private User host;
 
-    @ManyToOne()
+    @ManyToOne
     @JoinColumn(name = "guest_id")
     private User guest;
 }

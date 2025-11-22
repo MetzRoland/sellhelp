@@ -22,16 +22,16 @@ public class Report {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "reported_user_id")
     private User reportedUser;
 
-    @ManyToOne()
-    @JoinColumn(name = "user_id")
+    @ManyToOne
+    @JoinColumn(name = "sender_user_id")
     private User senderUser;
 
-    @ManyToOne()
-    @JoinColumn(name = "reprot_type_id")
+    @ManyToOne
+    @JoinColumn(name = "report_type_id")
     private ReportType reportType;
 
     @Column(name = "created_at")
