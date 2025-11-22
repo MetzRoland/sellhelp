@@ -14,7 +14,7 @@ import org.hibernate.annotations.CurrentTimestamp;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-class Review {
+public class Review {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
