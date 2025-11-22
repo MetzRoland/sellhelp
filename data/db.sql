@@ -91,7 +91,8 @@ CREATE TABLE "comments" (
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_post_id"
     FOREIGN KEY ("post_id")
-      REFERENCES "posts"("id"),
+      REFERENCES "posts"("id")
+      ON DELETE CASCADE,
   CONSTRAINT "FK_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
@@ -111,6 +112,7 @@ CREATE TABLE "chat_messages" (
   CONSTRAINT "FK_chat_messages_chat_id"
     FOREIGN KEY ("chat_id")
       REFERENCES "chats"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "user_files" (
@@ -131,6 +133,7 @@ CREATE TABLE "chat_files" (
   CONSTRAINT "FK_chat_files_message_id"
     FOREIGN KEY ("message_id")
       REFERENCES "chat_messages"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "post_files" (
@@ -141,6 +144,7 @@ CREATE TABLE "post_files" (
   CONSTRAINT "FK_post_files_post_id"
     FOREIGN KEY ("post_id")
       REFERENCES "posts"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "user_secrets" (
@@ -172,6 +176,7 @@ CREATE TABLE "notifications" (
   "user_id" INT,
   "title" VARCHAR(100) NOT NULL,
   "message" VARCHAR(2000) NOT NULL,
+  "sent_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_notifications_user_id"
     FOREIGN KEY ("user_id")
