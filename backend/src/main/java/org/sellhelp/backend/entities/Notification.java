@@ -1,5 +1,9 @@
 package org.sellhelp.backend.entities;
 
+import java.time.LocalDateTime;
+
+import org.hibernate.annotations.CurrentTimestamp;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -27,4 +31,8 @@ public class Notification {
 
     @Column(name = "message", nullable = false)
     private String message;
+
+    @Column(name = "sent_at")
+    @CurrentTimestamp
+    private LocalDateTime sentAt;
 }
