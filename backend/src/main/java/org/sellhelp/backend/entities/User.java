@@ -61,7 +61,7 @@ public class User {
     private UserSecret userSecret;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "reviewWriter")
+    @OneToMany(mappedBy = "reviewedUser")
     private List<Review> reviews;
 }
 
