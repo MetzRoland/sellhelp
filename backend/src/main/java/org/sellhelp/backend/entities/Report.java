@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -32,6 +34,7 @@ public class Report {
 
     @ManyToOne
     @JoinColumn(name = "report_type_id")
+    @JsonIgnore
     private ReportType reportType;
 
     @Column(name = "created_at")

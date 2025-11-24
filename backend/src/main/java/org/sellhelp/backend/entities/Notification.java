@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -24,6 +26,7 @@ public class Notification {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
+    @JsonIgnore
     private User notifiedUser;
 
     @Column(name = "title", nullable = false)

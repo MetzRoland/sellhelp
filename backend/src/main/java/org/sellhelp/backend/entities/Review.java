@@ -8,6 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "reviews")
 @Data
@@ -27,6 +29,7 @@ public class Review {
 
     @ManyToOne
     @JoinColumn(name = "reviewed_user_id")
+    @JsonIgnore
     private User reviewedUser;
 
     @Column(name = "rating", nullable = false)

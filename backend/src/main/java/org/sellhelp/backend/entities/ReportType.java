@@ -1,5 +1,7 @@
 package org.sellhelp.backend.entities;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +22,7 @@ public class ReportType {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "reportType")
+    private List<Report> reports;
 }

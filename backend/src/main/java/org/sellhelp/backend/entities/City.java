@@ -5,8 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 @Entity
 @Table(name = "cities")
@@ -25,6 +24,7 @@ public class City {
 
     @ManyToOne
     @JoinColumn(name = "county_id")
+    @JsonIgnore
     private County county;
 
 }

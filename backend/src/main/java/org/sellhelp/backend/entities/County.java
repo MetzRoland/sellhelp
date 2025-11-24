@@ -5,7 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.util.List;
 
 @Entity
@@ -22,4 +21,7 @@ public class County {
 
     @Column(name = "county_name", nullable = false, unique = true)
     private String countyName;
+
+    @OneToMany(mappedBy = "county")
+    private List<City> cityList;
 }

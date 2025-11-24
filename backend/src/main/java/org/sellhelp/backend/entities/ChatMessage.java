@@ -1,8 +1,11 @@
 package org.sellhelp.backend.entities;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.hibernate.annotations.CurrentTimestamp;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -24,6 +27,7 @@ public class ChatMessage {
 
     @ManyToOne
     @JoinColumn(name = "chat_id")
+    @JsonIgnore
     private Chat chat;
 
     @ManyToOne
@@ -36,4 +40,7 @@ public class ChatMessage {
     @Column(name = "sent_at")
     @CurrentTimestamp
     private LocalDateTime sentAt;
+
+    @OneToMany(mappedBy = "chatMessage")
+    private List<ChatFile> files;
 }

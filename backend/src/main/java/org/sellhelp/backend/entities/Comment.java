@@ -10,6 +10,8 @@ import java.time.LocalDateTime;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @Entity
 @Table(name = "comments")
 @Data
@@ -22,6 +24,7 @@ public class Comment {
     @Column(name = "id")
     private Integer id;
 
+    @JsonIgnore
     @ManyToOne
     @JoinColumn(name = "post_id")
     private Post post;
