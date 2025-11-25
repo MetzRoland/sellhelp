@@ -22,7 +22,6 @@ public class ChatFile {
     @JoinColumn(name = "message_id", nullable = false)
     private ChatMessage chatMessage;
 
-
     @Column(name = "file_path", nullable = false)
     private String filePath;
 }

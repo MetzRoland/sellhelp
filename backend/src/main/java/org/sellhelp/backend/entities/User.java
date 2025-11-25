@@ -1,6 +1,7 @@
 package org.sellhelp.backend.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -51,7 +52,7 @@ public class User {
     private Role role;
 
     @Column(name = "is_banned")
-    private boolean is_banned;
+    private boolean banned;
 
     @Column(name = "created_at", nullable = false)
     @CurrentTimestamp

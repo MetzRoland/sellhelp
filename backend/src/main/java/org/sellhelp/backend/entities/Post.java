@@ -47,6 +47,6 @@ public class Post {
     @JoinColumn(name = "city_id")
     private City city;
 
-    @OneToMany(mappedBy = "post", cascade = {CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToMany(mappedBy = "post")
     private List<PostFile> postFiles;
 }
