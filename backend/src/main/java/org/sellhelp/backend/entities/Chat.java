@@ -1,5 +1,7 @@
 package org.sellhelp.backend.entities;
 
+import java.util.List;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,4 +27,8 @@ public class Chat {
     @ManyToOne
     @JoinColumn(name = "guest_id")
     private User guest;
+
+    @OneToMany(mappedBy = "chat")
+    private List<ChatMessage> chatMessages;
+
 }

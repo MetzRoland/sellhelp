@@ -1,5 +1,7 @@
 package org.sellhelp.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,6 +22,7 @@ public class ChatFile {
 
     @ManyToOne
     @JoinColumn(name = "message_id", nullable = false)
+    @JsonIgnore
     private ChatMessage chatMessage;
 
     @Column(name = "file_path", nullable = false)

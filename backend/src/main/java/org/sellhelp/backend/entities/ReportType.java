@@ -1,5 +1,8 @@
 package org.sellhelp.backend.entities;
 
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -20,4 +23,8 @@ public class ReportType {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "reportType")
+    @JsonIgnore
+    private List<Report> reports;
 }

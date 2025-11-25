@@ -61,8 +61,12 @@ public class User {
     @OneToOne(mappedBy = "user")
     private UserSecret userSecret;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "reviewedUser")
     private List<Review> reviews;
-}
 
+    @OneToMany(mappedBy = "notifiedUser")
+    private List<Notification> userNotifications;
+
+    @OneToMany(mappedBy = "user")
+    private List<UserFile> userFiles;
+}
