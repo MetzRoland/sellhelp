@@ -274,6 +274,7 @@ BEFORE UPDATE OF password ON "user_secrets"
 FOR EACH ROW
 EXECUTE FUNCTION update_last_used_pass();
 
+CREATE INDEX idx_cities_city_name ON cities (city_name);
 
 -- Enable FDW
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
@@ -301,15 +302,6 @@ SELECT cron.schedule(
     'daily_delete_expired_posts',
     '0 0 * * *',
 $$
-DELETE FROM post_files
-WHERE post_id IN (
-    SELECT id FROM posts
-    WHERE created_at < NOW() - INTERVAL '30 days'
-      AND status_id <> (
-            SELECT id FROM post_status 
-            WHERE status_name = 'closed'
-          )
-);
 DELETE FROM posts
 WHERE created_at < NOW() - INTERVAL '30 days'
   AND status_id <> (

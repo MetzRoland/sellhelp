@@ -41,6 +41,6 @@ public class ChatMessage {
     @CurrentTimestamp
     private LocalDateTime sentAt;
 
-    @OneToMany(mappedBy = "chatMessage")
+    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL)
     private List<ChatFile> chatFiles;
 }

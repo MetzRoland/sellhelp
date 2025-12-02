@@ -27,7 +27,7 @@ public class Review {
     @JoinColumn(name = "sender_user_id")
     private User senderUser;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "reviewed_user_id")
     @JsonIgnore
     private User reviewedUser;

@@ -7,8 +7,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CurrentTimestamp;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -29,13 +31,13 @@ public class User {
     private String username;
 
     @Column(name = "first_name", nullable = false)
-    private String first_name;
+    private String firstName;
 
     @Column(name = "last_name", nullable = false)
-    private String last_name;
+    private String lastName;
 
     @Column(name = "birth_date", nullable = false)
-    private Date birth_date;
+    private LocalDate birthDate;
 
     @Column(name = "email", nullable = false, unique = true)
     private String email;
@@ -58,15 +60,15 @@ public class User {
     @CurrentTimestamp
     private LocalDateTime createdAt;
 
-    @OneToOne(mappedBy = "user")
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserSecret userSecret;
 
-    @OneToMany(mappedBy = "reviewedUser")
+    @OneToMany(mappedBy = "reviewedUser", cascade = CascadeType.ALL)
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "notifiedUser")
+    @OneToMany(mappedBy = "notifiedUser", cascade = CascadeType.ALL)
     private List<Notification> userNotifications;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<UserFile> userFiles;
 }

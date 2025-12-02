@@ -25,6 +25,6 @@ public class PostStatus {
     private String statusName;
 
     @JsonIgnore
-    @OneToMany(mappedBy = "postStatus")
+    @OneToMany(mappedBy = "postStatus", cascade = CascadeType.ALL)
     private List<Post> posts;
 }

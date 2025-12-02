@@ -24,7 +24,7 @@ public class Notification {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User notifiedUser;
