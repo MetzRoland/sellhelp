@@ -20,7 +20,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

@@ -15,7 +15,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@Builder(toBuilder = true)
 public class Review {
 
     @Id
