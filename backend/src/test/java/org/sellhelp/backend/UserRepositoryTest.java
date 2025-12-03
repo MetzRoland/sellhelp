@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.test.util.AssertionErrors.*;
@@ -35,94 +36,93 @@ public class UserRepositoryTest {
                                 .build()
                 )
                 .userNotifications(
-                        List.of(
+                        new ArrayList<>(List.of(
                                 Notification.builder()
                                         .title("Notification 1")
                                         .message("This is notification 1")
                                         .build()
-                        )
+                        ))
                 )
                 .reviews(
-                        List.of(
+                        new ArrayList<>(List.of(
                                 Review.builder()
                                         .rating((byte) 5)
                                         .comment("Good job")
                                         .build()
-                        )
+                        ))
                 )
                 .userFiles(
-                        List.of(
+                        new ArrayList<>(List.of(
                                 UserFile.builder()
                                         .filePath("resume.docx")
                                         .build(),
                                 UserFile.builder()
                                         .filePath("resume2.docx")
                                         .build()
-                        )
+                        ))
                 )
                 .build();
-
-
-        testUser.getReviews().getFirst().setSenderUser(testUser);
-        testUser.getReviews().getFirst().setReviewedUser(testUser);
-
-        //testUser.getUserSecret().setUser(testUser);
     }
 
     @Test
     public void userCanBeAddedToUserRepositoryAndDB(){
+        User savedUser = userRepository.save(testUser);
+
+        assertNotNull(null, savedUser.getId());
+
+        assertEquals(null, "123", savedUser.getUserSecret().getPassword());
+
+        assertEquals(null, "Roland", savedUser.getFirstName());
+
+        assertEquals(null, "Metz", savedUser.getLastName());
+
+        assertEquals(null, "metzroland", savedUser.getUsername());
+
+        assertEquals(null, "a@gmail.com", savedUser.getEmail());
+
+        assertEquals(null, LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
+
+        assertEquals(null, "Notification 1", savedUser.getUserNotifications().get(0).getTitle());
+
+        assertEquals(null, "resume.docx", savedUser.getUserFiles().get(0).getFilePath());
+
+        assertEquals(null, 2, savedUser.getUserFiles().size());
+
+        assertEquals(null, "Good job", savedUser.getReviews().get(0).getComment());
+
+        assertEquals(null, (byte) 5, savedUser.getReviews().get(0).getRating());
+    }
+
+    @Test
+    public void userCanBeUpdatedToUserRepositoryAndDB(){
         userRepository.save(testUser);
 
-        Integer testUserId = userRepository.findAll().getFirst().getId();
+        testUser.setFirstName("Karoly");
 
-        assertNotNull(null, testUserId);
+        User updatedUser = userRepository.save(testUser);
 
-        assertEquals(null,1, userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getId());
+        assertNotNull(null, updatedUser.getId());
 
-        assertEquals(null, "123", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getUserSecret().getPassword());
+        assertEquals(null, "123", updatedUser.getUserSecret().getPassword());
 
-        assertEquals(null, "Roland", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getFirstName());
+        assertEquals(null, "Karoly", updatedUser.getFirstName());
 
-        assertEquals(null, "Metz", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getLastName());
+        assertEquals(null, "Metz", updatedUser.getLastName());
 
-        assertEquals(null, "metzroland", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getUsername());
+        assertEquals(null, "metzroland", updatedUser.getUsername());
 
-        assertEquals(null, "a@gmail.com", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getEmail());
+        assertEquals(null, "a@gmail.com", updatedUser.getEmail());
 
-        assertEquals(null, LocalDate.of(2003, 5, 12), userRepository.findById(1).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getBirthDate());
+        assertEquals(null, LocalDate.of(2003, 5, 12), updatedUser.getBirthDate());
 
-        assertEquals(null, "Notification 1", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getUserNotifications().getFirst().getTitle());
+        assertEquals(null, "Notification 1", updatedUser.getUserNotifications().get(0).getTitle());
 
-        assertEquals(null, "resume.docx", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getUserFiles().getFirst().getFilePath());
+        assertEquals(null, "resume.docx", updatedUser.getUserFiles().get(0).getFilePath());
 
-        assertEquals(null, 2, userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getUserFiles().size());
+        assertEquals(null, 2, updatedUser.getUserFiles().size());
 
-        assertEquals(null, "Good job", userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getReviews().getFirst().getComment());
+        assertEquals(null, "Good job", updatedUser.getReviews().get(0).getComment());
 
-        assertEquals(null, (byte) 5, userRepository.findById(testUserId).orElseThrow(
-                () -> new RuntimeException("User not found")
-        ).getReviews().getFirst().getRating());
+        assertEquals(null, (byte) 5, updatedUser.getReviews().get(0).getRating());
     }
 }
