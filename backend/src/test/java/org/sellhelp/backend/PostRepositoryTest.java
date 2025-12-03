@@ -13,7 +13,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 public class PostRepositoryTest {
@@ -108,7 +108,7 @@ public class PostRepositoryTest {
 
         postRepository.delete(savedPost);
 
-        assertFalse(null, postRepository.findById(savedPostId).isPresent());
+        assertFalse(postRepository.findById(savedPostId).isPresent());
     }
 
     @Test
@@ -138,6 +138,6 @@ public class PostRepositoryTest {
 
         postRepository.delete(updatedPost);
 
-        assertFalse(null, postRepository.findById(updatedPost.getId()).isPresent());
+        assertFalse(postRepository.findById(updatedPost.getId()).isPresent());
     }
 }

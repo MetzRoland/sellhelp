@@ -10,7 +10,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 public class CityRepositoryTest {
@@ -64,7 +64,7 @@ public class CityRepositoryTest {
 
         cityRepository.delete(savedCity);
 
-        assertFalse(null, cityRepository.findById(savedCityId).isPresent());
+        assertFalse(cityRepository.findById(savedCityId).isPresent());
     }
 
     @Test
@@ -89,6 +89,6 @@ public class CityRepositoryTest {
 
         cityRepository.delete(updatedCity);
 
-        assertFalse(null, cityRepository.findById(updatedCity.getId()).isPresent());
+        assertFalse(cityRepository.findById(updatedCity.getId()).isPresent());
     }
 }

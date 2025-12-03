@@ -11,8 +11,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.springframework.test.util.AssertionErrors.*;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 public class UserRepositoryTest {
@@ -73,17 +74,17 @@ public class UserRepositoryTest {
 
         assertNotNull(savedUser.getId());
 
-        assertEquals(null, "123", savedUser.getUserSecret().getPassword());
-        assertEquals(null, "Roland", savedUser.getFirstName());
-        assertEquals(null, "Metz", savedUser.getLastName());
-        assertEquals(null, "metzroland", savedUser.getUsername());
-        assertEquals(null, "a@gmail.com", savedUser.getEmail());
-        assertEquals(null, LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
-        assertEquals(null, "Notification 1", savedUser.getUserNotifications().get(0).getTitle());
-        assertEquals(null, "resume.docx", savedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(null, 2, savedUser.getUserFiles().size());
-        assertEquals(null, "Good job", savedUser.getReviews().get(0).getComment());
-        assertEquals(null, (byte) 5, savedUser.getReviews().get(0).getRating());
+        assertEquals("123", savedUser.getUserSecret().getPassword());
+        assertEquals("Roland", savedUser.getFirstName());
+        assertEquals("Metz", savedUser.getLastName());
+        assertEquals("metzroland", savedUser.getUsername());
+        assertEquals("a@gmail.com", savedUser.getEmail());
+        assertEquals(LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
+        assertEquals("Notification 1", savedUser.getUserNotifications().get(0).getTitle());
+        assertEquals("resume.docx", savedUser.getUserFiles().get(0).getFilePath());
+        assertEquals(2, savedUser.getUserFiles().size());
+        assertEquals("Good job", savedUser.getReviews().get(0).getComment());
+        assertEquals((byte) 5, savedUser.getReviews().get(0).getRating());
     }
 
     @Test
@@ -96,17 +97,17 @@ public class UserRepositoryTest {
 
         assertNotNull(updatedUser.getId());
 
-        assertEquals(null, "123", updatedUser.getUserSecret().getPassword());
-        assertEquals(null, "Karoly", updatedUser.getFirstName());
-        assertEquals(null, "Metz", updatedUser.getLastName());
-        assertEquals(null, "metzroland", updatedUser.getUsername());
-        assertEquals(null, "a@gmail.com", updatedUser.getEmail());
-        assertEquals(null, LocalDate.of(2003, 5, 12), updatedUser.getBirthDate());
-        assertEquals(null, "Notification 1", updatedUser.getUserNotifications().get(0).getTitle());
-        assertEquals(null, "resume.docx", updatedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(null, 2, updatedUser.getUserFiles().size());
-        assertEquals(null, "Good job", updatedUser.getReviews().get(0).getComment());
-        assertEquals(null, (byte) 5, updatedUser.getReviews().get(0).getRating());
+        assertEquals("123", updatedUser.getUserSecret().getPassword());
+        assertEquals("Karoly", updatedUser.getFirstName());
+        assertEquals("Metz", updatedUser.getLastName());
+        assertEquals("metzroland", updatedUser.getUsername());
+        assertEquals("a@gmail.com", updatedUser.getEmail());
+        assertEquals(LocalDate.of(2003, 5, 12), updatedUser.getBirthDate());
+        assertEquals("Notification 1", updatedUser.getUserNotifications().get(0).getTitle());
+        assertEquals("resume.docx", updatedUser.getUserFiles().get(0).getFilePath());
+        assertEquals(2, updatedUser.getUserFiles().size());
+        assertEquals("Good job", updatedUser.getReviews().get(0).getComment());
+        assertEquals((byte) 5, updatedUser.getReviews().get(0).getRating());
     }
 
     @Test
@@ -116,7 +117,7 @@ public class UserRepositoryTest {
 
         userRepository.delete(savedUser);
 
-        assertFalse(null, userRepository.findById(savedUserId).isPresent());
+        assertFalse(userRepository.findById(savedUserId).isPresent());
     }
 
     @Test
@@ -127,28 +128,28 @@ public class UserRepositoryTest {
 
         assertNotNull(savedUserId);
 
-        assertEquals(null, "123", savedUser.getUserSecret().getPassword());
-        assertEquals(null, "Roland", savedUser.getFirstName());
-        assertEquals(null, "Metz", savedUser.getLastName());
-        assertEquals(null, "metzroland", savedUser.getUsername());
-        assertEquals(null, "a@gmail.com", savedUser.getEmail());
-        assertEquals(null, LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
-        assertEquals(null, "Notification 1", savedUser.getUserNotifications().get(0).getTitle());
-        assertEquals(null, "resume.docx", savedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(null, 2, savedUser.getUserFiles().size());
-        assertEquals(null, "Good job", savedUser.getReviews().get(0).getComment());
-        assertEquals(null, (byte) 5, savedUser.getReviews().get(0).getRating());
+        assertEquals("123", savedUser.getUserSecret().getPassword());
+        assertEquals("Roland", savedUser.getFirstName());
+        assertEquals("Metz", savedUser.getLastName());
+        assertEquals("metzroland", savedUser.getUsername());
+        assertEquals("a@gmail.com", savedUser.getEmail());
+        assertEquals(LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
+        assertEquals("Notification 1", savedUser.getUserNotifications().get(0).getTitle());
+        assertEquals("resume.docx", savedUser.getUserFiles().get(0).getFilePath());
+        assertEquals(2, savedUser.getUserFiles().size());
+        assertEquals("Good job", savedUser.getReviews().get(0).getComment());
+        assertEquals((byte) 5, savedUser.getReviews().get(0).getRating());
 
         savedUser.setFirstName("Márk");
         savedUser.getUserNotifications().get(0).setTitle("Notification 1 updated");
 
         User updatedUser = userRepository.save(savedUser);
 
-        assertEquals(null, "Márk", updatedUser.getFirstName());
-        assertEquals(null, "Notification 1 updated", updatedUser.getUserNotifications().get(0).getTitle());
+        assertEquals("Márk", updatedUser.getFirstName());
+        assertEquals("Notification 1 updated", updatedUser.getUserNotifications().get(0).getTitle());
 
         userRepository.delete(updatedUser);
 
-        assertFalse(null, userRepository.findById(updatedUser.getId()).isPresent());
+        assertFalse(userRepository.findById(updatedUser.getId()).isPresent());
     }
 }
