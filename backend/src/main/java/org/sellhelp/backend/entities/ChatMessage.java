@@ -1,6 +1,6 @@
 package org.sellhelp.backend.entities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import org.hibernate.annotations.CurrentTimestamp;
@@ -39,7 +39,7 @@ public class ChatMessage {
 
     @Column(name = "sent_at")
     @CurrentTimestamp
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 
     @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL)
     private List<ChatFile> chatFiles;

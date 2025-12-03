@@ -11,7 +11,7 @@ import org.hibernate.annotations.Cascade;
 import org.hibernate.annotations.CurrentTimestamp;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 
@@ -58,7 +58,7 @@ public class User {
 
     @Column(name = "created_at", nullable = false)
     @CurrentTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserSecret userSecret;

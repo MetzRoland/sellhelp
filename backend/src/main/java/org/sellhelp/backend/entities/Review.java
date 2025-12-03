@@ -1,6 +1,6 @@
 package org.sellhelp.backend.entities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -41,5 +41,5 @@ public class Review {
 
     @Column(name = "created_at", nullable = false)
     @CurrentTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

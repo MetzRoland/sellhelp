@@ -1,6 +1,6 @@
 package org.sellhelp.backend.entities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
@@ -37,5 +37,5 @@ public class Notification {
 
     @Column(name = "sent_at")
     @CurrentTimestamp
-    private LocalDateTime sentAt;
+    private Instant sentAt;
 }

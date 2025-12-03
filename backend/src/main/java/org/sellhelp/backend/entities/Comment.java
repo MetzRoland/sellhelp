@@ -6,7 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
@@ -38,5 +38,5 @@ public class Comment {
 
     @Column(name = "created_at")
     @CurrentTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }

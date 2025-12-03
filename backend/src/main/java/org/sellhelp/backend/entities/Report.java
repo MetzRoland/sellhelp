@@ -1,6 +1,6 @@
 package org.sellhelp.backend.entities;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
@@ -38,5 +38,5 @@ public class Report {
 
     @Column(name = "created_at")
     @CurrentTimestamp
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 }
