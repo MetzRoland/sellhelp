@@ -1,6 +1,8 @@
 package org.sellhelp.backend.dtos;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.sellhelp.backend.entities.*;
 
 import java.time.LocalDate;
@@ -8,6 +10,8 @@ import java.util.Date;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class CreateUserDTO {
     private String username;
     private String first_name;
