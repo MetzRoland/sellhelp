@@ -1,13 +1,10 @@
-package org.sellhelp.backend;
+package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatMessage;
 import org.sellhelp.backend.entities.User;
-import org.sellhelp.backend.repositories.ChatMessageRepository;
-import org.sellhelp.backend.repositories.ChatRepository;
-import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 

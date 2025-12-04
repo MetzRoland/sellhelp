@@ -1,4 +1,4 @@
-package org.sellhelp.backend;
+package org.sellhelp.backend.repositories;
 
 import java.time.LocalDate;
 
@@ -6,8 +6,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Review;
 import org.sellhelp.backend.entities.User;
-import org.sellhelp.backend.repositories.ReviewRepository;
-import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
