@@ -1,8 +1,5 @@
 package org.sellhelp.backend;
 
-import org.sellhelp.backend.entities.City;
-import org.sellhelp.backend.entities.County;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 

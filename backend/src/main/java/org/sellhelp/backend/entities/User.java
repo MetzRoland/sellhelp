@@ -60,15 +60,15 @@ public class User {
     @CurrentTimestamp
     private Instant createdAt;
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST,  CascadeType.MERGE, CascadeType.REMOVE})
     private UserSecret userSecret;
 
-    @OneToMany(mappedBy = "reviewedUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reviewedUser")
     private List<Review> reviews;
 
-    @OneToMany(mappedBy = "notifiedUser", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "notifiedUser", cascade = CascadeType.REMOVE)
     private List<Notification> userNotifications;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", cascade = CascadeType.REMOVE)
     private List<UserFile> userFiles;
 }

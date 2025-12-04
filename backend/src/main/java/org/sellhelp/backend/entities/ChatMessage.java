@@ -41,6 +41,6 @@ public class ChatMessage {
     @CurrentTimestamp
     private Instant sentAt;
 
-    @OneToMany(mappedBy = "chatMessage", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chatMessage", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
     private List<ChatFile> chatFiles;
 }

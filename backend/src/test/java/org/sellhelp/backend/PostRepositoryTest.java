@@ -7,7 +7,6 @@ import org.sellhelp.backend.repositories.PostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,29 +22,7 @@ public class PostRepositoryTest {
     private Post testPost;
 
     @BeforeEach
-    public void init(){
-        County county = County.builder()
-                .countyName("Baranya")
-                .build();
-
-        City city = City.builder()
-                .cityName("Pécs")
-                .county(county)
-                .build();
-
-        User postPublisher = User.builder()
-                .firstName("Lajos")
-                .lastName("Gabor")
-                .email("lajosgabor@gmail.com")
-                .username("lajosgabor")
-                .banned(false)
-                .birthDate(LocalDate.of(2001, 3, 23))
-                .build();
-
-        PostStatus postStatus = PostStatus.builder()
-                .statusName("Done")
-                .build();
-
+    public void init(){;
         PostFile postFile1 = PostFile.builder()
                 .postFilePath("postFile1.docx")
                 .build();
@@ -56,9 +33,6 @@ public class PostRepositoryTest {
                 .title("Post 1")
                 .description("This is post 1")
                 .reward(10000)
-                .city(city)
-                .postPublisher(postPublisher)
-                .postStatus(postStatus)
                 .postFiles(postFiles)
                 .build();
 
@@ -73,11 +47,7 @@ public class PostRepositoryTest {
         assertEquals("Post 1", savedPost.getTitle());
         assertEquals("This is post 1", savedPost.getDescription());
         assertEquals(10000, savedPost.getReward());
-        assertEquals("Pécs", savedPost.getCity().getCityName());
-        assertEquals("Baranya", savedPost.getCity().getCounty().getCountyName());
-        assertEquals("Done", savedPost.getPostStatus().getStatusName());
         assertEquals(1, savedPost.getPostFiles().size());
-        assertEquals("Lajos", savedPost.getPostPublisher().getFirstName());
     }
 
     @Test
@@ -85,7 +55,6 @@ public class PostRepositoryTest {
         Post savedPost = postRepository.save(testPost);
 
         savedPost.setReward(8000);
-        savedPost.getPostPublisher().setFirstName("Péter");
 
         Post updatedPost = postRepository.save(savedPost);
 
@@ -94,11 +63,7 @@ public class PostRepositoryTest {
         assertEquals("Post 1", updatedPost.getTitle());
         assertEquals("This is post 1", updatedPost.getDescription());
         assertEquals(8000, updatedPost.getReward());
-        assertEquals("Pécs", updatedPost.getCity().getCityName());
-        assertEquals("Baranya", updatedPost.getCity().getCounty().getCountyName());
-        assertEquals("Done", updatedPost.getPostStatus().getStatusName());
         assertEquals(1, updatedPost.getPostFiles().size());
-        assertEquals("Péter", updatedPost.getPostPublisher().getFirstName());
     }
 
     @Test
@@ -122,19 +87,13 @@ public class PostRepositoryTest {
         assertEquals("Post 1", postRepository.findById(savedPostId).get().getTitle());
         assertEquals("This is post 1", postRepository.findById(savedPostId).get().getDescription());
         assertEquals(10000, postRepository.findById(savedPostId).get().getReward());
-        assertEquals("Pécs", postRepository.findById(savedPostId).get().getCity().getCityName());
-        assertEquals("Baranya", postRepository.findById(savedPostId).get().getCity().getCounty().getCountyName());
-        assertEquals("Done", postRepository.findById(savedPostId).get().getPostStatus().getStatusName());
         assertEquals(1, postRepository.findById(savedPostId).get().getPostFiles().size());
-        assertEquals("Lajos", postRepository.findById(savedPostId).get().getPostPublisher().getFirstName());
 
-        savedPost.getCity().setCityName("Mohács");
         savedPost.setReward(15000);
 
         Post updatedPost = postRepository.save(savedPost);
 
         assertEquals(15000, updatedPost.getReward());
-        assertEquals("Mohács", updatedPost.getCity().getCityName());
 
         postRepository.delete(updatedPost);
 

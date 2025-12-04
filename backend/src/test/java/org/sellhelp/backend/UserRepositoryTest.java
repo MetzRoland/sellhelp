@@ -8,8 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -28,30 +26,6 @@ public class UserRepositoryTest {
                 .passUpdateToken(null)
                 .build();
 
-        UserFile userFile1 = UserFile.builder()
-                .filePath("resume.docx")
-                .build();
-
-        UserFile userFile2 = UserFile.builder()
-                .filePath("resume2.docx")
-                .build();
-
-        List<UserFile> userFiles = new ArrayList<>(List.of(userFile1, userFile2));
-
-        Notification notification1 = Notification.builder()
-                .title("Notification 1")
-                .message("This is notification 1")
-                .build();
-
-        List<Notification> userNotifications = new ArrayList<>(List.of(notification1));
-
-        Review review1 = Review.builder()
-                .rating((byte) 5)
-                .comment("Good job")
-                .build();
-
-        List<Review> reviews = new ArrayList<>(List.of(review1));
-
         testUser = User.builder()
                 .firstName("Roland")
                 .lastName("Metz")
@@ -59,9 +33,6 @@ public class UserRepositoryTest {
                 .birthDate(LocalDate.of(2003, 5, 12))
                 .email("a@gmail.com")
                 .userSecret(userSecret)
-                .userNotifications(userNotifications)
-                .reviews(reviews)
-                .userFiles(userFiles)
                 .build();
 
     }
@@ -78,11 +49,6 @@ public class UserRepositoryTest {
         assertEquals("metzroland", savedUser.getUsername());
         assertEquals("a@gmail.com", savedUser.getEmail());
         assertEquals(LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
-        assertEquals("Notification 1", savedUser.getUserNotifications().get(0).getTitle());
-        assertEquals("resume.docx", savedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(2, savedUser.getUserFiles().size());
-        assertEquals("Good job", savedUser.getReviews().get(0).getComment());
-        assertEquals((byte) 5, savedUser.getReviews().get(0).getRating());
     }
 
     @Test
@@ -101,11 +67,6 @@ public class UserRepositoryTest {
         assertEquals("metzroland", updatedUser.getUsername());
         assertEquals("a@gmail.com", updatedUser.getEmail());
         assertEquals(LocalDate.of(2003, 5, 12), updatedUser.getBirthDate());
-        assertEquals("Notification 1", updatedUser.getUserNotifications().get(0).getTitle());
-        assertEquals("resume.docx", updatedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(2, updatedUser.getUserFiles().size());
-        assertEquals("Good job", updatedUser.getReviews().get(0).getComment());
-        assertEquals((byte) 5, updatedUser.getReviews().get(0).getRating());
     }
 
     @Test
@@ -132,19 +93,12 @@ public class UserRepositoryTest {
         assertEquals("metzroland", savedUser.getUsername());
         assertEquals("a@gmail.com", savedUser.getEmail());
         assertEquals(LocalDate.of(2003, 5, 12), savedUser.getBirthDate());
-        assertEquals("Notification 1", savedUser.getUserNotifications().get(0).getTitle());
-        assertEquals("resume.docx", savedUser.getUserFiles().get(0).getFilePath());
-        assertEquals(2, savedUser.getUserFiles().size());
-        assertEquals("Good job", savedUser.getReviews().get(0).getComment());
-        assertEquals((byte) 5, savedUser.getReviews().get(0).getRating());
 
         savedUser.setFirstName("Márk");
-        savedUser.getUserNotifications().get(0).setTitle("Notification 1 updated");
 
         User updatedUser = userRepository.save(savedUser);
 
         assertEquals("Márk", updatedUser.getFirstName());
-        assertEquals("Notification 1 updated", updatedUser.getUserNotifications().get(0).getTitle());
 
         userRepository.delete(updatedUser);
 

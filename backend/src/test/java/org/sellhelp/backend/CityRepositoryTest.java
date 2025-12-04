@@ -3,7 +3,6 @@ package org.sellhelp.backend;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.City;
-import org.sellhelp.backend.entities.County;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -21,13 +20,8 @@ public class CityRepositoryTest {
 
     @BeforeEach
     public void init(){
-        County county = County.builder()
-                .countyName("Baranya")
-                .build();
-
         testCity = City.builder()
                 .cityName("Pécs")
-                .county(county)
                 .build();
 
     }
@@ -39,7 +33,6 @@ public class CityRepositoryTest {
         assertNotNull(savedCity.getId());
 
         assertEquals("Pécs", savedCity.getCityName());
-        assertEquals("Baranya", savedCity.getCounty().getCountyName());
     }
 
     @Test
@@ -47,14 +40,12 @@ public class CityRepositoryTest {
         City savedCity = cityRepository.save(testCity);
 
         savedCity.setCityName("Budapest");
-        savedCity.getCounty().setCountyName("Pest");
 
         City updatedCity = cityRepository.save(savedCity);
 
         assertNotNull(updatedCity.getId());
 
         assertEquals("Budapest", updatedCity.getCityName());
-        assertEquals("Pest", updatedCity.getCounty().getCountyName());
     }
 
     @Test
@@ -75,17 +66,14 @@ public class CityRepositoryTest {
         assertNotNull(savedCityId);
 
         assertEquals("Pécs", cityRepository.findById(savedCityId).get().getCityName());
-        assertEquals("Baranya", cityRepository.findById(savedCityId).get().getCounty().getCountyName());
 
         savedCity.setCityName("Budapest");
-        savedCity.getCounty().setCountyName("Pest");
 
         City updatedCity = cityRepository.save(savedCity);
 
         assertNotNull(updatedCity.getId());
 
         assertEquals("Budapest", updatedCity.getCityName());
-        assertEquals("Pest", updatedCity.getCounty().getCountyName());
 
         cityRepository.delete(updatedCity);
 

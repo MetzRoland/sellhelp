@@ -20,7 +20,7 @@ public class UserFile {
     @Column(name = "id")
     private Integer id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "user_id")
     @JsonIgnore
     private User user;

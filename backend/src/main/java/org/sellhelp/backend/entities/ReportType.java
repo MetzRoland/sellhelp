@@ -24,7 +24,7 @@ public class ReportType {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @OneToMany(mappedBy = "reportType", cascade = CascadeType.ALL)
+    @OneToMany
     @JsonIgnore
     private List<Report> reports;
 }

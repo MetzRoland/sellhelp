@@ -28,7 +28,7 @@ public class Chat {
     @JoinColumn(name = "guest_id")
     private User guest;
 
-    @OneToMany(mappedBy = "chat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "chat", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<ChatMessage> chatMessages;
 
 }
