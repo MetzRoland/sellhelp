@@ -9,10 +9,10 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class ApplicationRepositoryTest {
+public class JobJobApplicationRepositoryTest {
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private JobApplicationRepository jobApplicationRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -22,7 +22,7 @@ public class ApplicationRepositoryTest {
 
     private User testUser;
     private Post testPost;
-    private Application testApplication;
+    private JobApplication testJobApplication;
 
     @BeforeEach
     public void init() {
@@ -49,7 +49,7 @@ public class ApplicationRepositoryTest {
 
         testPost = postRepository.save(testPost);
 
-        testApplication = Application.builder()
+        testJobApplication = JobApplication.builder()
                 .applicant(testUser)
                 .jobPost(testPost)
                 .build();
@@ -57,18 +57,18 @@ public class ApplicationRepositoryTest {
 
     @Test
     public void applicantCanBeAddedToRepositoryAndDB() {
-        Application savedApplication = applicationRepository.save(testApplication);
+        JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
-        assertNotNull(savedApplication.getId());
-        assertNotNull(savedApplication.getAppliedAt());
+        assertNotNull(savedJobApplication.getId());
+        assertNotNull(savedJobApplication.getAppliedAt());
 
-        assertEquals(testUser.getId(), savedApplication.getApplicant().getId());
-        assertEquals(testPost.getId(), savedApplication.getJobPost().getId());
+        assertEquals(testUser.getId(), savedJobApplication.getApplicant().getId());
+        assertEquals(testPost.getId(), savedJobApplication.getJobPost().getId());
     }
 
     @Test
     public void applicantCanBeUpdatedInRepositoryAndDB() {
-        Application savedApplication = applicationRepository.save(testApplication);
+        JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
         Post newPost = Post.builder()
                 .title("Updated Post")
@@ -78,32 +78,32 @@ public class ApplicationRepositoryTest {
 
         newPost = postRepository.save(newPost);
 
-        savedApplication.setJobPost(newPost);
+        savedJobApplication.setJobPost(newPost);
 
-        Application updatedApplication = applicationRepository.save(savedApplication);
+        JobApplication updatedJobApplication = jobApplicationRepository.save(savedJobApplication);
 
-        assertNotNull(updatedApplication.getId());
-        assertEquals(newPost.getId(), updatedApplication.getJobPost().getId());
+        assertNotNull(updatedJobApplication.getId());
+        assertEquals(newPost.getId(), updatedJobApplication.getJobPost().getId());
     }
 
     @Test
     public void applicantCanBeDeletedFromRepositoryAndDB() {
-        Application savedApplication = applicationRepository.save(testApplication);
-        Integer id = savedApplication.getId();
+        JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
+        Integer id = savedJobApplication.getId();
 
-        applicationRepository.delete(savedApplication);
+        jobApplicationRepository.delete(savedJobApplication);
 
-        assertFalse(applicationRepository.findById(id).isPresent());
+        assertFalse(jobApplicationRepository.findById(id).isPresent());
     }
 
     @Test
     public void applicantGeneralCRUDFunctionalityTest() {
-        Application savedApplication = applicationRepository.save(testApplication);
+        JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
-        assertNotNull(savedApplication.getId());
-        assertEquals(testUser.getId(), savedApplication.getApplicant().getId());
-        assertEquals(testPost.getId(), savedApplication.getJobPost().getId());
-        assertNotNull(savedApplication.getAppliedAt());
+        assertNotNull(savedJobApplication.getId());
+        assertEquals(testUser.getId(), savedJobApplication.getApplicant().getId());
+        assertEquals(testPost.getId(), savedJobApplication.getJobPost().getId());
+        assertNotNull(savedJobApplication.getAppliedAt());
 
         Post newPost = Post.builder()
                 .title("Another Post")
@@ -113,15 +113,15 @@ public class ApplicationRepositoryTest {
 
         newPost = postRepository.save(newPost);
 
-        savedApplication.setJobPost(newPost);
+        savedJobApplication.setJobPost(newPost);
 
-        Application updatedApplication = applicationRepository.save(savedApplication);
+        JobApplication updatedJobApplication = jobApplicationRepository.save(savedJobApplication);
 
-        assertEquals(newPost.getId(), updatedApplication.getJobPost().getId());
+        assertEquals(newPost.getId(), updatedJobApplication.getJobPost().getId());
 
-        applicationRepository.delete(updatedApplication);
+        jobApplicationRepository.delete(updatedJobApplication);
 
-        assertFalse(applicationRepository.findById(updatedApplication.getId()).isPresent());
+        assertFalse(jobApplicationRepository.findById(updatedJobApplication.getId()).isPresent());
     }
 
     @Test
@@ -130,7 +130,7 @@ public class ApplicationRepositoryTest {
         Integer userId = testUser.getId();
         Integer postId = testPost.getId();
 
-        applicationRepository.delete(testApplication);
+        jobApplicationRepository.delete(testJobApplication);
 
         assertTrue(userRepository.findById(userId).isPresent(),
                 "User should NOT be deleted automatically");
@@ -142,7 +142,7 @@ public class ApplicationRepositoryTest {
     @Test
     public void removingApplicantThenDeletingUserShouldSucceed() {
 
-        applicationRepository.delete(testApplication);
+        jobApplicationRepository.delete(testJobApplication);
 
         assertDoesNotThrow(() -> userRepository.delete(testUser));
     }
@@ -150,7 +150,7 @@ public class ApplicationRepositoryTest {
     @Test
     public void removingApplicantThenDeletingPostShouldSucceed() {
 
-        applicationRepository.delete(testApplication);
+        jobApplicationRepository.delete(testJobApplication);
 
         assertDoesNotThrow(() -> postRepository.delete(testPost));
     }

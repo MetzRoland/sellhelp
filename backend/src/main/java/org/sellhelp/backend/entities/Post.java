@@ -58,5 +58,5 @@ public class Post {
     private List<Comment> postComments;
 
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private List<Application> applications;
+    private List<JobApplication> jobApplications;
 }

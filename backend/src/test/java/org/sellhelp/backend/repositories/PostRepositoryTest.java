@@ -24,13 +24,13 @@ public class PostRepositoryTest {
     private CommentRepository commentRepository;
 
     @Autowired
-    private ApplicationRepository applicationRepository;
+    private JobApplicationRepository jobApplicationRepository;
 
     private User testUser;
     private Post testPost;
     private PostFile testFile;
     private Comment testComment;
-    private Application testApplication;
+    private JobApplication testJobApplication;
 
     @BeforeEach
     public void init() {
@@ -60,14 +60,14 @@ public class PostRepositoryTest {
         List<Comment> comments = new ArrayList<>();
         comments.add(testComment);
 
-        testApplication = Application.builder()
+        testJobApplication = JobApplication.builder()
                 .applicant(testUser)
                 .jobPost(testPost)
                 .build();
-        testApplication = applicationRepository.save(testApplication);
+        testJobApplication = jobApplicationRepository.save(testJobApplication);
 
-        List<Application> applications = new ArrayList<>();
-        applications.add(testApplication);
+        List<JobApplication> jobApplications = new ArrayList<>();
+        jobApplications.add(testJobApplication);
 
         testPost = Post.builder()
                 .title("Test Post")
@@ -76,7 +76,7 @@ public class PostRepositoryTest {
                 .postPublisher(testUser)
                 .postFiles(files)
                 .postComments(comments)
-                .applications(applications)
+                .jobApplications(jobApplications)
                 .build();
         testPost = postRepository.save(testPost);
 
@@ -90,7 +90,7 @@ public class PostRepositoryTest {
         assertEquals(1, testPost.getPostFiles().size());
         assertEquals(testUser.getId(), testPost.getPostPublisher().getId());
         assertEquals(1, testPost.getPostComments().size());
-        assertEquals(1, testPost.getApplications().size());
+        assertEquals(1, testPost.getJobApplications().size());
     }
 
     @Test
@@ -117,13 +117,13 @@ public class PostRepositoryTest {
     public void deletingPostCascadesToFilesCommentsApplications() {
         Integer fileId = testPost.getPostFiles().get(0).getId();
         Integer commentId = testPost.getPostComments().get(0).getId();
-        Integer applicationId = testPost.getApplications().get(0).getId();
+        Integer applicationId = testPost.getJobApplications().get(0).getId();
 
         postRepository.delete(testPost);
 
         assertTrue(postRepository.findById(fileId).isEmpty(), "PostFile should be cascade removed");
         assertFalse(commentRepository.findById(commentId).isPresent(), "Comment should be cascade removed");
-        assertFalse(applicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
+        assertFalse(jobApplicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
     }
 
     @Test
@@ -143,7 +143,7 @@ public class PostRepositoryTest {
         assertEquals("Test Post", savedPost.getTitle());
         assertEquals(1, savedPost.getPostFiles().size(), "PostFiles should be saved");
         assertEquals(1, savedPost.getPostComments().size(), "PostComments should be saved");
-        assertEquals(1, savedPost.getApplications().size(), "Applications should be saved");
+        assertEquals(1, savedPost.getJobApplications().size(), "Applications should be saved");
         assertEquals(testUser.getId(), savedPost.getPostPublisher().getId(), "Publisher should be correct");
 
         savedPost.setTitle("Updated Post Title");
@@ -161,7 +161,7 @@ public class PostRepositoryTest {
 
         Integer fileId = testFile.getId();
         Integer commentId = testComment.getId();
-        Integer applicationId = testApplication.getId();
+        Integer applicationId = testJobApplication.getId();
 
         postRepository.delete(updatedPost);
 
@@ -169,7 +169,7 @@ public class PostRepositoryTest {
 
         assertTrue(postRepository.findById(fileId).isEmpty(), "PostFile should be cascade removed");
         assertFalse(commentRepository.findById(commentId).isPresent(), "Comment should be cascade removed");
-        assertFalse(applicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
+        assertFalse(jobApplicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
 
         assertTrue(userRepository.findById(testUser.getId()).isPresent(), "PostPublisher should not be deleted");
     }

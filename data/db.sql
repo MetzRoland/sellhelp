@@ -61,7 +61,7 @@ CREATE TABLE "chats" (
       REFERENCES "users"("id")
 );
 
-CREATE TABLE "applications" (
+CREATE TABLE "job_applications" (
   "id" INT,
   "user_id" INT,
   "post_id" INT,

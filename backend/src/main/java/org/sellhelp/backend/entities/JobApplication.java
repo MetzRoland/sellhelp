@@ -10,12 +10,12 @@ import org.hibernate.annotations.CurrentTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "applicants")
+@Table(name = "job_applications")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Application {
+public class JobApplication {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
