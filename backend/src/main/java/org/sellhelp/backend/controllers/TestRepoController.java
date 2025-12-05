@@ -67,6 +67,7 @@ public class TestRepoController {
                 .password(passwordEncoder.encode(dto.getPassword()))
                 .user(user)
                 .build();
+        
         user.setUserSecret(userSecret);
 
         userRepository.save(user);
