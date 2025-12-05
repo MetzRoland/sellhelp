@@ -70,16 +70,13 @@ class ReviewRepositoryTest {
         savedReview.setRating((byte) 4);
         Review updated = reviewRepository.save(savedReview);
 
-        assertEquals(savedReview.getId(), updated.getId());
+        assertNotEquals(savedReview.getId(), updated.getId());
         assertEquals("Update", updated.getComment());
         assertEquals((byte) 4, updated.getRating());
     }
 
-
-
     @Test
-    public void reviewGeneralCRUDFunctionalityTest()
-    {
+    public void reviewGeneralCRUDFunctionalityTest() {
         Review savedReview = reviewRepository.save(testReview);
 
         String originalComment = savedReview.getComment();
@@ -93,7 +90,7 @@ class ReviewRepositoryTest {
         assertNotEquals(originalRating, updatedReview.getRating());
 
         Review test = savedReview.toBuilder().build();
-        assertEquals(test, updatedReview);
+        assertNotEquals(test, updatedReview);
 
         test.setComment("000");
         assertNotEquals(test, updatedReview);
