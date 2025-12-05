@@ -7,41 +7,98 @@ on:
     branches: [ "gh-actions" ]
 
 jobs:
-  build:
 
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
-
-      - name: Build with Maven
-        run: mvn clean package
+      - name: Compile code
+        run: mvn -B clean compile
         working-directory: backend
 
-  test:
+      - name: Upload compiled classes
+        uses: actions/upload-artifact@v3
+        with:
+          name: compiled-classes
+          path: backend/target/classes
 
+  test:
     runs-on: ubuntu-latest
     needs: build
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Set up JDK 25
+      - name: Set up JDK
         uses: actions/setup-java@v4
         with:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
 
+      - name: Download compiled classes
+        uses: actions/download-artifact@v3
+        with:
+          name: compiled-classes
+          path: backend/target/classes
 
-      - name: Test with Maven
-        run: mvn test
+      - name: Run unit tests
+        run: mvn -B test
+        working-directory: backend
+
+  package:
+    runs-on: ubuntu-latest
+    needs: test
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Build artifact (JAR)
+        run: mvn -B package
+        working-directory: backend
+
+      - name: Upload JAR artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: backend-jar
+          path: backend/target/*.jar
+
+  verify:
+    runs-on: ubuntu-latest
+    needs: package
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Download JAR artifact
+        uses: actions/download-artifact@v3
+        with:
+          name: backend-jar
+          path: backend/target
+
+      - name: Verify / Integration tests
+        run: mvn -B verify
         working-directory: backend
