@@ -1,29 +1,24 @@
 name: Spring Boot CI
 
-# Trigger workflow on push or pull request events
 on:
   push:
-    branches:
-      - backend/entities  # Trigger on push to the main branch
+    branches: [ backend/entities ]
   pull_request:
-    branches:
-      - backend/entities  # Trigger on pull requests to the main branch
+    branches: [ backend/entities ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest  # Using the latest Ubuntu runner
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2  # Checkout the repository
+        uses: actions/checkout@v4
 
-      - name: Set up JDK 25
-        uses: actions/setup-java@v3
+      - name: Set up JDK
+        uses: actions/setup-java@v4
         with:
-          java-version: '25'  # Use Java 11, change it if needed
+          java-version: '17'
+          distribution: 'temurin'
 
-      - name: Build with Maven
-        run: mvn clean install -DskipTests=false  # Skip no tests (run all tests)
-
-      - name: Run tests
-        run: mvn test  # Run the tests after the build
+      - name: Build and Run Tests
+        run: mvn clean verify
