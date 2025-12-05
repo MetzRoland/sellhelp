@@ -40,6 +40,10 @@ public class Post {
     private User postPublisher;
 
     @ManyToOne
+    @JoinColumn(name = "selected_user_id")
+    private User selectedUser;
+
+    @ManyToOne
     @JoinColumn(name = "status_id")
     private PostStatus postStatus;
 
@@ -52,4 +56,7 @@ public class Post {
 
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Comment> postComments;
+
+    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private List<Application> applications;
 }

@@ -61,6 +61,20 @@ CREATE TABLE "chats" (
       REFERENCES "users"("id")
 );
 
+CREATE TABLE "applications" (
+  "id" INT,
+  "user_id" INT,
+  "post_id" INT,
+  "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_applications_user_id"
+    FOREIGN KEY ("user_id")
+      REFERENCES "users"("id"),
+  CONSTRAINT "FK_applications_chat_id"
+    FOREIGN KEY ("post_id")
+      REFERENCES "posts"("id")
+);
+
 CREATE TABLE "posts" (
   "id" SERIAL,
   "user_id" INT,
@@ -69,6 +83,7 @@ CREATE TABLE "posts" (
   "reward" INT DEFAULT 0,
   "status_id" SMALLINT,
   "city_id" INT,
+  "selected_user_id" INT,
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_posts_status_id"
@@ -79,7 +94,10 @@ CREATE TABLE "posts" (
       REFERENCES "users"("id"),
   CONSTRAINT "FK_posts_city_id"
     FOREIGN KEY ("city_id")
-      REFERENCES "cities"("id")
+      REFERENCES "cities"("id"),
+  CONSTRAINT "FK_posts_selected_user_id"
+    FOREIGN KEY ("selected_user_id")
+      REFERENCES "users"("id")
 );
 
 CREATE TABLE "comments" (

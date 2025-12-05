@@ -9,93 +9,169 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
 public class PostRepositoryTest {
+
     @Autowired
     private PostRepository postRepository;
 
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private ApplicationRepository applicationRepository;
+
+    private User testUser;
     private Post testPost;
+    private PostFile testFile;
+    private Comment testComment;
+    private Application testApplication;
 
     @BeforeEach
-    public void init(){;
-        PostFile postFile1 = PostFile.builder()
-                .postFilePath("postFile1.docx")
+    public void init() {
+        UserSecret userSecret = UserSecret.builder().password("pass123").build();
+        testUser = User.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .username("johndoe")
+                .birthDate(java.time.LocalDate.of(1990, 1, 1))
+                .email("john@example.com")
+                .userSecret(userSecret)
                 .build();
+        testUser = userRepository.save(testUser);
 
-        List<PostFile> postFiles = new ArrayList<>(List.of(postFile1));
+        testFile = PostFile.builder()
+                .postFilePath("file1.pdf")
+                .build();
+        List<PostFile> files = new ArrayList<>();
+        files.add(testFile);
+
+        testComment = Comment.builder()
+                .message("Nice post!")
+                .post(testPost)
+                .build();
+        testComment = commentRepository.save(testComment);
+
+        List<Comment> comments = new ArrayList<>();
+        comments.add(testComment);
+
+        testApplication = Application.builder()
+                .applicant(testUser)
+                .jobPost(testPost)
+                .build();
+        testApplication = applicationRepository.save(testApplication);
+
+        List<Application> applications = new ArrayList<>();
+        applications.add(testApplication);
 
         testPost = Post.builder()
-                .title("Post 1")
-                .description("This is post 1")
-                .reward(10000)
-                .postFiles(postFiles)
+                .title("Test Post")
+                .description("Test Description")
+                .reward(5000)
+                .postPublisher(testUser)
+                .postFiles(files)
+                .postComments(comments)
+                .applications(applications)
                 .build();
+        testPost = postRepository.save(testPost);
 
+        testFile.setPost(testPost);
     }
 
     @Test
-    public void postCanBeAddedToPostRepositoryAndDB(){
-        Post savedPost = postRepository.save(testPost);
-
-        assertNotNull(savedPost.getId());
-
-        assertEquals("Post 1", savedPost.getTitle());
-        assertEquals("This is post 1", savedPost.getDescription());
-        assertEquals(10000, savedPost.getReward());
-        assertEquals(1, savedPost.getPostFiles().size());
+    public void postCanBeAddedToRepositoryAndDB() {
+        assertNotNull(testPost.getId());
+        assertEquals("Test Post", testPost.getTitle());
+        assertEquals(1, testPost.getPostFiles().size());
+        assertEquals(testUser.getId(), testPost.getPostPublisher().getId());
+        assertEquals(1, testPost.getPostComments().size());
+        assertEquals(1, testPost.getApplications().size());
     }
 
     @Test
-    public void postCanBeUpdatedToPostRepositoryAndDB(){
-        Post savedPost = postRepository.save(testPost);
+    public void postCanBeUpdatedInRepositoryAndDB() {
+        testPost.setReward(8000);
+        testPost.getPostFiles().clear(); // remove files
 
-        savedPost.setReward(8000);
+        Post updatedPost = postRepository.save(testPost);
 
-        Post updatedPost = postRepository.save(savedPost);
-
-        assertNotNull(updatedPost.getId());
-
-        assertEquals("Post 1", updatedPost.getTitle());
-        assertEquals("This is post 1", updatedPost.getDescription());
         assertEquals(8000, updatedPost.getReward());
-        assertEquals(1, updatedPost.getPostFiles().size());
+        assertEquals(0, updatedPost.getPostFiles().size());
     }
 
     @Test
-    public void postCanBeDeletedFromPostRepositoryAndDB(){
-        Post savedPost = postRepository.save(testPost);
-        Integer savedPostId = savedPost.getId();
+    public void postCanBeDeletedFromRepositoryAndDB() {
+        Integer postId = testPost.getId();
 
-        postRepository.delete(savedPost);
+        postRepository.delete(testPost);
 
-        assertFalse(postRepository.findById(savedPostId).isPresent());
+        assertFalse(postRepository.findById(postId).isPresent());
     }
 
     @Test
-    public void postGeneralCRUDFunctionalityTest(){
+    public void deletingPostCascadesToFilesCommentsApplications() {
+        Integer fileId = testPost.getPostFiles().get(0).getId();
+        Integer commentId = testPost.getPostComments().get(0).getId();
+        Integer applicationId = testPost.getApplications().get(0).getId();
+
+        postRepository.delete(testPost);
+
+        assertTrue(postRepository.findById(fileId).isEmpty(), "PostFile should be cascade removed");
+        assertFalse(commentRepository.findById(commentId).isPresent(), "Comment should be cascade removed");
+        assertFalse(applicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
+    }
+
+    @Test
+    public void deletingPostDoesNotDeleteUser() {
+        Integer userId = testUser.getId();
+
+        postRepository.delete(testPost);
+
+        assertTrue(userRepository.findById(userId).isPresent(), "User should not be deleted");
+    }
+
+    @Test
+    public void postGeneralCRUDFunctionalityTest() {
         Post savedPost = postRepository.save(testPost);
+        Integer postId = savedPost.getId();
+        assertNotNull(postId, "Post ID should not be null after save");
+        assertEquals("Test Post", savedPost.getTitle());
+        assertEquals(1, savedPost.getPostFiles().size(), "PostFiles should be saved");
+        assertEquals(1, savedPost.getPostComments().size(), "PostComments should be saved");
+        assertEquals(1, savedPost.getApplications().size(), "Applications should be saved");
+        assertEquals(testUser.getId(), savedPost.getPostPublisher().getId(), "Publisher should be correct");
 
-        Integer savedPostId = savedPost.getId();
+        savedPost.setTitle("Updated Post Title");
+        savedPost.setReward(10000);
 
-        assertNotNull(savedPostId);
-
-        assertEquals("Post 1", postRepository.findById(savedPostId).get().getTitle());
-        assertEquals("This is post 1", postRepository.findById(savedPostId).get().getDescription());
-        assertEquals(10000, postRepository.findById(savedPostId).get().getReward());
-        assertEquals(1, postRepository.findById(savedPostId).get().getPostFiles().size());
-
-        savedPost.setReward(15000);
+        savedPost.getPostFiles().clear();
+        savedPost.getPostComments().clear();
 
         Post updatedPost = postRepository.save(savedPost);
 
-        assertEquals(15000, updatedPost.getReward());
+        assertEquals("Updated Post Title", updatedPost.getTitle());
+        assertEquals(10000, updatedPost.getReward());
+        assertEquals(0, updatedPost.getPostFiles().size(), "PostFiles should be cleared");
+        assertEquals(0, updatedPost.getPostComments().size(), "PostComments should be cleared");
+
+        Integer fileId = testFile.getId();
+        Integer commentId = testComment.getId();
+        Integer applicationId = testApplication.getId();
 
         postRepository.delete(updatedPost);
 
-        assertFalse(postRepository.findById(updatedPost.getId()).isPresent());
+        assertFalse(postRepository.findById(postId).isPresent(), "Post should be deleted");
+
+        assertTrue(postRepository.findById(fileId).isEmpty(), "PostFile should be cascade removed");
+        assertFalse(commentRepository.findById(commentId).isPresent(), "Comment should be cascade removed");
+        assertFalse(applicationRepository.findById(applicationId).isPresent(), "Application should be cascade removed");
+
+        assertTrue(userRepository.findById(testUser.getId()).isPresent(), "PostPublisher should not be deleted");
     }
+
 }
