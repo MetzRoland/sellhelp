@@ -1,0 +1,29 @@
+package org.sellhelp.backend.entities;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Entity
+@Table(name = "post_files")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
+public class PostFile {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+
+    @Column(name = "file_path", nullable = false)
+    private String postFilePath;
+
+    @JsonIgnore
+    @ManyToOne
+    @JoinColumn(name = "post_id")
+    private Post post;
+}

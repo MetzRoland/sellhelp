@@ -1,11 +1,10 @@
-package org.sellhelp.backend;
+package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class BackendApplicationTests {
-
+class BackendJobApplicationTests {
 	@Test
 	void contextLoads() {
 	}

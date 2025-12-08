@@ -61,6 +61,20 @@ CREATE TABLE "chats" (
       REFERENCES "users"("id")
 );
 
+CREATE TABLE "job_applications" (
+  "id" INT,
+  "user_id" INT,
+  "post_id" INT,
+  "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_applications_user_id"
+    FOREIGN KEY ("user_id")
+      REFERENCES "users"("id"),
+  CONSTRAINT "FK_applications_chat_id"
+    FOREIGN KEY ("post_id")
+      REFERENCES "posts"("id")
+);
+
 CREATE TABLE "posts" (
   "id" SERIAL,
   "user_id" INT,
@@ -69,6 +83,7 @@ CREATE TABLE "posts" (
   "reward" INT DEFAULT 0,
   "status_id" SMALLINT,
   "city_id" INT,
+  "selected_user_id" INT,
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_posts_status_id"
@@ -79,7 +94,10 @@ CREATE TABLE "posts" (
       REFERENCES "users"("id"),
   CONSTRAINT "FK_posts_city_id"
     FOREIGN KEY ("city_id")
-      REFERENCES "cities"("id")
+      REFERENCES "cities"("id"),
+  CONSTRAINT "FK_posts_selected_user_id"
+    FOREIGN KEY ("selected_user_id")
+      REFERENCES "users"("id")
 );
 
 CREATE TABLE "comments" (
@@ -91,7 +109,8 @@ CREATE TABLE "comments" (
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_post_id"
     FOREIGN KEY ("post_id")
-      REFERENCES "posts"("id"),
+      REFERENCES "posts"("id")
+      ON DELETE CASCADE,
   CONSTRAINT "FK_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
@@ -111,6 +130,7 @@ CREATE TABLE "chat_messages" (
   CONSTRAINT "FK_chat_messages_chat_id"
     FOREIGN KEY ("chat_id")
       REFERENCES "chats"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "user_files" (
@@ -131,6 +151,7 @@ CREATE TABLE "chat_files" (
   CONSTRAINT "FK_chat_files_message_id"
     FOREIGN KEY ("message_id")
       REFERENCES "chat_messages"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "post_files" (
@@ -141,6 +162,7 @@ CREATE TABLE "post_files" (
   CONSTRAINT "FK_post_files_post_id"
     FOREIGN KEY ("post_id")
       REFERENCES "posts"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "user_secrets" (
@@ -157,13 +179,17 @@ CREATE TABLE "user_secrets" (
 
 CREATE TABLE "reviews" (
   "id" SERIAL,
-  "user_id" INT,
+  "sender_user_id" INT,
+  "reviewed_user_id" INT,
   "rating" SMALLINT NOT NULL,
   "comment" VARCHAR(2000),
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
-  CONSTRAINT "FK_rewievs_user_id"
-    FOREIGN KEY ("user_id")
+  CONSTRAINT "FK_reviews_sender_user_id"
+    FOREIGN KEY ("sender_user_id")
+      REFERENCES "users"("id")
+  CONSTRAINT "FK_reviews_reviewed_user_id"
+    FOREIGN KEY ("reviewed_user_id")
       REFERENCES "users"("id")
 );
 
@@ -172,6 +198,7 @@ CREATE TABLE "notifications" (
   "user_id" INT,
   "title" VARCHAR(100) NOT NULL,
   "message" VARCHAR(2000) NOT NULL,
+  "sent_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_notifications_user_id"
     FOREIGN KEY ("user_id")
@@ -265,6 +292,7 @@ BEFORE UPDATE OF password ON "user_secrets"
 FOR EACH ROW
 EXECUTE FUNCTION update_last_used_pass();
 
+CREATE INDEX idx_cities_city_name ON cities (city_name);
 
 -- Enable FDW
 CREATE EXTENSION IF NOT EXISTS postgres_fdw;
@@ -281,7 +309,7 @@ SERVER sellhelpdb_server
 OPTIONS (user 'sandbox', password 'SandBoxPassword1111.');
 
 IMPORT FOREIGN SCHEMA public
-LIMIT TO (posts, post_files)
+LIMIT TO (posts, post_files, post_status)
 FROM SERVER sellhelpdb_server
 INTO public;
 
@@ -292,15 +320,6 @@ SELECT cron.schedule(
     'daily_delete_expired_posts',
     '0 0 * * *',
 $$
-DELETE FROM post_files
-WHERE post_id IN (
-    SELECT id FROM posts
-    WHERE created_at < NOW() - INTERVAL '30 days'
-      AND status_id <> (
-            SELECT id FROM post_status 
-            WHERE status_name = 'closed'
-          )
-);
 DELETE FROM posts
 WHERE created_at < NOW() - INTERVAL '30 days'
   AND status_id <> (
