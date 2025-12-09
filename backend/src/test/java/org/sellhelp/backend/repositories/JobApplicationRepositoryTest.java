@@ -9,7 +9,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-public class JobJobApplicationRepositoryTest {
+public class JobApplicationRepositoryTest {
 
     @Autowired
     private JobApplicationRepository jobApplicationRepository;
