@@ -63,24 +63,6 @@ CREATE TABLE "chats" (
       REFERENCES "users"("id")
 );
 
-CREATE TABLE "job_applications" (
-  "id" INT,
-  "user_id" INT,
-  "post_id" INT,
-  "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY ("id"),
-
-  CONSTRAINT "FK_applications_user_id"
-    FOREIGN KEY ("user_id")
-      REFERENCES "users"("id")
-      ON DELETE CASCADE,
-
-  CONSTRAINT "FK_applications_post_id"
-    FOREIGN KEY ("post_id")
-      REFERENCES "posts"("id")
-      ON DELETE CASCADE
-);
-
 CREATE TABLE "posts" (
   "id" SERIAL,
   "user_id" INT,
@@ -104,6 +86,25 @@ CREATE TABLE "posts" (
   CONSTRAINT "FK_posts_selected_user_id"
     FOREIGN KEY ("selected_user_id")
       REFERENCES "users"("id")
+      ON DELETE SET NULL
+);
+
+CREATE TABLE "job_applications" (
+  "id" INT,
+  "user_id" INT,
+  "post_id" INT,
+  "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY ("id"),
+
+  CONSTRAINT "FK_applications_user_id"
+    FOREIGN KEY ("user_id")
+      REFERENCES "users"("id")
+      ON DELETE CASCADE,
+
+  CONSTRAINT "FK_applications_post_id"
+    FOREIGN KEY ("post_id")
+      REFERENCES "posts"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "comments" (
