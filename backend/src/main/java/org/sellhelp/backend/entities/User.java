@@ -66,6 +66,9 @@ public class User {
     @OneToMany(mappedBy = "reviewedUser")
     private List<Review> reviews;
 
+    @OneToMany(mappedBy = "senderUser")
+    private List<Review> sentReviews;
+
     @OneToMany(mappedBy = "notifiedUser", cascade = CascadeType.REMOVE)
     private List<Notification> userNotifications;
 
