@@ -86,6 +86,7 @@ CREATE TABLE "posts" (
   CONSTRAINT "FK_posts_selected_user_id"
     FOREIGN KEY ("selected_user_id")
       REFERENCES "users"("id")
+      ON DELETE SET NULL
 );
 
 CREATE TABLE "job_applications" (
