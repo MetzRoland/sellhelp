@@ -1,10 +1,10 @@
-name: Java CI with Maven
+itiesname: Java CI with Maven
 
 on:
   push:
-    branches: [ "backend/services" ]
+    branches: [ "backend/entities" ]
   pull_request:
-    branches: [ "backend/services" ]
+    branches: [ "backend/entities" ]
 
 jobs:
 
