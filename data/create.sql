@@ -53,9 +53,11 @@ CREATE TABLE "chats" (
   "host_id" INT,
   "guest_id" INT,
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_host_id"
     FOREIGN KEY ("host_id")
       REFERENCES "users"("id"),
+
   CONSTRAINT "FK_guest_id"
     FOREIGN KEY ("guest_id")
       REFERENCES "users"("id")
@@ -67,12 +69,16 @@ CREATE TABLE "job_applications" (
   "post_id" INT,
   "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_applications_user_id"
     FOREIGN KEY ("user_id")
-      REFERENCES "users"("id"),
-  CONSTRAINT "FK_applications_chat_id"
+      REFERENCES "users"("id")
+      ON DELETE CASCADE,
+
+  CONSTRAINT "FK_applications_post_id"
     FOREIGN KEY ("post_id")
       REFERENCES "posts"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "posts" (
@@ -107,13 +113,16 @@ CREATE TABLE "comments" (
   "message" VARCHAR(2000) NOT NULL,
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_post_id"
     FOREIGN KEY ("post_id")
       REFERENCES "posts"("id")
       ON DELETE CASCADE,
+
   CONSTRAINT "FK_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
+      ON DELETE SET NULL
 );
 
 
@@ -124,9 +133,12 @@ CREATE TABLE "chat_messages" (
   "message" VARCHAR(2000) NOT NULL,
   "sent_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_chat_messages_user_id"
     FOREIGN KEY ("user_id")
-      REFERENCES "users"("id"),
+      REFERENCES "users"("id")
+      ON DELETE SET NULL,
+
   CONSTRAINT "FK_chat_messages_chat_id"
     FOREIGN KEY ("chat_id")
       REFERENCES "chats"("id")
@@ -141,6 +153,7 @@ CREATE TABLE "user_files" (
   CONSTRAINT "FK_user_files_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "chat_files" (
@@ -172,9 +185,11 @@ CREATE TABLE "user_secrets" (
   "last_used_pass" CHAR(60),
   "pass_update_token" VARCHAR(60),
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_user_secrets_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "reviews" (
@@ -185,12 +200,16 @@ CREATE TABLE "reviews" (
   "comment" VARCHAR(2000),
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
+
   CONSTRAINT "FK_reviews_sender_user_id"
     FOREIGN KEY ("sender_user_id")
-      REFERENCES "users"("id"),
+      REFERENCES "users"("id")
+      ON DELETE SET NULL,
+
   CONSTRAINT "FK_reviews_reviewed_user_id"
     FOREIGN KEY ("reviewed_user_id")
       REFERENCES "users"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "notifications" (
@@ -203,6 +222,7 @@ CREATE TABLE "notifications" (
   CONSTRAINT "FK_notifications_user_id"
     FOREIGN KEY ("user_id")
       REFERENCES "users"("id")
+      ON DELETE CASCADE
 );
 
 CREATE TABLE "reports" (
