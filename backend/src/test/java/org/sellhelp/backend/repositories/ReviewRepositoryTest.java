@@ -98,4 +98,17 @@ class ReviewRepositoryTest {
         test.setComment("000");
         assertNotEquals(test, updatedReview);
     }
+
+    @Test
+    public void deleteUserWithReviewTest()
+    {
+        Review savedReview = reviewRepository.save(testReview);
+        Integer sReviewId = savedReview.getId();
+
+        userRepository.delete(savedReview.getSenderUser());
+        savedReview.setSenderUser(null);
+
+        assertEquals(1, userRepository.count());
+
+    }
 }
