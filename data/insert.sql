@@ -30,11 +30,11 @@ VALUES
 (1, 'Pécs');
 
 INSERT INTO "users" (
-  "username", "first_name", "last_name", "birth_date",
+  "first_name", "last_name", "birth_date",
   "email", "city_id", "role_id"
 )
 VALUES (
-  'johndoe', 'John', 'Doe', '1990-05-10',
+  'John', 'Doe', '1990-05-10',
   'john@example.com', 1, 3
 );
 
