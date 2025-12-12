@@ -15,7 +15,8 @@ import java.util.Optional;
 @Component
 public class MyUserDetailService implements UserDetailsService {
 
-    @Autowired private UserRepository userRepo;
+    @Autowired
+    private UserRepository userRepo;
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
@@ -24,13 +25,7 @@ public class MyUserDetailService implements UserDetailsService {
         if(userRes.isEmpty())
             throw new UsernameNotFoundException("No user found with this email "+email);
         User user = userRes.get();
-        return new
-                org.springframework.security.core.userdetails.User(
-                    email,
-                    user.getUserSecret().getPassword(),
-                    Collections.singletonList(
-                            new SimpleGrantedAuthority("ROLE_USER")
-                    )
-        );
+
+        return new MyUserDetails(user);
     }
 }

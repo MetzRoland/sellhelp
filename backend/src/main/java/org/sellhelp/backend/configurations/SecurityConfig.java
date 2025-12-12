@@ -55,7 +55,7 @@ public class SecurityConfig {
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .userDetailsService(userDetailService)
         ;
-        //http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

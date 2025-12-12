@@ -25,6 +25,7 @@ public class JWTUtil {
                 .withClaim("email", email)
                 .withIssuedAt(new Date())
                 .withIssuer("SellHelp")
+                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
                 .sign(Algorithm.HMAC256(secret));
     }
 
@@ -37,6 +38,7 @@ public class JWTUtil {
                 .build();
 
         DecodedJWT jwt = verifier.verify(token);
+
         return jwt.getClaim("email").asString();
     }
 
@@ -50,15 +52,15 @@ public class JWTUtil {
         }
     }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
-        try {
-            String email = extractEmail(token);
-            return (email != null && email.equals(userDetails.getUsername())
-                    && !isTokenExpired(token));
-        } catch (Exception e) {
-            return false;
-        }
-    }
+//    public boolean validateToken(String token, UserDetails userDetails) {
+//        try {
+//            String email = extractEmail(token);
+//            return (email != null && email.equals(userDetails.getUsername())
+//                    && !isTokenExpired(token));
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
 
     private boolean isTokenExpired(String token) {
         try {
@@ -69,4 +71,41 @@ public class JWTUtil {
             return true; // treat invalid tokens as expired
         }
     }
+
+    public boolean isValidSigniture(String token) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+            return decodedJWT.getSignature().equals(Algorithm.HMAC256(secret).toString());
+        } catch (Exception e) {
+            // Could log the error here
+        }
+        return false;
+    }
+
+//    public boolean validateToken(String token, UserDetails userDetails) {
+//        try {
+//            String email = extractEmail(token);
+//            return (email != null && email.equals(userDetails.getUsername())
+//                    && !isTokenExpired(token) && isValidSigniture(token));
+//        } catch (Exception e) {
+//            return false;
+//        }
+//    }
+
+    public boolean validateToken(String token, UserDetails userDetails) {
+        try {
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
+                    .withSubject("User Details")
+                    .withIssuer("SellHelp")
+                    .build();
+
+            DecodedJWT jwt = verifier.verify(token); // throws exception if invalid
+            String email = jwt.getClaim("email").asString();
+
+            return email != null && email.equals(userDetails.getUsername());
+        } catch (JWTVerificationException e) {
+            return false;
+        }
+    }
+
 }

@@ -5,6 +5,7 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,8 +19,11 @@ public class UserController {
 
     @GetMapping("/info")
     public User getUserDetails(){
-        String email = (String) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
 
-        return userRepo.findByEmail(email).get();
+        return userRepo.findByEmail(email).orElseThrow(
+                () -> new RuntimeException("A felhasználó nem található!")
+        );
     }
 }
