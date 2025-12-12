@@ -186,7 +186,7 @@ CREATE TABLE "user_secrets" (
   "user_id" INT,
   "password" CHAR(60) NOT NULL,
   "last_used_pass" CHAR(60),
-  "pass_update_token" VARCHAR(60),
+  "totp_secret" VARCHAR(60),
   PRIMARY KEY ("id"),
 
   CONSTRAINT "FK_user_secrets_user_id"

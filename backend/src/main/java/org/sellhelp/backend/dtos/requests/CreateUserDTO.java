@@ -1,4 +1,4 @@
-package org.sellhelp.backend.dtos;
+package org.sellhelp.backend.dtos.requests;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.sellhelp.backend.entities.*;
 
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 
 @Data

@@ -1,6 +1,6 @@
 package org.sellhelp.backend.controllers;
 
-import org.sellhelp.backend.dtos.CreateUserDTO;
+import org.sellhelp.backend.dtos.requests.CreateUserDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
 import org.sellhelp.backend.entities.User;
@@ -9,14 +9,12 @@ import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/public")
