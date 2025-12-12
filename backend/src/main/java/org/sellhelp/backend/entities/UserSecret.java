@@ -25,8 +25,8 @@ public class UserSecret {
     @Column(name = "last_used_pass")
     private String lastUsedPassword;
 
-    @Column(name = "pass_update_token")
-    private String passUpdateToken;
+    @Column(name = "totp_secret")
+    private String totpSecret;;
 
     @JsonIgnore
     @OneToOne
