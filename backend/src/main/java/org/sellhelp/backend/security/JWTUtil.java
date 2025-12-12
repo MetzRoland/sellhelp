@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.util.Date;
@@ -37,5 +38,35 @@ public class JWTUtil {
 
         DecodedJWT jwt = verifier.verify(token);
         return jwt.getClaim("email").asString();
+    }
+
+    public String extractEmail(String token) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+            return decodedJWT.getClaim("email").asString();
+        } catch (Exception e) {
+            // Could log the error here
+            return null;
+        }
+    }
+
+    public boolean validateToken(String token, UserDetails userDetails) {
+        try {
+            String email = extractEmail(token);
+            return (email != null && email.equals(userDetails.getUsername())
+                    && !isTokenExpired(token));
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isTokenExpired(String token) {
+        try {
+            DecodedJWT decodedJWT = JWT.decode(token);
+            Date expiry = decodedJWT.getExpiresAt();
+            return expiry != null && expiry.before(new Date());
+        } catch (Exception e) {
+            return true; // treat invalid tokens as expired
+        }
     }
 }

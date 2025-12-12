@@ -2,6 +2,7 @@ package org.sellhelp.backend.configurations;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.JWTFilter;
 import org.sellhelp.backend.security.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
