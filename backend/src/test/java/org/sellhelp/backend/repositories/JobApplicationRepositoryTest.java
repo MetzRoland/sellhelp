@@ -3,6 +3,7 @@ package org.sellhelp.backend.repositories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.*;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -33,10 +34,10 @@ public class JobApplicationRepositoryTest {
         testUser = User.builder()
                 .firstName("Anna")
                 .lastName("Kiss")
-                .username("annakiss")
                 .birthDate(java.time.LocalDate.of(1998, 1, 5))
                 .email("anna@gmail.com")
                 .userSecret(userSecret)
+                .authProvider(AuthProvider.LOCAL)
                 .build();
 
         testUser = userRepository.save(testUser);

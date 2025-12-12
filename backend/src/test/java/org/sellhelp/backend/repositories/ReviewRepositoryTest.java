@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Review;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -27,19 +28,19 @@ class ReviewRepositoryTest {
     @BeforeEach
     void init() {
         testSenderUser = userRepository.save(User.builder()
-                .username("NagyB")
                 .firstName("Kis")
                 .lastName("Béla")
                 .birthDate(LocalDate.of(2001, 11, 3))
                 .email("kB@newMail.mail")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testReviewedUser = userRepository.save(User.builder()
-                .username("metzroland")
                 .firstName("Roland")
                 .lastName("Metz")
                 .birthDate(LocalDate.of(2003, 5, 12))
                 .email("a@gmail.com")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testReview = Review.builder()

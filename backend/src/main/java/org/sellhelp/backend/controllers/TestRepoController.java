@@ -53,7 +53,6 @@ public class TestRepoController {
                 .orElseThrow(() -> new RuntimeException("Role not found"));
 
         User user = User.builder()
-                .username(dto.getUsername())
                 .firstName(dto.getFirst_name())
                 .lastName(dto.getLast_name())
                 .birthDate(dto.getBirth_date())

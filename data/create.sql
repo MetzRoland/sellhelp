@@ -26,6 +26,8 @@ CREATE TABLE "user_roles" (
   PRIMARY KEY ("id")
 );
 
+CREATE TYPE auth_provider_type AS ENUM ('LOCAL', 'GOOGLE');
+
 CREATE TABLE "users" (
   "id" SERIAL,
   "username" VARCHAR(50) NOT NULL UNIQUE,
@@ -35,7 +37,7 @@ CREATE TABLE "users" (
   "email" VARCHAR(50) NOT NULL UNIQUE,
   "profile_picture_path" VARCHAR(255),
   "city_id" SMALLINT NOT NULL,
-  "google_id" VARCHAR(255),
+  "auth_provider" auth_provider_type NOT NULL,
   "role_id" SMALLINT NOT NULL,
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   "is_banned" BOOLEAN DEFAULT FALSE,
@@ -90,27 +92,9 @@ CREATE TABLE "posts" (
 );
 
 CREATE TABLE "job_applications" (
-  "id" INT,
-  "user_id" INT,
-  "post_id" INT,
-  "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY ("id"),
-
-  CONSTRAINT "FK_applications_user_id"
-    FOREIGN KEY ("user_id")
-      REFERENCES "users"("id")
-      ON DELETE CASCADE,
-
-  CONSTRAINT "FK_applications_post_id"
-    FOREIGN KEY ("post_id")
-      REFERENCES "posts"("id")
-      ON DELETE CASCADE
-);
-
-CREATE TABLE "job_applications" (
-  "id" INT,
-  "user_id" INT,
-  "post_id" INT,
+  "id" SERIAL,
+  "user_id" INT UNIQUE,
+  "post_id" INT UNIQUE,
   "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
 
@@ -263,4 +247,14 @@ CREATE TABLE "report_types" (
   "id" SMALLINT,
   "name" VARCHAR(30) NOT NULL UNIQUE,
   PRIMARY KEY ("id")
+);
+
+CREATE TABLE "review_files" (
+  "id" SERIAL,
+  "review_id" INT,
+  "file_path" VARCHAR(255) NOT NULL,
+  PRIMARY KEY ("id"),
+  CONSTRAINT "FK_review_files_review_id"
+    FOREIGN KEY ("review_id")
+      REFERENCES "reviews"("id")
 );

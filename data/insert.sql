@@ -1,8 +1,8 @@
 INSERT INTO "user_roles" ("id", "role_name")
 VALUES 
-(1, 'admin'),
-(2, 'moderator'),
-(3, 'user');
+(1, 'ROLE_ADMIN'),
+(2, 'ROLE_MODERATOR'),
+(3, 'ROLE_USER');
 
 INSERT INTO "post_status" ("id", "status_name")
 VALUES 

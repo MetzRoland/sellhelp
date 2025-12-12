@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatMessage;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -34,10 +35,11 @@ public class ChatMessageRepositoryTest {
         sender = User.builder()
                 .firstName("John")
                 .lastName("Doe")
-                .username("johndoe")
                 .email("john@example.com")
                 .birthDate(LocalDate.of(1990, 1, 1))
+                .authProvider(AuthProvider.LOCAL)
                 .build();
+
         userRepository.save(sender);
 
         chat = Chat.builder()
