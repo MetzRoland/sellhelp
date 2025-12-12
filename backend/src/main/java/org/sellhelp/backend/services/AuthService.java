@@ -1,5 +1,6 @@
 package org.sellhelp.backend.services;
 
+import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
@@ -19,14 +20,17 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final CityRepository cityRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
-                       CityRepository cityRepository, PasswordEncoder passwordEncoder){
+                       CityRepository cityRepository, PasswordEncoder passwordEncoder,
+                       ModelMapper modelMapper){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
         this.passwordEncoder = passwordEncoder;
+        this.modelMapper = modelMapper;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO){
@@ -38,24 +42,18 @@ public class AuthService {
                 () -> new RuntimeException("Szerepkör nem található")
         );
 
+        User user = modelMapper.map(registerDTO, User.class);
+        user.setCity(city);
+        user.setRole(role);
+        user.setAuthProvider(AuthProvider.LOCAL);
+
         UserSecret userSecret = UserSecret.builder()
                 .password(passwordEncoder.encode(registerDTO.getPassword()))
+                .user(user)
                 .build();
 
-        User user = User.builder()
-                .firstName(registerDTO.getFirstName())
-                .lastName(registerDTO.getLastName())
-                .email(registerDTO.getEmail())
-                .birthDate(registerDTO.getBirthDate())
-                .city(city)
-                .userSecret(userSecret)
-                .role(role)
-                .authProvider(AuthProvider.LOCAL)
-                .build();
-
-        userSecret.setUser(user);
+        user.setUserSecret(userSecret);
 
         userRepository.save(user);
-
     }
 }
