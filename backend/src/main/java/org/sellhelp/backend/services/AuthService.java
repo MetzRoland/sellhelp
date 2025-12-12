@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
@@ -10,7 +11,14 @@ import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -21,16 +29,23 @@ public class AuthService {
     private final CityRepository cityRepository;
     private final PasswordEncoder passwordEncoder;
     private final ModelMapper modelMapper;
+    private final UserDetailsService userDetailsService;
+    private final AuthenticationManager authenticationManager;
+    private final JWTUtil jwtUtil;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
-                       ModelMapper modelMapper){
+                       ModelMapper modelMapper, UserDetailsService userDetailsService,
+                       AuthenticationManager authenticationManager, JWTUtil jwtUtil){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
         this.passwordEncoder = passwordEncoder;
         this.modelMapper = modelMapper;
+        this.userDetailsService = userDetailsService;
+        this.authenticationManager = authenticationManager;
+        this.jwtUtil = jwtUtil;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO){
@@ -56,4 +71,22 @@ public class AuthService {
 
         userRepository.save(user);
     }
+
+    public String loginHandler(LoginDTO loginDTO)
+    {
+        try{
+            UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getEmail());
+            UsernamePasswordAuthenticationToken authInputToken =
+                    new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
+            authenticationManager.authenticate(authInputToken);
+
+            return jwtUtil.generateToken(userDetails.getUsername());
+
+        } catch(AuthenticationException authExc){
+            throw new RuntimeException("Invalid username/password.");
+        }
+
+    }
+    
+    
 }
