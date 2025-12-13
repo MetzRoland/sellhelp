@@ -15,11 +15,14 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    @Value("${jwt_secret}")
-    private String secret;
+    @Value("${jwt_access_secret}")
+    private String access_secret;
 
-    public String generateToken(String email, String secret, String tokenType, int expirationMS) throws
-            IllegalArgumentException, JWTCreationException {
+    @Value("${jwt_refresh_secret}")
+    private String refresh_secret;
+
+    public String generateToken(String email, String secret, String tokenType, int expirationMS)
+            throws IllegalArgumentException, JWTCreationException {
         return JWT.create()
                 .withSubject("User Details")
                 .withClaim("email", email)
@@ -30,15 +33,15 @@ public class JWTUtil {
                 .sign(Algorithm.HMAC256(secret));
     }
 
-    public String generateAccessToken(String email){
+    public String generateAccessToken(String email) {
         return generateToken(email, secret, "access", 1000 * 60 * 15);
     }
 
     public String validateTokenAndRetrieveSubject(String token)
-            throws JWTVerificationException
-    {
-        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
+            throws JWTVerificationException {
+        JWTVerifier verifier = JWT.require(Algorithm.HMAC256(access_secret))
                 .withSubject("User Details")
+                .withClaim("type", "access")
                 .withIssuer("SellHelp")
                 .build();
 
@@ -57,15 +60,15 @@ public class JWTUtil {
         }
     }
 
-//    public boolean validateToken(String token, UserDetails userDetails) {
-//        try {
-//            String email = extractEmail(token);
-//            return (email != null && email.equals(userDetails.getUsername())
-//                    && !isTokenExpired(token));
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
+    // public boolean validateToken(String token, UserDetails userDetails) {
+    // try {
+    // String email = extractEmail(token);
+    // return (email != null && email.equals(userDetails.getUsername())
+    // && !isTokenExpired(token));
+    // } catch (Exception e) {
+    // return false;
+    // }
+    // }
 
     private boolean isTokenExpired(String token) {
         try {
@@ -80,27 +83,28 @@ public class JWTUtil {
     public boolean isValidSigniture(String token) {
         try {
             DecodedJWT decodedJWT = JWT.decode(token);
-            return decodedJWT.getSignature().equals(Algorithm.HMAC256(secret).toString());
+            return decodedJWT.getSignature().equals(Algorithm.HMAC256(access_secret).toString());
         } catch (Exception e) {
             // Could log the error here
         }
         return false;
     }
 
-//    public boolean validateToken(String token, UserDetails userDetails) {
-//        try {
-//            String email = extractEmail(token);
-//            return (email != null && email.equals(userDetails.getUsername())
-//                    && !isTokenExpired(token) && isValidSigniture(token));
-//        } catch (Exception e) {
-//            return false;
-//        }
-//    }
+    // public boolean validateToken(String token, UserDetails userDetails) {
+    // try {
+    // String email = extractEmail(token);
+    // return (email != null && email.equals(userDetails.getUsername())
+    // && !isTokenExpired(token) && isValidSigniture(token));
+    // } catch (Exception e) {
+    // return false;
+    // }
+    // }
 
     public boolean validateToken(String token, String secret, String tokenType, UserDetails userDetails) {
         try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(access_secret))
                     .withSubject("User Details")
+                    .withClaim("type", "access")
                     .withIssuer("SellHelp")
                     .withClaim("type", tokenType)
                     .build();
