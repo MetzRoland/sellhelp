@@ -94,7 +94,6 @@ public class JWTUtil {
         try {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
                     .withSubject("User Details")
-                    .withClaim("type", "access")
                     .withClaim("type", tokenType)
                     .withIssuer("SellHelp")
                     .build();
