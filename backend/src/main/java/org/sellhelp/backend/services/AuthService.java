@@ -80,7 +80,7 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
             authenticationManager.authenticate(authInputToken);
 
-            return jwtUtil.generateToken(userDetails.getUsername());
+            return jwtUtil.generateAccessToken(userDetails.getUsername());
 
         } catch(AuthenticationException authExc){
             throw new RuntimeException("Invalid username/password.");

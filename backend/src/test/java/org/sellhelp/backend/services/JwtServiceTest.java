@@ -10,7 +10,7 @@ public class JwtServiceTest {
 
     public void test()
     {
-        String token = jwtService.generateToken("game@cucc.com");
+        String token = jwtService.generateAccessToken("game@cucc.com");
 
         // jwtService.validateToken();
     }

@@ -27,7 +27,7 @@ public class JWTUtil {
     @Value("${jwt_refresh_time}")
     private int refresh_time;
 
-    public String generateToken(String email, String secret, String tokenType, int expirationMS)
+    private String generateToken(String email, String secret, String tokenType, int expirationMS)
             throws IllegalArgumentException, JWTCreationException {
         return JWT.create()
                 .withSubject("User Details")
@@ -44,7 +44,7 @@ public class JWTUtil {
     }
 
     public String generateRefreshToken(String email) {
-        return generateToken(email, access_secret, "access", refresh_time);
+        return generateToken(email, refresh_secret, "refresh", refresh_time);
     }
 
     public String validateTokenAndRetrieveSubject(String token)
@@ -126,6 +126,16 @@ public class JWTUtil {
         } catch (JWTVerificationException e) {
             return false;
         }
+    }
+
+    public boolean validateAccessToken(String token, UserDetails userDetails)
+    {
+        return validateToken(token, access_secret, "access", userDetails);
+    }
+
+    public boolean validateRefreshToken(String token, UserDetails userDetails)
+    {
+        return validateToken(token, refresh_secret, "refresh", userDetails);
     }
 
 }
