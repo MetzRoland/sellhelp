@@ -88,7 +88,7 @@ public class AuthService {
             return new TokenDTO(accessToken, refreshToken);
 
         } catch(AuthenticationException authExc){
-            throw new RuntimeException("Invalid username/password.");
+            throw new RuntimeException("Helytelen email vagy jelszó!");
         }
     }
 
@@ -108,7 +108,7 @@ public class AuthService {
             }
 
         } catch(AuthenticationException authExc){
-            throw new RuntimeException("Invalid username/password.");
+            throw new RuntimeException("Invalid refresh token!");
         }
         return null;
     }

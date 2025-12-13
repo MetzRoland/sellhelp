@@ -1,7 +1,10 @@
 package org.sellhelp.backend.exceptions;
 
+import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
+import org.sellhelp.backend.dtos.responses.ValidationErrorsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -15,28 +18,44 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("status", HttpStatus.BAD_REQUEST.value());
+    public ResponseEntity<ValidationErrorsDTO> handleValidationExceptions(MethodArgumentNotValidException ex) {
+        ValidationErrorsDTO validationErrorsDTO = new ValidationErrorsDTO();
+
+        validationErrorsDTO.setTimestamp(LocalDateTime.now());
+        validationErrorsDTO.setStatus(HttpStatus.BAD_REQUEST.value());
 
         Map<String, String> fieldErrors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             fieldErrors.put(error.getField(), error.getDefaultMessage());
         }
 
-        body.put("errors", fieldErrors);
+        validationErrorsDTO.setErrors(fieldErrors);
 
-        return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(validationErrorsDTO, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<GeneralErrorDTO> handleInvalidJson(
+            HttpMessageNotReadableException ex) {
+
+        GeneralErrorDTO errorDTO = new GeneralErrorDTO();
+
+        errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setMessage("Invalid JSON syntax!");
+
+        return ResponseEntity.badRequest().body(errorDTO);
     }
 
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<Object> handleException(Exception ex) {
-        Map<String, Object> body = new HashMap<>();
-        body.put("timestamp", LocalDateTime.now());
-        body.put("message", ex.getMessage());
-        body.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-        return new ResponseEntity<>(body, HttpStatus.INTERNAL_SERVER_ERROR);
+    public ResponseEntity<GeneralErrorDTO> handleException(Exception ex) {
+        GeneralErrorDTO errorDTO = new GeneralErrorDTO();
+
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setMessage(ex.getMessage());
+        errorDTO.setStatus(HttpStatus.INTERNAL_SERVER_ERROR.value());
+
+        return new ResponseEntity<>(errorDTO, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
