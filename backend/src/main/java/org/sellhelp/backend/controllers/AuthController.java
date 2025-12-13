@@ -42,7 +42,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> loginHandler(@RequestBody LoginDTO loginDTO)
     {
-        TokenDTO token = new TokenDTO(authService.loginHandler(loginDTO));
-        return ResponseEntity.ok(token);
+        return ResponseEntity.ok(authService.loginHandler(loginDTO));
     }
 }

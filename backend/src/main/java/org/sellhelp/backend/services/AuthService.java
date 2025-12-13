@@ -3,6 +3,7 @@ package org.sellhelp.backend.services;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
+import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
 import org.sellhelp.backend.entities.User;
@@ -72,7 +73,7 @@ public class AuthService {
         userRepository.save(user);
     }
 
-    public String loginHandler(LoginDTO loginDTO)
+    public TokenDTO loginHandler(LoginDTO loginDTO)
     {
         try{
             UserDetails userDetails = userDetailsService.loadUserByUsername(loginDTO.getEmail());
@@ -80,7 +81,10 @@ public class AuthService {
                     new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
             authenticationManager.authenticate(authInputToken);
 
-            return jwtUtil.generateAccessToken(userDetails.getUsername());
+            String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
+            String refreshToken = jwtUtil.generateRefreshToken(userDetails.getUsername());
+
+            return new TokenDTO(accessToken, refreshToken);
 
         } catch(AuthenticationException authExc){
             throw new RuntimeException("Invalid username/password.");
