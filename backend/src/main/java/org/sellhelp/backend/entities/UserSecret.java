@@ -26,7 +26,7 @@ public class UserSecret {
     private String lastUsedPassword;
 
     @Column(name = "totp_secret")
-    private String totpSecret;;
+    private String totpSecret;
 
     @JsonIgnore
     @OneToOne
