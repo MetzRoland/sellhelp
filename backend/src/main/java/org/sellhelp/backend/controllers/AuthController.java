@@ -2,6 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
+import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.security.JWTUtil;
@@ -43,5 +44,11 @@ public class AuthController {
     public ResponseEntity<TokenDTO> loginHandler(@RequestBody LoginDTO loginDTO)
     {
         return ResponseEntity.ok(authService.loginHandler(loginDTO));
+    }
+
+    @PostMapping("/login/refresh")
+    public ResponseEntity<TokenDTO> loginHandler(@RequestBody RefreshDTO refreshDTO)
+    {
+        return ResponseEntity.ok(authService.refresh(refreshDTO));
     }
 }

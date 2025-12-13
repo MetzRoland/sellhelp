@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
+import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.entities.City;
@@ -89,7 +90,27 @@ public class AuthService {
         } catch(AuthenticationException authExc){
             throw new RuntimeException("Invalid username/password.");
         }
+    }
 
+    public TokenDTO refresh(RefreshDTO refreshDTO)
+    {
+        try{
+            String refreshToken = refreshDTO.getRefreshToken();
+            String email = jwtUtil.extractEmail(refreshToken);
+
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+            if (jwtUtil.validateRefreshToken(refreshDTO.getRefreshToken(), userDetails))
+            {
+                String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
+
+                return new TokenDTO(accessToken, refreshDTO.getRefreshToken());
+            }
+
+        } catch(AuthenticationException authExc){
+            throw new RuntimeException("Invalid username/password.");
+        }
+        return null;
     }
     
     
