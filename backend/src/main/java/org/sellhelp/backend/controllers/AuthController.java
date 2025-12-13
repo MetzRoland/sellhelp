@@ -7,32 +7,28 @@ import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
-import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Map;
 
 @RequestMapping("/auth")
 @RestController
 public class AuthController {
     private final AuthService authService;
-    private final JWTUtil jwtUtil;
-    private final UserDetailsService userDetailsService;
-    private final AuthenticationManager authenticationManager;
+
+    @Value("${jwt_cookie_access_time}")
+    private int accessTokenCookieExpiration;
+
+    @Value("${jwt_cookie_refresh_time}")
+    private int refreshTokenCookieExpiration;
 
     @Autowired
-    public AuthController(AuthService authService, JWTUtil jwtUtil, AuthenticationManager authenticationManager,
-                          UserDetailsService userDetailsService){
+    public AuthController(AuthService authService){
         this.authService = authService;
-        this.jwtUtil = jwtUtil;
-        this.userDetailsService = userDetailsService;
-        this.authenticationManager = authenticationManager;
     }
 
     @PostMapping("/register")
@@ -43,23 +39,12 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> loginHandler(@RequestBody LoginDTO loginDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> loginHandler(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.loginHandler(loginDTO);
 
-        Cookie accessTokenCookie = new Cookie("accessToken", tokenDTO.getAccess_token());
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(15 * 60);
-        accessTokenCookie.setAttribute("SameSite", "Strict");
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", tokenDTO.getRefresh_token());
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(15 * 60);
-        refreshTokenCookie.setAttribute("SameSite", "Strict");
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -68,27 +53,22 @@ public class AuthController {
     }
 
     @PostMapping("/login/refresh")
-    public ResponseEntity<TokenDTO> refreshHandler(@RequestBody RefreshDTO refreshDTO)
+    public ResponseEntity<TokenDTO> refreshHandler(@RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
     {
-        return ResponseEntity.ok(authService.refresh(refreshDTO));
+        TokenDTO tokenDTO = authService.refresh(refreshDTO);
+
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+
+        response.addCookie(accessTokenCookie);
+
+        return ResponseEntity.ok(tokenDTO);
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<String> logoutHandler(@RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
+    public ResponseEntity<String> logoutHandler(HttpServletResponse response)
     {
-        Cookie accessTokenCookie = new Cookie("accessToken", null);
-        accessTokenCookie.setHttpOnly(true);
-        accessTokenCookie.setSecure(false);
-        accessTokenCookie.setPath("/");
-        accessTokenCookie.setMaxAge(0);
-        accessTokenCookie.setAttribute("SameSite", "Strict");
-
-        Cookie refreshTokenCookie = new Cookie("refreshToken", null);
-        refreshTokenCookie.setHttpOnly(true);
-        refreshTokenCookie.setSecure(false);
-        refreshTokenCookie.setPath("/");
-        refreshTokenCookie.setMaxAge(0);
-        refreshTokenCookie.setAttribute("SameSite", "Strict");
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", null, 0);
+        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", null, 0);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);

@@ -1,14 +1,12 @@
 package org.sellhelp.backend.configurations;
 
 import jakarta.servlet.http.HttpServletResponse;
-import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.JWTFilter;
 import org.sellhelp.backend.security.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -27,14 +25,16 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
-    @Autowired
-    private UserRepository userRepo;
+
+    private final JWTFilter jwtFilter;
+
+    private final MyUserDetailService userDetailService;
 
     @Autowired
-    private JWTFilter filter;
-
-    @Autowired
-    private MyUserDetailService userDetailService;
+    public SecurityConfig(JWTFilter jwtFilter, MyUserDetailService userDetailService){
+        this.jwtFilter = jwtFilter;
+        this.userDetailService = userDetailService;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -55,7 +55,7 @@ public class SecurityConfig {
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .userDetailsService(userDetailService)
         ;
-        http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

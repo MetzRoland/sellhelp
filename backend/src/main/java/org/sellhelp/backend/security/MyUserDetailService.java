@@ -15,12 +15,16 @@ import java.util.Optional;
 @Component
 public class MyUserDetailService implements UserDetailsService {
 
+    private final UserRepository userRepository;
+
     @Autowired
-    private UserRepository userRepo;
+    public MyUserDetailService(UserRepository userRepository){
+        this.userRepository = userRepository;
+    }
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Optional<User> userRes = userRepo.findByEmail(email);
+        Optional<User> userRes = userRepository.findByEmail(email);
 
         if(userRes.isEmpty())
             throw new UsernameNotFoundException("No user found with this email "+email);
