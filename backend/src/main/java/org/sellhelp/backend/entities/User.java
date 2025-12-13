@@ -1,19 +1,15 @@
 package org.sellhelp.backend.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 import org.sellhelp.backend.enums.AuthProvider;
 
 import java.time.LocalDate;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -56,7 +52,7 @@ public class User {
     private boolean banned;
 
     @Column(name = "created_at", nullable = false)
-    @CurrentTimestamp
+    @CreationTimestamp
     private Instant createdAt;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST,  CascadeType.MERGE, CascadeType.REMOVE})

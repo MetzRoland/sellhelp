@@ -30,7 +30,6 @@ CREATE TYPE auth_provider_type AS ENUM ('LOCAL', 'GOOGLE');
 
 CREATE TABLE "users" (
   "id" SERIAL,
-  "username" VARCHAR(50) NOT NULL UNIQUE,
   "first_name" VARCHAR(50) NOT NULL,
   "last_name" VARCHAR(50) NOT NULL,
   "birth_date" DATE NOT NULL,
