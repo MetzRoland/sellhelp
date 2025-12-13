@@ -2,7 +2,7 @@ package org.sellhelp.backend.configurations;
 
 import jakarta.servlet.http.HttpServletResponse;
 import org.sellhelp.backend.security.JWTFilter;
-import org.sellhelp.backend.security.MyUserDetailService;
+import org.sellhelp.backend.security.UserAuthDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -28,10 +28,10 @@ public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
 
-    private final MyUserDetailService userDetailService;
+    private final UserAuthDetailService userDetailService;
 
     @Autowired
-    public SecurityConfig(JWTFilter jwtFilter, MyUserDetailService userDetailService){
+    public SecurityConfig(JWTFilter jwtFilter, UserAuthDetailService userDetailService){
         this.jwtFilter = jwtFilter;
         this.userDetailService = userDetailService;
     }
