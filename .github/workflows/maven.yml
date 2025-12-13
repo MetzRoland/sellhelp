@@ -2,9 +2,7 @@ name: Java CI with Maven
 
 on:
   push:
-    branches: [ "backend/entities" ]
   pull_request:
-    branches: [ "backend/entities" ]
 
 jobs:
 
