@@ -20,7 +20,7 @@ public class JWTUtil {
 
     @Value("${jwt_refresh_secret}")
     private String refresh_secret;
-    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyIERldGFpbHMiLCJlbWFpbCI6ImphbmlAZW1haWwuaHUiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzY1NjE3MjQ1LCJpc3MiOiJTZWxsSGVscCIsImV4cCI6MTc2NTYxODE0NX0.6efKOxNV2xd4vco5JaKo-4THj5w8yfCExAsJ3-gJhu8
+
     @Value("${jwt_access_time}")
     private int access_time;
 
@@ -69,16 +69,6 @@ public class JWTUtil {
             return null;
         }
     }
-
-    // public boolean validateToken(String token, UserDetails userDetails) {
-    // try {
-    // String email = extractEmail(token);
-    // return (email != null && email.equals(userDetails.getUsername())
-    // && !isTokenExpired(token));
-    // } catch (Exception e) {
-    // return false;
-    // }
-    // }
 
     private boolean isTokenExpired(String token) {
         try {
