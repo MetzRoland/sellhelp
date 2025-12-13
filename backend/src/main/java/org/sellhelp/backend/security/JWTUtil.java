@@ -20,7 +20,7 @@ public class JWTUtil {
 
     @Value("${jwt_refresh_secret}")
     private String refresh_secret;
-
+    // eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJVc2VyIERldGFpbHMiLCJlbWFpbCI6ImphbmlAZW1haWwuaHUiLCJ0eXBlIjoiYWNjZXNzIiwiaWF0IjoxNzY1NjE3MjQ1LCJpc3MiOiJTZWxsSGVscCIsImV4cCI6MTc2NTYxODE0NX0.6efKOxNV2xd4vco5JaKo-4THj5w8yfCExAsJ3-gJhu8
     @Value("${jwt_access_time}")
     private int access_time;
 
@@ -100,23 +100,13 @@ public class JWTUtil {
         return false;
     }
 
-    // public boolean validateToken(String token, UserDetails userDetails) {
-    // try {
-    // String email = extractEmail(token);
-    // return (email != null && email.equals(userDetails.getUsername())
-    // && !isTokenExpired(token) && isValidSigniture(token));
-    // } catch (Exception e) {
-    // return false;
-    // }
-    // }
-
     public boolean validateToken(String token, String secret, String tokenType, UserDetails userDetails) {
         try {
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(access_secret))
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
                     .withSubject("User Details")
                     .withClaim("type", "access")
-                    .withIssuer("SellHelp")
                     .withClaim("type", tokenType)
+                    .withIssuer("SellHelp")
                     .build();
 
             DecodedJWT jwt = verifier.verify(token); // throws exception if invalid
