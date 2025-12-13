@@ -31,11 +31,11 @@ VALUES
 
 INSERT INTO "users" (
   "first_name", "last_name", "birth_date",
-  "email", "city_id", "role_id"
+  "email", "city_id", "auth_provider", "role_id"
 )
 VALUES (
   'John', 'Doe', '1990-05-10',
-  'john@example.com', 1, 3
+  'john@example.com', 1, 'LOCAL', 3
 );
 
 INSERT INTO "user_secrets" ("user_id", "password")
