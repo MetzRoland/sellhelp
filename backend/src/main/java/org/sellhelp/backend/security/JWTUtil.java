@@ -18,15 +18,20 @@ public class JWTUtil {
     @Value("${jwt_secret}")
     private String secret;
 
-    public String generateToken(String email) throws
+    public String generateToken(String email, String secret, String tokenType, int expirationMS) throws
             IllegalArgumentException, JWTCreationException {
         return JWT.create()
                 .withSubject("User Details")
                 .withClaim("email", email)
+                .withClaim("type", tokenType)
                 .withIssuedAt(new Date())
                 .withIssuer("SellHelp")
-                .withExpiresAt(new Date(System.currentTimeMillis() + 1000 * 60 * 15))
+                .withExpiresAt(new Date(System.currentTimeMillis() + expirationMS))
                 .sign(Algorithm.HMAC256(secret));
+    }
+
+    public String generateAccessToken(String email){
+        return generateToken(email, secret, "access", 1000 * 60 * 15);
     }
 
     public String validateTokenAndRetrieveSubject(String token)
@@ -92,11 +97,12 @@ public class JWTUtil {
 //        }
 //    }
 
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, String secret, String tokenType, UserDetails userDetails) {
         try {
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(secret))
                     .withSubject("User Details")
                     .withIssuer("SellHelp")
+                    .withClaim("type", tokenType)
                     .build();
 
             DecodedJWT jwt = verifier.verify(token); // throws exception if invalid
