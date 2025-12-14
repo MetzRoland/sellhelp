@@ -1,0 +1,36 @@
+services:
+  sellhelp:
+    image: sellhelp:latest
+    ports:
+      - 8080:8080
+    depends_on:
+     - database
+     - storage
+    env_file: '.env-docker'
+
+  database:
+    image: 'postgres:latest'
+    ports:
+      - 5432:5432
+    env_file: '.env-docker'
+    volumes:
+      - ./data:/docker-entrypoint-initdb.d
+
+  adminer:
+    image: adminer
+    restart: always
+    ports:
+      - 8888:8080
+    depends_on:
+      - database
+
+
+  storage:
+    image: 'minio/minio:latest'
+    ports:
+      - 9000:9000
+      - 9001:9001
+    env_file: '.env-docker'
+    volumes:
+      - ./minio_data:/data
+    command: server /data --console-address ":9001"
