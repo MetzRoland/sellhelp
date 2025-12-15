@@ -3,31 +3,25 @@ package org.sellhelp.backend.controllers;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
-import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
-import org.sellhelp.backend.entities.User;
-import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CookieGenerator;
+import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/user")
 public class UserController {
-
-    private final UserRepository userRepository;
-
-    private final ModelMapper modelMapper;
+    private final UserService userService;
 
     @Autowired
-    public UserController(UserRepository userRepository, ModelMapper modelMapper){
-        this.userRepository = userRepository;
-        this.modelMapper = modelMapper;
+    public UserController(UserService userService){
+        this.userService = userService;
     }
 
     @GetMapping("/info")
@@ -35,10 +29,7 @@ public class UserController {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
 
-        UserDTO userDTO = modelMapper.map(userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")), UserDTO.class);
-
-        return userDTO;
+        return userService.getUserDetails(email);
     }
 
     @GetMapping("/logout")
@@ -52,4 +43,53 @@ public class UserController {
 
         return ResponseEntity.ok("Sikeres kijelentkezés!");
     }
+
+    @PatchMapping("/update/details")
+    public ResponseEntity<String> updateUserDetails(@RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
+        try
+        {
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email = userDetails.getUsername();
+
+            userService.updateUserDetails(email, userDetailsUpdateDTO);
+
+            return ResponseEntity.ok("Sikeres frissítés!");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("A firssítés sikertelen. Server hiba!");
+        }
+    }
+
+//    @PatchMapping("/update/email")
+//    public ResponseEntity<String> updateUserEmail(@RequestBody UserEmailUpdateDTO userEmailUpdateDTO){
+//        try
+//        {
+//            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//            String email = userDetails.getUsername();
+//
+//            userService.updateUserDetails(email, userEmailUpdateDTO);
+//
+//            return ResponseEntity.ok("Sikeres frissítés!");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("A firssítés sikertelen. Server hiba!");
+//        }
+//    }
+//
+//    @PatchMapping("/update/password")
+//    public ResponseEntity<String> updateUserPassword(@RequestBody UserPasswordUpdateDTO userPasswordUpdateDTO){
+//        try
+//        {
+//            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+//            String email = userDetails.getUsername();
+//
+//            userService.updateUserDetails(email, userDetailsUpdateDTO);
+//
+//            return ResponseEntity.ok("Sikeres frissítés!");
+//        } catch (Exception e) {
+//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+//                    .body("A firssítés sikertelen. Server hiba!");
+//        }
+//    }
+
 }

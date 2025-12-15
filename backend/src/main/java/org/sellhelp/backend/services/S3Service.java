@@ -15,7 +15,6 @@ import java.io.IOException;
 public class S3Service {
 
     private final S3Client s3Client;
-
     private final String bucketName;
 
     @Autowired
