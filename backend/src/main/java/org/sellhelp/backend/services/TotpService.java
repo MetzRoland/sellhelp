@@ -12,10 +12,14 @@ public class TotpService {
     private final SecretGenerator secretGenerator = new DefaultSecretGenerator();
 
     public TotpService() {
-        verifier = new DefaultCodeVerifier(
+        DefaultCodeVerifier codeVerifier = new DefaultCodeVerifier(
                 new DefaultCodeGenerator(),
                 new SystemTimeProvider()
         );
+
+        codeVerifier.setAllowedTimePeriodDiscrepancy(0);
+
+        this.verifier = codeVerifier;
     }
 
     public String generateSecret() {
