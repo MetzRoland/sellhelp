@@ -16,12 +16,18 @@ public class S3Service {
 
     private final S3Client s3Client;
 
-    @Value("${s3.bucket}")
-    private String bucketName;
+    private final String bucketName;
 
     @Autowired
-    public S3Service(S3Client s3Client) {
+    public S3Service(S3Client s3Client, @Value("${s3.bucket}") String bucketName) {
         this.s3Client = s3Client;
+        this.bucketName = bucketName;
+
+        if (!bucketExists(bucketName))
+        {
+            s3Client.createBucket(request -> request.bucket(bucketName));
+        }
+
     }
 
     public boolean fileExists(String fileName) {
@@ -76,5 +82,15 @@ public class S3Service {
                 .build();
 
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    boolean bucketExists(String bucketName) {
+        try {
+            s3Client.headBucket(request -> request.bucket(bucketName));
+            return true;
+        }
+        catch (NoSuchBucketException exception) {
+            return false;
+        }
     }
 }
