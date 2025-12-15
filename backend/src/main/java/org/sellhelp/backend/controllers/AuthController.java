@@ -7,20 +7,25 @@ import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
 import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
+import org.sellhelp.backend.services.MfaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+
 @RequestMapping("/auth")
 @RestController
 public class AuthController {
     private final AuthService authService;
+    private final MfaService mfaService;
 
     @Value("${jwt_cookie_access_time}")
     private int accessTokenCookieExpiration;
@@ -29,8 +34,9 @@ public class AuthController {
     private int refreshTokenCookieExpiration;
 
     @Autowired
-    public AuthController(AuthService authService){
+    public AuthController(AuthService authService, MfaService mfaService){
         this.authService = authService;
+        this.mfaService = mfaService;
     }
 
     @PostMapping("/register")
@@ -68,21 +74,21 @@ public class AuthController {
 
     @GetMapping("/enable2fa")
     public ResponseEntity<TotpSecretDTO> enableMfa(){
-        TotpSecretDTO totpSecretDTO = authService.enableMfa();
+        TotpSecretDTO totpSecretDTO = mfaService.enableMfa();
 
         return ResponseEntity.ok(totpSecretDTO);
     }
 
     @GetMapping("/disable2fa")
     public ResponseEntity<TotpSecretDTO> disableMfa(){
-        TotpSecretDTO totpSecretDTO = authService.disableMfa();
+        TotpSecretDTO totpSecretDTO = mfaService.disableMfa();
 
         return ResponseEntity.ok(totpSecretDTO);
     }
 
     @PostMapping("/verify-totp")
-    public ResponseEntity<TokenDTO> verifyTotp(@RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
-        TokenDTO tokenDTO = authService.validateTotpCode(totpCodeDTO);
+    public ResponseEntity<TokenDTO> verifyTotp(@Valid @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
+        TokenDTO tokenDTO = mfaService.validateTotpCode(totpCodeDTO);
 
         Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
         Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);

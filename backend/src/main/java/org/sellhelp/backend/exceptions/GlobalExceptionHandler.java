@@ -5,6 +5,7 @@ import org.sellhelp.backend.dtos.responses.ValidationErrorsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -32,6 +33,28 @@ public class GlobalExceptionHandler {
         validationErrorsDTO.setErrors(fieldErrors);
 
         return new ResponseEntity<>(validationErrorsDTO, HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(AuthenticationException.class)
+    public ResponseEntity<GeneralErrorDTO> handleAuthenticationException(AuthenticationException ex) {
+        GeneralErrorDTO errorDTO = new GeneralErrorDTO();
+
+        errorDTO.setStatus(HttpStatus.UNAUTHORIZED.value());
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorDTO);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<GeneralErrorDTO> handleRuntimeException(RuntimeException ex) {
+        GeneralErrorDTO errorDTO = new GeneralErrorDTO();
+
+        errorDTO.setStatus(HttpStatus.BAD_REQUEST.value());
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorDTO);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
@@ -67,3 +90,4 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
     }
 }
+

@@ -65,7 +65,7 @@ public class JWTUtil {
             DecodedJWT decodedJWT = JWT.decode(token);
             return decodedJWT.getClaim("email").asString();
         } catch (Exception e) {
-            // Could log the error here
+
             return null;
         }
     }
@@ -76,7 +76,7 @@ public class JWTUtil {
             Date expiry = decodedJWT.getExpiresAt();
             return expiry != null && expiry.before(new Date());
         } catch (Exception e) {
-            return true; // treat invalid tokens as expired
+            return true;
         }
     }
 
@@ -85,7 +85,7 @@ public class JWTUtil {
             DecodedJWT decodedJWT = JWT.decode(token);
             return decodedJWT.getSignature().equals(Algorithm.HMAC256(access_secret).toString());
         } catch (Exception e) {
-            // Could log the error here
+
         }
         return false;
     }
@@ -98,7 +98,7 @@ public class JWTUtil {
                     .withIssuer("SellHelp")
                     .build();
 
-            DecodedJWT jwt = verifier.verify(token); // throws exception if invalid
+            DecodedJWT jwt = verifier.verify(token);
             String email = jwt.getClaim("email").asString();
 
             return email != null && email.equals(userDetails.getUsername());
