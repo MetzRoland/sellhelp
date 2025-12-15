@@ -21,6 +21,8 @@ public class UserDTO {
     private String email;
     private LocalDate birthDate;
     private String cityName;
+    private boolean isMfa;
+    private String totpSecret;
     private Instant createdAt;
     private List<Review> reviews;
     private List<Review> sentReviews;

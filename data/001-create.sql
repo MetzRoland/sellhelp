@@ -185,6 +185,7 @@ CREATE TABLE "user_secrets" (
   "user_id" INT,
   "password" CHAR(60) NOT NULL,
   "last_used_pass" CHAR(60),
+  "is_mfa" BOOLEAN NOT NULL DEFAULT false,
   "totp_secret" VARCHAR(60),
   PRIMARY KEY ("id"),
 

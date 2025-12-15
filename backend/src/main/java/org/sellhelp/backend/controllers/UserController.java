@@ -1,11 +1,15 @@
 package org.sellhelp.backend.controllers;
 
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CookieGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -35,5 +39,17 @@ public class UserController {
                 () -> new RuntimeException("A felhasználó nem található!")), UserDTO.class);
 
         return userDTO;
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logoutHandler(HttpServletResponse response)
+    {
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", null, 0);
+        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", null, 0);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        return ResponseEntity.ok("Sikeres kijelentkezés!");
     }
 }

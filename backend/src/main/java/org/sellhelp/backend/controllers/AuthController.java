@@ -6,7 +6,9 @@ import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
+import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
+import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,15 +66,30 @@ public class AuthController {
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @GetMapping("/logout")
-    public ResponseEntity<String> logoutHandler(HttpServletResponse response)
-    {
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", null, 0);
-        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", null, 0);
+    @GetMapping("/enable2fa")
+    public ResponseEntity<TotpSecretDTO> enableMfa(){
+        TotpSecretDTO totpSecretDTO = authService.enableMfa();
+
+        return ResponseEntity.ok(totpSecretDTO);
+    }
+
+    @GetMapping("/disable2fa")
+    public ResponseEntity<TotpSecretDTO> disableMfa(){
+        TotpSecretDTO totpSecretDTO = authService.disableMfa();
+
+        return ResponseEntity.ok(totpSecretDTO);
+    }
+
+    @PostMapping("/verify-totp")
+    public ResponseEntity<TokenDTO> verifyTotp(@RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
+        TokenDTO tokenDTO = authService.validateTotpCode(totpCodeDTO);
+
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
-        return ResponseEntity.ok("Sikeres kijelentkezés!");
+        return ResponseEntity.ok(tokenDTO);
     }
 }
