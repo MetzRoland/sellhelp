@@ -3,12 +3,17 @@ package org.sellhelp.backend.controllers;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
+import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
+import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
 import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
+import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
+import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,10 +23,18 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/user")
 public class UserController {
     private final UserService userService;
+    private final EmailService emailService;
+
+    @Value("${jwt.cookie.access.time}")
+    private int accessTokenCookieExpiration;
+
+    @Value("${jwt.cookie.refresh.time}")
+    private int refreshTokenCookieExpiration;
 
     @Autowired
-    public UserController(UserService userService){
+    public UserController(UserService userService, EmailService emailService){
         this.userService = userService;
+        this.emailService = emailService;
     }
 
     @GetMapping("/info")
@@ -45,7 +58,7 @@ public class UserController {
     }
 
     @PatchMapping("/update/details")
-    public ResponseEntity<String> updateUserDetails(@RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
+    public ResponseEntity<String> updateUserDetails(@Valid @RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
 
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String email = userDetails.getUsername();
@@ -55,36 +68,46 @@ public class UserController {
             return ResponseEntity.ok("Sikeres frissítés!");
     }
 
-//    @PatchMapping("/update/email")
-//    public ResponseEntity<String> updateUserEmail(@RequestBody UserEmailUpdateDTO userEmailUpdateDTO){
-//        try
-//        {
-//            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            String email = userDetails.getUsername();
-//
-//            userService.updateUserDetails(email, userEmailUpdateDTO);
-//
-//            return ResponseEntity.ok("Sikeres frissítés!");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("A firssítés sikertelen. Server hiba!");
-//        }
-//    }
-//
-//    @PatchMapping("/update/password")
-//    public ResponseEntity<String> updateUserPassword(@RequestBody UserPasswordUpdateDTO userPasswordUpdateDTO){
-//        try
-//        {
-//            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-//            String email = userDetails.getUsername();
-//
-//            userService.updateUserDetails(email, userDetailsUpdateDTO);
-//
-//            return ResponseEntity.ok("Sikeres frissítés!");
-//        } catch (Exception e) {
-//            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-//                    .body("A firssítés sikertelen. Server hiba!");
-//        }
-//    }
+    @PatchMapping("/update/email")
+    public ResponseEntity<String> updateUserEmail(HttpServletResponse response, @Valid @RequestBody EmailUpdateDTO emailUpdateDTO){
 
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        TokenDTO tokenDTO = userService.updateUserEmail(email, emailUpdateDTO);
+
+        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
+
+        return ResponseEntity.ok("Email sikeresen frissítve!");
+    }
+
+    @GetMapping("/update/password/send")
+    public ResponseEntity<String> sendUserPasswordEmail(){
+        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+
+        emailService.updatePassword(email);
+
+        return ResponseEntity.ok("Email a jelszó módosításhoz elküldve!");
+    }
+
+    @PatchMapping("/update/password")
+    public ResponseEntity<String> updateUserPassword(HttpServletResponse response, @Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO){
+            UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            String email = userDetails.getUsername();
+
+            TokenDTO tokenDTO = userService.updateUserPassword(email, passwordUpdateDTO);
+
+            Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+            Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+
+            response.addCookie(accessTokenCookie);
+            response.addCookie(refreshTokenCookie);
+
+            return ResponseEntity.ok("Sikeres frissítés!");
+    }
 }

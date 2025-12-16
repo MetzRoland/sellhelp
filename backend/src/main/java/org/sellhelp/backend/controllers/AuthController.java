@@ -27,10 +27,10 @@ public class AuthController {
     private final AuthService authService;
     private final MfaService mfaService;
 
-    @Value("${jwt_cookie_access_time}")
+    @Value("${jwt.cookie.access.time}")
     private int accessTokenCookieExpiration;
 
-    @Value("${jwt_cookie_refresh_time}")
+    @Value("${jwt.cookie.refresh.time}")
     private int refreshTokenCookieExpiration;
 
     @Autowired
@@ -61,7 +61,7 @@ public class AuthController {
     }
 
     @PostMapping("/login/refresh")
-    public ResponseEntity<TokenDTO> refreshHandler(@RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> refreshHandler(@Valid @RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.refresh(refreshDTO);
 

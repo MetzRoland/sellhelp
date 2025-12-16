@@ -39,13 +39,15 @@ public class AuthService {
     private final TotpService totpService;
     private final QrCodeService qrCodeService;
     private final TempTokenService tempTokenService;
+    private final EmailService emailService;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       TotpService totpService, QrCodeService qrCodeService,TempTokenService tempTokenService){
+                       TotpService totpService, QrCodeService qrCodeService,TempTokenService tempTokenService,
+                       EmailService emailService){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -57,6 +59,7 @@ public class AuthService {
         this.totpService = totpService;
         this.qrCodeService = qrCodeService;
         this.tempTokenService = tempTokenService;
+        this.emailService = emailService;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO){
@@ -81,6 +84,7 @@ public class AuthService {
         user.setUserSecret(userSecret);
 
         userRepository.save(user);
+        // emailService.registrationSuccessEmail(user.getEmail());
     }
 
     public TokenDTO loginHandler(LoginDTO loginDTO)

@@ -15,17 +15,23 @@ import java.util.Date;
 @Component
 public class JWTUtil {
 
-    @Value("${jwt_access_secret}")
+    @Value("${jwt.access.secret}")
     private String access_secret;
 
-    @Value("${jwt_refresh_secret}")
+    @Value("${jwt.refresh.secret}")
     private String refresh_secret;
 
-    @Value("${jwt_access_time}")
+    @Value("${jwt.password.update.secret}")
+    private String password_update_secret;
+
+    @Value("${jwt.access.time}")
     private int access_time;
 
-    @Value("${jwt_refresh_time}")
+    @Value("${jwt.refresh.time}")
     private int refresh_time;
+
+    @Value("${jwt.password.update.time}")
+    private int password_update_time;
 
     private String generateToken(String email, String secret, String tokenType, int expirationMS)
             throws IllegalArgumentException, JWTCreationException {
@@ -45,6 +51,10 @@ public class JWTUtil {
 
     public String generateRefreshToken(String email) {
         return generateToken(email, refresh_secret, "refresh", refresh_time);
+    }
+
+    public String generatePasswordUpdateToken(String email) {
+        return generateToken(email, password_update_secret, "passwordUpdate", password_update_time);
     }
 
     public String validateTokenAndRetrieveSubject(String token)
