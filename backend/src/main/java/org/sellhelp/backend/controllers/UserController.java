@@ -46,18 +46,13 @@ public class UserController {
 
     @PatchMapping("/update/details")
     public ResponseEntity<String> updateUserDetails(@RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
-        try
-        {
+
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String email = userDetails.getUsername();
 
             userService.updateUserDetails(email, userDetailsUpdateDTO);
 
             return ResponseEntity.ok("Sikeres frissítés!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("A firssítés sikertelen. Server hiba!");
-        }
     }
 
 //    @PatchMapping("/update/email")

@@ -40,6 +40,10 @@ public class UserService {
             user.setLastName(userDetailsUpdateDTO.getLastName());
         }
 
+        if (userDetailsUpdateDTO.getBirthDate() != null) {
+            user.setBirthDate(userDetailsUpdateDTO.getBirthDate());
+        }
+
         if (userDetailsUpdateDTO.getCityName() != null) {
             City c =  cityRepository.findByCityName(userDetailsUpdateDTO.getCityName()).orElseThrow(
                     () -> new EntityNotFoundException("A település nem található!")

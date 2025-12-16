@@ -1,10 +1,13 @@
 package org.sellhelp.backend.dtos.requests;
 
+import jakarta.validation.constraints.Past;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
 
 @Data
 @Builder
@@ -20,4 +23,7 @@ public class UserDetailsUpdateDTO {
 
     @Size(min = 1, max = 100, message = "A városnév 1 és 100 karakter közötti!")
     private String cityName;
+
+    @Past
+    private LocalDate birthDate;
 }
