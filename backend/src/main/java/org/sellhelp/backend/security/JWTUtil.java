@@ -127,4 +127,9 @@ public class JWTUtil {
         return validateToken(token, refresh_secret, "refresh", userDetails);
     }
 
+    public boolean validatePasswordUpdateToken(String token, UserDetails userDetails)
+    {
+        return validateToken(token, password_update_secret, "passwordUpdate", userDetails);
+    }
+
 }

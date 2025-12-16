@@ -16,4 +16,5 @@ public class PasswordUpdateDTO {
             message = "A jelszónak legalább 8 karakterből kell állnia, tartalmaznia kell kis- és nagybetűt és számot!"
     )
     private String password;
+    private String token;
 }

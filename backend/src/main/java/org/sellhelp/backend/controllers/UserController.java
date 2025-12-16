@@ -10,6 +10,7 @@ import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
+import org.sellhelp.backend.security.JWTUtil;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     private final UserService userService;
     private final EmailService emailService;
+    private final JWTUtil jwtUtil;
 
     @Value("${jwt.cookie.access.time}")
     private int accessTokenCookieExpiration;
@@ -32,9 +34,10 @@ public class UserController {
     private int refreshTokenCookieExpiration;
 
     @Autowired
-    public UserController(UserService userService, EmailService emailService){
+    public UserController(UserService userService, EmailService emailService, JWTUtil jwtUtil){
         this.userService = userService;
         this.emailService = emailService;
+        this.jwtUtil = jwtUtil;
     }
 
     @GetMapping("/info")
@@ -99,6 +102,9 @@ public class UserController {
     public ResponseEntity<String> updateUserPassword(HttpServletResponse response, @Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO){
             UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
             String email = userDetails.getUsername();
+
+            if (!jwtUtil.validatePasswordUpdateToken(passwordUpdateDTO.getToken(), userDetails))
+            {return ResponseEntity.badRequest().body(null);}
 
             TokenDTO tokenDTO = userService.updateUserPassword(email, passwordUpdateDTO);
 
