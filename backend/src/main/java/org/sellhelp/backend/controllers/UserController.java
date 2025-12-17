@@ -26,18 +26,16 @@ public class UserController {
     private final UserService userService;
     private final EmailService emailService;
     private final JWTUtil jwtUtil;
+    private final CookieGenerator cookieGenerator;
 
-    @Value("${jwt.cookie.access.time}")
-    private int accessTokenCookieExpiration;
-
-    @Value("${jwt.cookie.refresh.time}")
-    private int refreshTokenCookieExpiration;
 
     @Autowired
-    public UserController(UserService userService, EmailService emailService, JWTUtil jwtUtil){
+    public UserController(UserService userService, EmailService emailService,
+                          JWTUtil jwtUtil, CookieGenerator cookieGenerator){
         this.userService = userService;
         this.emailService = emailService;
         this.jwtUtil = jwtUtil;
+        this.cookieGenerator = cookieGenerator;
     }
 
     @GetMapping("/info")
@@ -51,8 +49,8 @@ public class UserController {
     @GetMapping("/logout")
     public ResponseEntity<String> logoutHandler(HttpServletResponse response)
     {
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", null, 0);
-        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", null, 0);
+        Cookie accessTokenCookie = cookieGenerator.createCookie("accessToken", null, 0, "/");
+        Cookie refreshTokenCookie = cookieGenerator.createCookie("refreshToken", null, 0, "/auth/login/refresh");
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -79,8 +77,8 @@ public class UserController {
 
         TokenDTO tokenDTO = userService.updateUserEmail(email, emailUpdateDTO);
 
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
-        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+        Cookie accessTokenCookie = cookieGenerator.createAccessCookie(tokenDTO.getAccessToken());
+        Cookie refreshTokenCookie = cookieGenerator.createRefreshCookie(tokenDTO.getRefreshToken());
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -108,8 +106,8 @@ public class UserController {
 
             TokenDTO tokenDTO = userService.updateUserPassword(email, passwordUpdateDTO);
 
-            Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
-            Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+        Cookie accessTokenCookie = cookieGenerator.createAccessCookie(tokenDTO.getAccessToken());
+        Cookie refreshTokenCookie = cookieGenerator.createRefreshCookie(tokenDTO.getRefreshToken());
 
             response.addCookie(accessTokenCookie);
             response.addCookie(refreshTokenCookie);

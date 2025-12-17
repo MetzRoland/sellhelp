@@ -26,17 +26,14 @@ import java.time.LocalDateTime;
 public class AuthController {
     private final AuthService authService;
     private final MfaService mfaService;
-
-    @Value("${jwt.cookie.access.time}")
-    private int accessTokenCookieExpiration;
-
-    @Value("${jwt.cookie.refresh.time}")
-    private int refreshTokenCookieExpiration;
+    private final CookieGenerator cookieGenerator;
 
     @Autowired
-    public AuthController(AuthService authService, MfaService mfaService){
+    public AuthController(AuthService authService, MfaService mfaService,
+                          CookieGenerator cookieGenerator){
         this.authService = authService;
         this.mfaService = mfaService;
+        this.cookieGenerator = cookieGenerator;
     }
 
     @PostMapping("/register")
@@ -51,8 +48,8 @@ public class AuthController {
     {
         TokenDTO tokenDTO = authService.loginHandler(loginDTO);
 
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
-        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+        Cookie accessTokenCookie = cookieGenerator.createAccessCookie(tokenDTO.getAccessToken());
+        Cookie refreshTokenCookie = cookieGenerator.createRefreshCookie(tokenDTO.getRefreshToken());
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
@@ -65,7 +62,7 @@ public class AuthController {
     {
         TokenDTO tokenDTO = authService.refresh(refreshDTO);
 
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
+        Cookie accessTokenCookie = cookieGenerator.createAccessCookie(tokenDTO.getAccessToken());
 
         response.addCookie(accessTokenCookie);
 
@@ -90,8 +87,8 @@ public class AuthController {
     public ResponseEntity<TokenDTO> verifyTotp(@Valid @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
         TokenDTO tokenDTO = mfaService.validateTotpCode(totpCodeDTO);
 
-        Cookie accessTokenCookie = CookieGenerator.createCookie("accessToken", tokenDTO.getAccessToken(), accessTokenCookieExpiration);
-        Cookie refreshTokenCookie = CookieGenerator.createCookie("refreshToken", tokenDTO.getRefreshToken(), refreshTokenCookieExpiration);
+        Cookie accessTokenCookie = cookieGenerator.createAccessCookie(tokenDTO.getAccessToken());
+        Cookie refreshTokenCookie = cookieGenerator.createRefreshCookie(tokenDTO.getRefreshToken());
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
