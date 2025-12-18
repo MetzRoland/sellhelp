@@ -119,10 +119,10 @@ public class AuthController {
         String refreshToken = tokenDTO.getRefreshToken();
 
         response.addCookie(
-                CookieGenerator.createCookie("accessToken", accessToken, accessTokenCookieExpiration)
+                cookieGenerator.createAccessCookie(accessToken)
         );
         response.addCookie(
-                CookieGenerator.createCookie("refreshToken", refreshToken, refreshTokenCookieExpiration)
+                cookieGenerator.createRefreshCookie(refreshToken)
         );
 
         response.sendRedirect("http://localhost:3000/home");

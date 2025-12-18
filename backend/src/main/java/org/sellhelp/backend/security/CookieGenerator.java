@@ -30,6 +30,11 @@ public class CookieGenerator {
 
     public Cookie createRefreshCookie(String cookieValue)
     {
-        return createCookie("refreshToken", cookieValue, refreshTokenCookieExpiration, "/auth/login/refresh");
+        return createCookie("refreshToken", cookieValue, refreshTokenCookieExpiration, "/");
+    }
+
+    public Cookie deleteCookie(String cookieName)
+    {
+        return createCookie(cookieName, null, 0, "/");
     }
 }

@@ -42,10 +42,7 @@ public class AuthService {
     private final UserDetailsService userDetailsService;
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
-    private final TotpService totpService;
-    private final QrCodeService qrCodeService;
     private final TempTokenService tempTokenService;
-    private final EmailService emailService;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
@@ -62,10 +59,7 @@ public class AuthService {
         this.userDetailsService = userDetailsService;
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
-        this.totpService = totpService;
-        this.qrCodeService = qrCodeService;
         this.tempTokenService = tempTokenService;
-        this.emailService = emailService;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO){

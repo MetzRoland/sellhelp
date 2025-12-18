@@ -2,7 +2,9 @@ package org.sellhelp.backend.controllers;
 
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
@@ -47,13 +49,20 @@ public class UserController {
     }
 
     @GetMapping("/logout")
-    public ResponseEntity<String> logoutHandler(HttpServletResponse response)
+    public ResponseEntity<String> logoutHandler(HttpServletRequest request, HttpServletResponse response)
     {
-        Cookie accessTokenCookie = cookieGenerator.createCookie("accessToken", null, 0, "/");
-        Cookie refreshTokenCookie = cookieGenerator.createCookie("refreshToken", null, 0, "/auth/login/refresh");
+        Cookie accessTokenCookie = cookieGenerator.deleteCookie("accessToken");
+        Cookie refreshTokenCookie = cookieGenerator.deleteCookie("refreshToken");
 
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
+
+        HttpSession session = request.getSession(false);
+        if (session != null) {
+            session.invalidate();
+        }
+
+        SecurityContextHolder.clearContext();
 
         return ResponseEntity.ok("Sikeres kijelentkezés!");
     }
