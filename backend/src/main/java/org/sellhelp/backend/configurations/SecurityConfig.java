@@ -27,7 +27,6 @@ import java.util.List;
 public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
-
     private final UserAuthDetailService userDetailService;
 
     @Autowired
@@ -43,11 +42,12 @@ public class SecurityConfig {
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                        session.sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
                 )
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/api/public/**", "/s3/**", "/auth/**",
-                                "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**").permitAll()
+                                "/api-docs/**", "/swagger-ui/**", "/swagger-ui.html", "/webjars/**",
+                                "/oauth2/**").permitAll()
                         .requestMatchers("/user/**").hasRole("USER")
                         .anyRequest().authenticated()
                 )
@@ -55,6 +55,11 @@ public class SecurityConfig {
                         .authenticationEntryPoint((request, response, authException) ->
                                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
                 .userDetailsService(userDetailService)
+                .oauth2Login(oauth2 -> oauth2
+                        .loginPage("/auth/login/google")
+                        .defaultSuccessUrl("/auth/loginSuccess", true)
+                        .failureUrl("/loginFailure")
+                )
         ;
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
 
@@ -64,7 +69,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("http://localhost:3000", "https://sellhelp.org"));
+        config.setAllowedOrigins(List.of("*"));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("Content-Type", "Authorization"));
         config.setAllowCredentials(true);
