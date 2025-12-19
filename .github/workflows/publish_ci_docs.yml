@@ -1,4 +1,4 @@
-name: Publish CI Docs
+name: Publish CI Docs to GitHub Pages
 
 on:
   push:
