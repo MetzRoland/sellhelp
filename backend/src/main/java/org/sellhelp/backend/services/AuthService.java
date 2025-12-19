@@ -139,10 +139,14 @@ public class AuthService {
         OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
 
         String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
+        String firstName = oAuth2User.getAttribute("given_name");
+        String lastName  = oAuth2User.getAttribute("family_name");
+        String picturePath  = oAuth2User.getAttribute("picture");
 
         log.info("Email: {}", email);
-        log.info("Name: {}", name);
+        log.info("First name: {}", firstName);
+        log.info("Last name: {}", lastName);
+        log.info("Picture url: {}", picturePath);
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             Role role = roleRepository.findByRoleName("ROLE_USER")
@@ -152,15 +156,19 @@ public class AuthService {
                     .orElseThrow();
 
             User newUser = new User();
-            newUser.setFirstName(name);
-            newUser.setLastName(name);
+            newUser.setFirstName(firstName);
+            newUser.setLastName(lastName);
             newUser.setEmail(email);
             newUser.setAuthProvider(AuthProvider.GOOGLE);
             newUser.setBirthDate(LocalDate.of(2000, 12, 23));
             newUser.setRole(role);
             newUser.setCity(city);
+            newUser.setProfilePicturePath(picturePath);
             return userRepository.save(newUser);
         });
+
+        user.setProfilePicturePath(picturePath);
+        userRepository.save(user);
 
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User.builder()

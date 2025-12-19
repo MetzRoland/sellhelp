@@ -36,6 +36,9 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath;
+
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;
