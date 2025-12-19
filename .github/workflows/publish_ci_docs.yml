@@ -1,0 +1,43 @@
+name: Publish CI Results to GitHub Pages
+
+on:
+  workflow_run:
+    workflows: ["Java CI with Maven"]
+    types:
+      - completed
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      - name: Run tests & generate reports
+        working-directory: backend
+        run: mvn -B verify site
+        continue-on-error: true
+
+      - name: Prepare GitHub Pages content
+        run: |
+          mkdir -p public
+          cp -r backend/target/site/* public/ || true
+
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: public
