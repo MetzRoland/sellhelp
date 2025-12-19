@@ -1,4 +1,4 @@
-name: Publish CI Results to GitHub Pages
+name: Publish CI Docs
 
 on:
   workflow_run:
@@ -24,15 +24,24 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Run tests & generate reports
+      - name: Generate test reports
         working-directory: backend
         run: mvn -B verify site
         continue-on-error: true
 
       - name: Prepare GitHub Pages content
         run: |
-          mkdir -p public
-          cp -r backend/target/site/* public/ || true
+          TIMESTAMP=$(date +%Y-%m-%d-%H%M)
+          mkdir -p public/$TIMESTAMP
+          cp -r backend/target/site/* public/$TIMESTAMP/
+
+      - name: Generate index
+        run: |
+          echo "<h1>CI Test Reports</h1>" > public/index.html
+          for dir in public/*/; do
+            [[ "$dir" != "public/index.html" ]] || continue
+            echo "<a href=\"$dir\">$dir</a><br>" >> public/index.html
+          done
 
       - name: Deploy to GitHub Pages
         if: always()
@@ -41,3 +50,14 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
           publish_dir: public
+          keep_files: true
+
+      - name: Update README.md
+        run: |
+          LATEST=$(ls -dt public/*/ | head -n1)
+          sed -i '/<!-- ci-report-link -->/c\<a href="'"$LATEST"'">View latest CI report</a>' README.md
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "docs: update latest CI report link" || echo "No changes"
+          git push
