@@ -11,6 +11,7 @@ import org.sellhelp.backend.entities.Role;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserSecret;
 import org.sellhelp.backend.enums.AuthProvider;
+import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
@@ -62,12 +63,12 @@ public class AuthService {
         this.tempTokenService = tempTokenService;
     }
 
-    public void registerLocalUser(RegisterDTO registerDTO){
+    public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
         City city = cityRepository.findByCityName(registerDTO.getCityName()).orElseThrow(
                 () -> new RuntimeException("A város nem található")
         );
 
-        Role role = roleRepository.findByRoleName("ROLE_USER").orElseThrow(
+        Role role = roleRepository.findByRoleName(userRole.name()).orElseThrow(
                 () -> new RuntimeException("Szerepkör nem található")
         );
 

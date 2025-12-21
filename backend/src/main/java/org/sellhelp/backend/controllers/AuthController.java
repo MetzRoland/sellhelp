@@ -13,6 +13,7 @@ import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
 import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
+import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
 import org.sellhelp.backend.services.MfaService;
@@ -45,8 +46,9 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterDTO> registerLocalUser(@Valid @RequestBody RegisterDTO registerDTO){
-        authService.registerLocalUser(registerDTO);
+    public ResponseEntity<RegisterDTO> registerLocalUser(@Valid @RequestBody RegisterDTO registerDTO,
+                                                         @RequestParam(defaultValue = "ROLE_USER") UserRole userRole){
+        authService.registerLocalUser(registerDTO, userRole);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(registerDTO);
     }
