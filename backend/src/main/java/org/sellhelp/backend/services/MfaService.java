@@ -1,15 +1,17 @@
 package org.sellhelp.backend.services;
 
-import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.exceptions.InvalidTokenException;
+import org.sellhelp.backend.exceptions.InvalidTotpException;
+import org.sellhelp.backend.exceptions.MfaException;
+import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -19,27 +21,29 @@ public class MfaService {
     private final TotpService totpService;
     private final QrCodeService qrCodeService;
     private final TempTokenService tempTokenService;
+    private final CurrentUser currentUser;
 
     @Autowired
     public MfaService(JWTUtil jwtUtil, UserRepository userRepository, TotpService totpService,
-                      QrCodeService qrCodeService, TempTokenService tempTokenService){
+                      QrCodeService qrCodeService, TempTokenService tempTokenService,
+                      CurrentUser currentUser){
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.totpService = totpService;
         this.qrCodeService = qrCodeService;
         this.tempTokenService = tempTokenService;
+        this.currentUser = currentUser;
     }
 
     public TotpSecretDTO enableMfa(){
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
+        String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")
+                () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
         if(user.getUserSecret().isMfa()){
-            throw new RuntimeException("Már engedélyezve van a kétfaktoros hitelesítés!");
+            throw new MfaException("Már engedélyezve van a kétfaktoros hitelesítés!");
         }
 
         String totpSecret = totpService.generateSecret();
@@ -71,15 +75,14 @@ public class MfaService {
     }
 
     public TotpSecretDTO disableMfa(){
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
+        String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")
+                () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
         if(!user.getUserSecret().isMfa()){
-            throw new RuntimeException("Még nincs engedélyezve a kétfaktoros hitelesítés!");
+            throw new MfaException("Még nincs engedélyezve a kétfaktoros hitelesítés!");
         }
 
         user.getUserSecret().setMfa(false);
@@ -96,17 +99,17 @@ public class MfaService {
         String tempToken = totpCodeDTO.getTempToken();
 
         if (!tempTokenService.validate(tempToken)) {
-            throw new RuntimeException("Helytelen temp token!");
+            throw new InvalidTokenException("Helytelen temp token!");
         }
 
         String email = tempTokenService.getEmailByTempToken(tempToken);
 
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem létezik!")
+                () -> new UserNotFoundException("A felhasználó nem létezik!")
         );
 
         if(!totpService.verify(user.getUserSecret().getTotpSecret(), totpCodeDTO.getTotpCode())){
-            throw new RuntimeException("Helytelen hitelesítő kód!");
+            throw new InvalidTotpException("Helytelen hitelesítő kód!");
         }
 
         String accessToken = jwtUtil.generateAccessToken(email);

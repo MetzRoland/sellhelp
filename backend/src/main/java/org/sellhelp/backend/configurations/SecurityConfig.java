@@ -1,6 +1,8 @@
 package org.sellhelp.backend.configurations;
 
 import jakarta.servlet.http.HttpServletResponse;
+import org.sellhelp.backend.exceptions.CustomAccessDeniedHandler;
+import org.sellhelp.backend.exceptions.CustomAuthenticationEntryPoint;
 import org.sellhelp.backend.security.JWTFilter;
 import org.sellhelp.backend.security.UserAuthDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,11 +31,17 @@ public class SecurityConfig {
 
     private final JWTFilter jwtFilter;
     private final UserAuthDetailService userDetailService;
+    private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     @Autowired
-    public SecurityConfig(JWTFilter jwtFilter, UserAuthDetailService userDetailService){
+    public SecurityConfig(JWTFilter jwtFilter, UserAuthDetailService userDetailService,
+                          CustomAuthenticationEntryPoint customAuthenticationEntryPoint,
+                          CustomAccessDeniedHandler customAccessDeniedHandler){
         this.jwtFilter = jwtFilter;
         this.userDetailService = userDetailService;
+        this.customAuthenticationEntryPoint = customAuthenticationEntryPoint;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean
@@ -60,7 +68,8 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login", "/auth/register")
+                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login", "/auth/register"
+                , "/auth/enable2fa", "/auth/disable2fa", "/auth/verify-totp")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -68,14 +77,17 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/register").permitAll()
+                        .requestMatchers("/auth/login", "/auth/register", "/auth/verify-totp").permitAll()
+                        .requestMatchers("/auth/enable2fa", "/auth/disable2fa")
+                        .authenticated()
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptionHandling -> exceptionHandling
-                        .authenticationEntryPoint((request, response, authException) ->
-                                response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Unauthorized")))
+                        .authenticationEntryPoint(customAuthenticationEntryPoint)
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                )
                 .userDetailsService(userDetailService)
         ;
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

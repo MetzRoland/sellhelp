@@ -1,7 +1,6 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
-import org.apache.commons.lang3.NotImplementedException;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
@@ -10,10 +9,14 @@ import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.exceptions.InvalidTokenException;
+import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -25,24 +28,28 @@ public class UserService {
     private final CityRepository cityRepository;
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
+    private final CurrentUser currentUser;
 
 
     @Autowired
     public UserService(UserRepository userRepository, ModelMapper modelMapper,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
-                       JWTUtil jwtUtil)
+                       JWTUtil jwtUtil, CurrentUser currentUser)
     {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.cityRepository = cityRepository;
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
+        this.currentUser = currentUser;
     }
 
-    public void updateUserDetails(String email, UserDetailsUpdateDTO userDetailsUpdateDTO)
+    public void updateUserDetails(UserDetailsUpdateDTO userDetailsUpdateDTO)
     {
+        String email = currentUser.getCurrentlyLoggedUserEmail();
+
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("A felhasználó nem található!"));
+                () -> new UserNotFoundException("A felhasználó nem található!"));
 
         if (userDetailsUpdateDTO.getFirstName() != null) {
             user.setFirstName(userDetailsUpdateDTO.getFirstName());
@@ -66,11 +73,17 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public TokenDTO updateUserPassword(String email, PasswordUpdateDTO passwordUpdateDTO)
+    public TokenDTO updateUserPassword(PasswordUpdateDTO passwordUpdateDTO)
     {
+        UserDetails userDetails = currentUser.getCurrentlyLoggedUserDetails();
+        String email = currentUser.getCurrentlyLoggedUserEmail();
+
+        if (!jwtUtil.validatePasswordUpdateToken(passwordUpdateDTO.getToken(), userDetails)){
+            throw new InvalidTokenException("A token nem érvényes!");
+        }
 
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("A felhasználó nem található!"));
+                () -> new UserNotFoundException("A felhasználó nem található!"));
 
         if (passwordUpdateDTO.getPassword() != null) {
             user.getUserSecret().setPassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
@@ -81,11 +94,12 @@ public class UserService {
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
     }
 
-    public TokenDTO updateUserEmail(String email, EmailUpdateDTO emailUpdateDTO)
+    public TokenDTO updateUserEmail(EmailUpdateDTO emailUpdateDTO)
     {
+        String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
-                () -> new EntityNotFoundException("A felhasználó nem található!"));
+                () -> new UserNotFoundException("A felhasználó nem található!"));
 
         if (emailUpdateDTO.getEmail() != null) {
             user.setEmail(emailUpdateDTO.getEmail());
@@ -96,10 +110,12 @@ public class UserService {
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
     }
 
-    public UserDTO getUserDetails(String email)
+    public UserDTO getUserDetails()
     {
+        String email = currentUser.getCurrentlyLoggedUserEmail();
+
         UserDTO userDTO = modelMapper.map(userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")), UserDTO.class);
+                () -> new UserNotFoundException("A felhasználó nem található!")), UserDTO.class);
         return userDTO;
     }
 }

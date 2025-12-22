@@ -39,7 +39,7 @@ public class UserAuthDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return !user.isBanned();
+        return true;
     }
 
     @Override
@@ -49,6 +49,6 @@ public class UserAuthDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return !user.isBanned();
     }
 }

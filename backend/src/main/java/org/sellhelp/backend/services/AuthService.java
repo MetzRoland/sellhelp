@@ -1,5 +1,6 @@
 package org.sellhelp.backend.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
@@ -12,15 +13,16 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserSecret;
 import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.enums.UserRole;
+import org.sellhelp.backend.exceptions.*;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -30,7 +32,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.List;
 
 @Service
 @Slf4j
@@ -65,12 +66,16 @@ public class AuthService {
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
         City city = cityRepository.findByCityName(registerDTO.getCityName()).orElseThrow(
-                () -> new RuntimeException("A város nem található")
+                () -> new EntityNotFoundException("A város nem található")
         );
 
         Role role = roleRepository.findByRoleName(userRole.name()).orElseThrow(
-                () -> new RuntimeException("Szerepkör nem található")
+                () -> new EntityNotFoundException("Szerepkör nem található")
         );
+
+        if(userRepository.findByEmail(registerDTO.getEmail()).isPresent()){
+            throw new UserAlreadyExistException("Az email már használatban van!");
+        }
 
         User user = modelMapper.map(registerDTO, User.class);
         user.setCity(city);
@@ -88,20 +93,37 @@ public class AuthService {
         // emailService.registrationSuccessEmail(user.getEmail());
     }
 
-    public TokenDTO loginHandler(LoginDTO loginDTO)
+    private TokenDTO loginHandler(LoginDTO loginDTO, boolean allowOnlySuperUser)
     {
         try {
             UsernamePasswordAuthenticationToken authInputToken =
                     new UsernamePasswordAuthenticationToken(loginDTO.getEmail(), loginDTO.getPassword());
             authenticationManager.authenticate(authInputToken);
         }
+        catch (DisabledException e) {
+            throw new UserBannedException("A felhasználó levan tiltva van!");
+        }
         catch(AuthenticationException authExc){
-            throw new RuntimeException("Helytelen email vagy jelszó!");
+            throw new LoginCredentialsException("Helytelen email vagy jelszó!");
         }
 
         User user = userRepository.findByEmail(loginDTO.getEmail()).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")
+                () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
+        String role = user.getRole().getRoleName();
+
+        if (allowOnlySuperUser && "ROLE_USER".equals(role)) {
+            throw new IncorrectUserRoleException(
+                    "USER jogosultságú felhasználók itt nem jelentkezhetnek be!"
+            );
+        }
+
+        if (!allowOnlySuperUser && !"ROLE_USER".equals(role)) {
+            throw new IncorrectUserRoleException(
+                    "Csak USER jogosultságú felhasználók jelentkezhetnek be!"
+            );
+        }
 
         if(!user.getUserSecret().isMfa() && user.getUserSecret().getTotpSecret() == null){
             String accessToken = jwtUtil.generateAccessToken(loginDTO.getEmail());
@@ -115,25 +137,32 @@ public class AuthService {
         return new TokenDTO(null, null, tempToken);
     }
 
+    public TokenDTO userLogin(LoginDTO loginDTO){
+        return loginHandler(loginDTO, false);
+    }
+
+    public TokenDTO superUserLogin(LoginDTO loginDTO){
+        return loginHandler(loginDTO, true);
+    }
+
     public TokenDTO refresh(RefreshDTO refreshDTO)
     {
-        try{
-            String refreshToken = refreshDTO.getRefreshToken();
-            String email = jwtUtil.extractEmail(refreshToken);
+        String refreshToken = refreshDTO.getRefreshToken();
+        String email = jwtUtil.extractEmail(refreshToken);
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
-
-            if (jwtUtil.validateRefreshToken(refreshDTO.getRefreshToken(), userDetails))
-            {
-                String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
-
-                return new TokenDTO(accessToken, refreshDTO.getRefreshToken(), null);
-            }
-
-        } catch(AuthenticationException authExc){
-            throw new RuntimeException("Helytelen refresh token!");
+        if(email == null){
+            throw new InvalidTokenException("Helytelen refresh token!");
         }
-        return null;
+
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (jwtUtil.validateRefreshToken(refreshDTO.getRefreshToken(), userDetails)) {
+            String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
+            return new TokenDTO(accessToken, refreshDTO.getRefreshToken(), null);
+        }
+        else {
+            throw new InvalidTokenException("Helytelen refresh token!");
+        }
     }
 
     public TokenDTO loginRegisterByGoogleOauth2(OAuth2AuthenticationToken oAuth2AuthenticationToken){
@@ -151,10 +180,10 @@ public class AuthService {
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             Role role = roleRepository.findByRoleName("ROLE_USER")
-                    .orElseThrow();
+                    .orElseThrow(() -> new EntityNotFoundException("Szerepkör nem található!"));
 
             City city = cityRepository.findByCityName("Pécs")
-                    .orElseThrow();
+                    .orElseThrow(() -> new EntityNotFoundException("A város nem található!"));
 
             User newUser = new User();
             newUser.setFirstName(firstName);

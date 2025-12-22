@@ -29,7 +29,7 @@ public class S3Service {
 
     }
 
-    public boolean fileExists(String fileName) {
+    private boolean fileExists(String fileName) {
         try {
             HeadObjectRequest headObjectRequest = HeadObjectRequest.builder()
                     .bucket(bucketName)

@@ -4,29 +4,35 @@ import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.responses.SuperUserDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Objects;
 
 @Service
 public class SuperUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
+    private final CurrentUser currentUser;
 
     @Autowired
-    public SuperUserService(UserRepository userRepository, ModelMapper modelMapper){
+    public SuperUserService(UserRepository userRepository, ModelMapper modelMapper,
+                            CurrentUser currentUser){
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.currentUser = currentUser;
     }
 
-    public SuperUserDTO getSuperUserDetails(String email) {
+    public SuperUserDTO getSuperUserDetails() {
+        String email = currentUser.getCurrentlyLoggedUserEmail();
+
         SuperUserDTO superUserDTO = modelMapper.map(userRepository.findByEmail(email).orElseThrow(
-                () -> new RuntimeException("A felhasználó nem található!")), SuperUserDTO.class);
+                () -> new UserNotFoundException("A felhasználó nem található!")), SuperUserDTO.class);
         return superUserDTO;
     }
 
@@ -49,49 +55,45 @@ public class SuperUserService {
     }
 
     public UserDTO banUser(Integer userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Felhasználó nem található"));
-
-        String targetRole = user.getRole().getRoleName();
-        boolean currentIsAdmin = hasRole("ADMIN");
-
-        if ("ROLE_MODERATOR".equals(targetRole) && !currentIsAdmin) {
-            throw new RuntimeException("Csak az admin bannolhat moderátort");
-        }
-
-        if (!"ROLE_USER".equals(targetRole) && !"ROLE_MODERATOR".equals(targetRole)) {
-            throw new RuntimeException("Ez a felhasználó nem bannolható");
-        }
-
-        if (user.isBanned()) {
-            throw new RuntimeException("A felhasználó már bannolva van!");
-        }
-
-        user.setBanned(true);
-        return modelMapper.map(userRepository.save(user), UserDTO.class);
+        return changeBanStatus(userId, true);
     }
 
     public UserDTO unbanUser(Integer userId) {
+        return changeBanStatus(userId, false);
+    }
+
+    private UserDTO changeBanStatus(Integer userId, boolean ban) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Felhasználó nem található"));
+                .orElseThrow(() -> new UserNotFoundException("Felhasználó nem található"));
 
         String targetRole = user.getRole().getRoleName();
         boolean currentIsAdmin = hasRole("ADMIN");
 
         if ("ROLE_MODERATOR".equals(targetRole) && !currentIsAdmin) {
-            throw new RuntimeException("Csak az admin unbannolhat moderátort");
+            throw new RuntimeException(
+                    ban
+                            ? "Csak az admin bannolhat moderátort"
+                            : "Csak az admin unbannolhat moderátort"
+            );
         }
 
         if (!"ROLE_USER".equals(targetRole) && !"ROLE_MODERATOR".equals(targetRole)) {
-            throw new RuntimeException("Ez a felhasználó nem unbannolható");
+            throw new RuntimeException(
+                    ban
+                            ? "Ez a felhasználó nem bannolható"
+                            : "Ez a felhasználó nem unbannolható"
+            );
         }
 
-        if (!user.isBanned()) {
+        if (ban && user.isBanned()) {
+            throw new RuntimeException("A felhasználó már bannolva van!");
+        }
+
+        if (!ban && !user.isBanned()) {
             throw new RuntimeException("A felhasználó még nincs bannolva!");
         }
 
-        user.setBanned(false);
+        user.setBanned(ban);
         return modelMapper.map(userRepository.save(user), UserDTO.class);
     }
-
 }
