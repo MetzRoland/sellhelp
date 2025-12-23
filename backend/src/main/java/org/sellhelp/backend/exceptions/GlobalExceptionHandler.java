@@ -2,6 +2,7 @@ package org.sellhelp.backend.exceptions;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
+import org.sellhelp.backend.dtos.responses.NotFoundErrorDTO;
 import org.sellhelp.backend.dtos.responses.ValidationErrorsDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,6 +11,7 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -24,6 +26,17 @@ public class GlobalExceptionHandler {
         errorDTO.setTimestamp(LocalDateTime.now());
         errorDTO.setMessage(errorMessage);
         errorDTO.setStatus(httpStatus.value());
+
+        return errorDTO;
+    }
+
+    private NotFoundErrorDTO createNotFoundErrorDto(String errorMessage, HttpStatus httpStatus, String path){
+        NotFoundErrorDTO errorDTO = new NotFoundErrorDTO();
+
+        errorDTO.setTimestamp(LocalDateTime.now());
+        errorDTO.setMessage(errorMessage);
+        errorDTO.setStatus(httpStatus.value());
+        errorDTO.setPath(path);
 
         return errorDTO;
     }
@@ -107,6 +120,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<GeneralErrorDTO> handleIllegalArgumentException(IllegalArgumentException ex) {
         GeneralErrorDTO errorDTO = createErrorDto(ex.getMessage(), HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<NotFoundErrorDTO> handleNotFoundException(NoHandlerFoundException ex) {
+        NotFoundErrorDTO errorDTO = createNotFoundErrorDto("Az oldal nem létezik!", HttpStatus.NOT_FOUND, ex.getRequestURL());
 
         return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
     }
