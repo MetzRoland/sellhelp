@@ -64,10 +64,7 @@ public class UserController {
 
     @GetMapping("/update/password/send")
     public ResponseEntity<String> sendUserPasswordEmail(){
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-
-        emailService.updatePassword(email);
+        emailService.updatePassword();
 
         return ResponseEntity.ok("Email a jelszó módosításhoz elküldve!");
     }
