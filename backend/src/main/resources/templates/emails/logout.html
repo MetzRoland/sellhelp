@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Regisztráció megerősítése</title>
+    <title>Kijelentkezés</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -29,6 +29,13 @@
             color: #333333;
             line-height: 1.6;
         }
+        .info-box {
+            background-color: #f1f5f9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
+        }
         .footer {
             margin-top: 30px;
             font-size: 12px;
@@ -40,24 +47,25 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres regisztráció</h1>
+        <h1>Sikeres kijelentkezés</h1>
     </div>
 
     <div class="content">
         <p>
-            Kedves <strong th:text="${firstName} + ' ' + ${lastName}">Felhasználó</strong>!
+            Kedves Felhasználó!
         </p>
 
         <p>
-            Örömmel értesítünk, hogy a regisztrációd sikeresen megtörtént.
+            Értesítünk, hogy sikeresen kijelentkeztél a fiókodból.
         </p>
 
-        <p>
-            Mostantól be tudsz jelentkezni a rendszerbe, és használhatod az elérhető funkciókat.
-        </p>
+        <div class="info-box">
+            <strong>Email cím:</strong>
+            <span th:text="${email}">user@example.com</span>
+        </div>
 
         <p>
-            Amennyiben nem te kezdeményezted a regisztrációt, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+            Ha nem te kezdeményezted a kijelentkezést, javasoljuk, hogy jelentkezz be újra, és ellenőrizd a fiókod biztonsági beállításait.
         </p>
 
         <p>

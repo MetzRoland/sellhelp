@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Regisztráció megerősítése</title>
+    <title>Fiók újra engedélyezve</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -23,11 +23,19 @@
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #2c3e50;
+            color: #27ae60;
         }
         .content {
             color: #333333;
             line-height: 1.6;
+        }
+        .info-box {
+            background-color: #eafaf1;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
         }
         .footer {
             margin-top: 30px;
@@ -40,24 +48,30 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres regisztráció</h1>
+        <h1>Fiók újra engedélyezve</h1>
     </div>
 
     <div class="content">
         <p>
-            Kedves <strong th:text="${firstName} + ' ' + ${lastName}">Felhasználó</strong>!
+            Tisztelt Felhasználó!
         </p>
 
         <p>
-            Örömmel értesítünk, hogy a regisztrációd sikeresen megtörtént.
+            Örömmel értesítünk, hogy a felhasználói fiókod tiltása feloldásra került,
+            így ismét teljes mértékben használható.
+        </p>
+
+        <div class="info-box">
+            <strong>Email cím:</strong>
+            <span th:text="${email}">user@example.com</span>
+        </div>
+
+        <p>
+            Mostantól újra be tudsz jelentkezni, és használhatod a rendszer összes elérhető funkcióját.
         </p>
 
         <p>
-            Mostantól be tudsz jelentkezni a rendszerbe, és használhatod az elérhető funkciókat.
-        </p>
-
-        <p>
-            Amennyiben nem te kezdeményezted a regisztrációt, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+            Köszönjük a türelmedet és az együttműködésedet.
         </p>
 
         <p>

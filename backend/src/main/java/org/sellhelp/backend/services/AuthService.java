@@ -45,14 +45,14 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final JWTUtil jwtUtil;
     private final TempTokenService tempTokenService;
+    private final EmailService emailService;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       TotpService totpService, QrCodeService qrCodeService,TempTokenService tempTokenService,
-                       EmailService emailService){
+                       EmailService emailService, TempTokenService tempTokenService){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -62,6 +62,7 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
         this.jwtUtil = jwtUtil;
         this.tempTokenService = tempTokenService;
+        this.emailService = emailService;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
@@ -90,7 +91,7 @@ public class AuthService {
         user.setUserSecret(userSecret);
 
         userRepository.save(user);
-        // emailService.registrationSuccessEmail(user.getEmail());
+        emailService.registrationSuccessEmail(user.getEmail());
     }
 
     private TokenDTO loginHandler(LoginDTO loginDTO, boolean allowOnlySuperUser)
@@ -128,6 +129,8 @@ public class AuthService {
         if(!user.getUserSecret().isMfa() && user.getUserSecret().getTotpSecret() == null){
             String accessToken = jwtUtil.generateAccessToken(loginDTO.getEmail());
             String refreshToken = jwtUtil.generateRefreshToken(loginDTO.getEmail());
+
+            emailService.loginUser(loginDTO.getEmail());
 
             return new TokenDTO(accessToken, refreshToken, null);
         }
@@ -194,6 +197,9 @@ public class AuthService {
             newUser.setRole(role);
             newUser.setCity(city);
             newUser.setProfilePicturePath(picturePath);
+
+            emailService.registerUser(firstName, lastName);
+
             return userRepository.save(newUser);
         });
 
@@ -216,6 +222,8 @@ public class AuthService {
 
         log.info("accessToken: {}", accessToken);
         log.info("refreshToken: {}", refreshToken);
+
+        emailService.loginUser(email);
 
         return new TokenDTO(accessToken, refreshToken, null);
 

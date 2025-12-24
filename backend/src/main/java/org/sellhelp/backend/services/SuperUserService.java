@@ -19,13 +19,15 @@ public class SuperUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final CurrentUser currentUser;
+    private final EmailService emailService;
 
     @Autowired
     public SuperUserService(UserRepository userRepository, ModelMapper modelMapper,
-                            CurrentUser currentUser){
+                            CurrentUser currentUser, EmailService emailService){
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
+        this.emailService = emailService;
     }
 
     public SuperUserDTO getSuperUserDetails() {
@@ -55,11 +57,19 @@ public class SuperUserService {
     }
 
     public UserDTO banUser(Integer userId) {
-        return changeBanStatus(userId, true);
+        UserDTO userDTO = changeBanStatus(userId, true);
+
+        emailService.banUser(userRepository.findById(userId).get().getEmail());
+
+        return userDTO;
     }
 
     public UserDTO unbanUser(Integer userId) {
-        return changeBanStatus(userId, false);
+        UserDTO userDTO = changeBanStatus(userId, false);
+
+        emailService.unbanUser(userRepository.findById(userId).get().getEmail());
+
+        return userDTO;
     }
 
     private UserDTO changeBanStatus(Integer userId, boolean ban) {

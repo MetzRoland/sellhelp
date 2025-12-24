@@ -1,5 +1,6 @@
 package org.sellhelp.backend.exceptions;
 
+import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
 import org.sellhelp.backend.dtos.responses.NotFoundErrorDTO;
@@ -90,6 +91,13 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(UserAlreadyExistException.class)
     public ResponseEntity<GeneralErrorDTO> handleUserAlreadyExistException(CustomException ex) {
         GeneralErrorDTO errorDTO = createErrorDto(ex.getMessage(), HttpStatus.BAD_REQUEST);
+
+        return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
+    }
+
+    @ExceptionHandler(EmailException.class)
+    public ResponseEntity<GeneralErrorDTO> handleMessagingException(EmailException ex) {
+        GeneralErrorDTO errorDTO = createErrorDto(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
 
         return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
     }

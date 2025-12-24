@@ -13,9 +13,9 @@ import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Arrays;
 
 @RestController
 @RequestMapping("/user")
@@ -41,6 +41,11 @@ public class UserController {
     @GetMapping("/logout")
     public ResponseEntity<String> logoutHandler(HttpServletRequest request, HttpServletResponse response)
     {
+        String accessToken = Arrays.stream(request.getCookies()).
+                filter(cookie -> cookie.getName().equals("accessToken")).toString();
+
+        emailService.logoutUser(accessToken);
+
         cookieGenerator.deleteLogoutCookies(request, response);
 
         return ResponseEntity.ok("Sikeres kijelentkezés!");

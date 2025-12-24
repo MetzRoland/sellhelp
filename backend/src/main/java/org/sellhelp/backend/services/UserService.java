@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
@@ -21,6 +22,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class UserService {
 
     private final UserRepository userRepository;
@@ -29,12 +31,12 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
     private final CurrentUser currentUser;
-
+    private final EmailService emailService;
 
     @Autowired
     public UserService(UserRepository userRepository, ModelMapper modelMapper,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
-                       JWTUtil jwtUtil, CurrentUser currentUser)
+                       JWTUtil jwtUtil, CurrentUser currentUser, EmailService emailService)
     {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
@@ -42,6 +44,7 @@ public class UserService {
         this.passwordEncoder = passwordEncoder;
         this.jwtUtil = jwtUtil;
         this.currentUser = currentUser;
+        this.emailService = emailService;
     }
 
     public void updateUserDetails(UserDetailsUpdateDTO userDetailsUpdateDTO)
@@ -71,6 +74,8 @@ public class UserService {
         }
 
         userRepository.save(user);
+
+        emailService.updateUserDetailsSuccess(email);
     }
 
     public TokenDTO updateUserPassword(PasswordUpdateDTO passwordUpdateDTO)
@@ -78,18 +83,24 @@ public class UserService {
         UserDetails userDetails = currentUser.getCurrentlyLoggedUserDetails();
         String email = currentUser.getCurrentlyLoggedUserEmail();
 
+        log.info("Email: {}", email);
+
         if (!jwtUtil.validatePasswordUpdateToken(passwordUpdateDTO.getToken(), userDetails)){
-            throw new InvalidTokenException("A token nem érvényes!");
+            throw new InvalidTokenException("A jelszómódosító token nem érvényes!");
         }
 
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!"));
 
-        if (passwordUpdateDTO.getPassword() != null) {
-            user.getUserSecret().setPassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getLastUsedPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg az előző jelszóval!");
         }
 
+        user.getUserSecret().setPassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
+
         userRepository.save(user);
+
+        emailService.updatePasswordSuccess(email);
 
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
     }

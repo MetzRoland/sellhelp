@@ -2,10 +2,12 @@ package org.sellhelp.backend.services;
 
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
+import org.sellhelp.backend.exceptions.EmailException;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.mail.MailException;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -50,40 +52,127 @@ public class EmailService {
         sendSimpleEmail(email, "Sikeres regisztráció", "Tisztelt Felhasználó!\nSikeresen regisztrált a SellHelp platformra!");
     }
 
+    private void sendHTMLTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables){
+        try{
+            Context context = new Context();
+            context.setVariables(variables);
 
-    // TODO: MessagingException needs global exception handler
-    public void sendHTMLTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables) throws MessagingException {
-        Context context = new Context();
-        context.setVariables(variables);
+            String html = templateEngine.process(templateName, context);
 
-        String html = templateEngine.process(templateName, context);
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(message, true, "UTF-8");
 
-        MimeMessage message = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper =
-                new MimeMessageHelper(message, true, "UTF-8");
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(html, true);
 
-        helper.setFrom(fromEmail);
-        helper.setTo(to);
-        helper.setSubject(subject);
-        helper.setText(html, true);
+            javaMailSender.send(message);
+        }
+        catch (MessagingException | MailException e){
+            throw new EmailException("Az email elküldése sikertelen: " + e.getMessage());
+        }
+    }
 
-        javaMailSender.send(message);
+    public void registerUser(String firstName, String lastName){
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("firstName", firstName);
+        variables.put("lastName", lastName);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Regisztráció", "emails/registration", variables);
+    }
+
+    public void loginUser(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bejelentkezés", "emails/login", variables);
+    }
+
+    public void logoutUser(String accessToken)
+    {
+        Map<String, Object> variables = new HashMap<>();
+
+        String toEmail = jwtUtil.extractEmail(accessToken);
+
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Kijelentkezés", "emails/logout", variables);
+    }
+
+    public void banUser(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bannolva lett a fiókod", "emails/banned", variables);
+    }
+
+    public void unbanUser(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A fiókod újra engedélyezve lett", "emails/unbanned", variables);
     }
 
     public void updatePassword()
     {
-        try {
-            String toEmail = currentUser.getCurrentlyLoggedUserEmail();
-            Map<String, Object> variables = new HashMap<>();
-            String token = jwtUtil.generatePasswordUpdateToken(toEmail);
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+        Map<String, Object> variables = new HashMap<>();
+        String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
-            String resetLink =
-                    "http://localhost:3000/reset-password?token=" + token;
-            variables.put("resetLink", resetLink);
+        String resetLink =
+                "http://localhost:3000/reset-password?token=" + token;
+        variables.put("resetLink", resetLink);
 
-            sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
-        } catch (MessagingException e) {
-            throw new RuntimeException(e);
-        }
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
+    }
+
+    public void updatePasswordSuccess(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás sikeres", "emails/passwordUpdateSuccess", variables);
+    }
+
+    public void updateUserDetailsSuccess(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Módosítás történ a felhasználói adatokban", "emails/userDetailsUpdated", variables);
+    }
+
+    public void updateUserEmailSuccess(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Email cím módosítva", "emails/userEmailUpdated", variables);
+    }
+
+    public void mfaEnabled(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés bekapcsolva", "emails/mfaEnabled", variables);
+    }
+
+    public void mfaDisabled(String toEmail)
+    {
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés kikapcsolva", "emails/mfaDisabled", variables);
     }
 }

@@ -22,17 +22,19 @@ public class MfaService {
     private final QrCodeService qrCodeService;
     private final TempTokenService tempTokenService;
     private final CurrentUser currentUser;
+    private final EmailService emailService;
 
     @Autowired
     public MfaService(JWTUtil jwtUtil, UserRepository userRepository, TotpService totpService,
                       QrCodeService qrCodeService, TempTokenService tempTokenService,
-                      CurrentUser currentUser){
+                      CurrentUser currentUser, EmailService emailService){
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.totpService = totpService;
         this.qrCodeService = qrCodeService;
         this.tempTokenService = tempTokenService;
         this.currentUser = currentUser;
+        this.emailService = emailService;
     }
 
     public TotpSecretDTO enableMfa(){
@@ -71,6 +73,8 @@ public class MfaService {
 
         TotpSecretDTO totpSecretDTO = new TotpSecretDTO(true, totpSecret, qrBase64);
 
+        emailService.mfaEnabled(email);
+
         return totpSecretDTO;
     }
 
@@ -91,6 +95,8 @@ public class MfaService {
         userRepository.save(user);
 
         TotpSecretDTO totpSecretDTO = new TotpSecretDTO(false, null, null);
+
+        emailService.mfaDisabled(email);
 
         return totpSecretDTO;
     }
@@ -118,6 +124,8 @@ public class MfaService {
         tempTokenService.removeToken(tempToken);
 
         TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken, null);
+
+        emailService.loginUser(email);
 
         return tokenDTO;
     }

@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Regisztráció megerősítése</title>
+    <title>Kétfaktoros hitelesítés bekapcsolva</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -23,11 +23,19 @@
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #2c3e50;
+            color: #2980b9;
         }
         .content {
             color: #333333;
             line-height: 1.6;
+        }
+        .info-box {
+            background-color: #eaf3fb;
+            border-left: 4px solid #2980b9;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
         }
         .footer {
             margin-top: 30px;
@@ -40,24 +48,26 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres regisztráció</h1>
+        <h1>Kétfaktoros hitelesítés bekapcsolva</h1>
     </div>
 
     <div class="content">
         <p>
-            Kedves <strong th:text="${firstName} + ' ' + ${lastName}">Felhasználó</strong>!
+            Kedves Felhasználó!
         </p>
 
         <p>
-            Örömmel értesítünk, hogy a regisztrációd sikeresen megtörtént.
+            A fiókodhoz tartozó kétfaktoros hitelesítés (MFA) sikeresen aktiválásra került.
+            Ez további biztonságot nyújt a fiókodnak, és bejelentkezéskor mostantól két lépésben kell hitelesítened magad.
         </p>
 
-        <p>
-            Mostantól be tudsz jelentkezni a rendszerbe, és használhatod az elérhető funkciókat.
-        </p>
+        <div class="info-box">
+            <strong>Email cím:</strong>
+            <span th:text="${email}">user@example.com</span>
+        </div>
 
         <p>
-            Amennyiben nem te kezdeményezted a regisztrációt, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+            Ha nem te aktiváltad a kétfaktoros hitelesítést, kérjük azonnal lépj kapcsolatba az ügyfélszolgálattal, és ellenőrizd a fiókod biztonságát.
         </p>
 
         <p>

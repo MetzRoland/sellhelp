@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Regisztráció megerősítése</title>
+    <title>Kétfaktoros hitelesítés kikapcsolva</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -23,11 +23,19 @@
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #2c3e50;
+            color: #c0392b;
         }
         .content {
             color: #333333;
             line-height: 1.6;
+        }
+        .info-box {
+            background-color: #fdecea;
+            border-left: 4px solid #c0392b;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
         }
         .footer {
             margin-top: 30px;
@@ -40,24 +48,26 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres regisztráció</h1>
+        <h1>Kétfaktoros hitelesítés kikapcsolva</h1>
     </div>
 
     <div class="content">
         <p>
-            Kedves <strong th:text="${firstName} + ' ' + ${lastName}">Felhasználó</strong>!
+            Kedves Felhasználó!
         </p>
 
         <p>
-            Örömmel értesítünk, hogy a regisztrációd sikeresen megtörtént.
+            Értesítünk, hogy a fiókodhoz tartozó kétfaktoros hitelesítés (MFA) kikapcsolásra került.
+            Ettől kezdve a bejelentkezéshez már csak a jelszó szükséges.
         </p>
 
-        <p>
-            Mostantól be tudsz jelentkezni a rendszerbe, és használhatod az elérhető funkciókat.
-        </p>
+        <div class="info-box">
+            <strong>Email cím:</strong>
+            <span th:text="${email}">user@example.com</span>
+        </div>
 
         <p>
-            Amennyiben nem te kezdeményezted a regisztrációt, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+            Ha nem te kapcsoltad ki a kétfaktoros hitelesítést, kérjük azonnal lépj kapcsolatba az ügyfélszolgálattal, és változtasd meg a jelszavadat a fiókod védelme érdekében.
         </p>
 
         <p>

@@ -6,11 +6,21 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class CurrentUser {
-    public UserDetails getCurrentlyLoggedUserDetails(){
-        return (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    public UserDetails getCurrentlyLoggedUserDetails() {
+        Object principal = SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getPrincipal();
+
+        if (principal instanceof UserDetails userDetails) {
+            return userDetails;
+        }
+
+        throw new IllegalStateException("User is not authenticated");
     }
 
-    public String getCurrentlyLoggedUserEmail(){
-        return getCurrentlyLoggedUserDetails().getUsername();
+    public String getCurrentlyLoggedUserEmail() {
+        return SecurityContextHolder.getContext()
+                .getAuthentication()
+                .getName();
     }
 }

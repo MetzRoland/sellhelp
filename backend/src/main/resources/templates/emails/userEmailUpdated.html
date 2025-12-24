@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Regisztráció megerősítése</title>
+    <title>Email cím módosítása</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -23,11 +23,19 @@
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #2c3e50;
+            color: #27ae60;
         }
         .content {
             color: #333333;
             line-height: 1.6;
+        }
+        .info-box {
+            background-color: #eafaf1;
+            border-left: 4px solid #27ae60;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+            font-size: 14px;
         }
         .footer {
             margin-top: 30px;
@@ -40,24 +48,25 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres regisztráció</h1>
+        <h1>Email cím módosítva</h1>
     </div>
 
     <div class="content">
         <p>
-            Kedves <strong th:text="${firstName} + ' ' + ${lastName}">Felhasználó</strong>!
+            Kedves Felhasználó!
         </p>
 
         <p>
-            Örömmel értesítünk, hogy a regisztrációd sikeresen megtörtént.
+            Értesítünk, hogy a fiókodhoz tartozó email cím sikeresen módosításra került.
         </p>
 
-        <p>
-            Mostantól be tudsz jelentkezni a rendszerbe, és használhatod az elérhető funkciókat.
-        </p>
+        <div class="info-box">
+            <strong>Új email cím:</strong>
+            <span th:text="${email}">user@example.com</span>
+        </div>
 
         <p>
-            Amennyiben nem te kezdeményezted a regisztrációt, kérjük, hagyd figyelmen kívül ezt az üzenetet.
+            Ha nem te hajtottad végre a módosítást, kérjük azonnal lépj kapcsolatba az ügyfélszolgálattal, és ellenőrizd a fiókod biztonságát.
         </p>
 
         <p>
