@@ -36,21 +36,6 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
-    public void sendSimpleEmail(String to, String subject, String text) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(subject);
-        message.setText(text); // plain text
-        message.setFrom(fromEmail); // sender email
-
-        javaMailSender.send(message);
-    }
-
-    public void registrationSuccessEmail(String email)
-    {
-        sendSimpleEmail(email, "Sikeres regisztráció", "Tisztelt Felhasználó!\nSikeresen regisztrált a SellHelp platformra!");
-    }
-
     private void sendHTMLTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables){
         try{
             Context context = new Context();
