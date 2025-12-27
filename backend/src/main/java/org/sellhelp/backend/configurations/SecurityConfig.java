@@ -1,6 +1,5 @@
 package org.sellhelp.backend.configurations;
 
-import jakarta.servlet.http.HttpServletResponse;
 import org.sellhelp.backend.exceptions.CustomAccessDeniedHandler;
 import org.sellhelp.backend.exceptions.CustomAuthenticationEntryPoint;
 import org.sellhelp.backend.security.JWTFilter;

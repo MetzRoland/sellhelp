@@ -104,11 +104,13 @@ public class AuthController {
     }
 
     @GetMapping("/loginSuccess")
-    public void handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
+    public ResponseEntity<Void> handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
         TokenDTO tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 
-        response.sendRedirect("http://localhost:3000/home");
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", "http://localhost:3000/home")
+                .build();
     }
 }
