@@ -91,7 +91,7 @@ public class AuthService {
         user.setUserSecret(userSecret);
 
         userRepository.save(user);
-        emailService.registrationSuccessEmail(user.getEmail());
+        emailService.registerUser(user.getEmail(), user.getFirstName(), user.getLastName());
     }
 
     private TokenDTO loginHandler(LoginDTO loginDTO, boolean allowOnlySuperUser)
@@ -198,7 +198,7 @@ public class AuthService {
             newUser.setCity(city);
             newUser.setProfilePicturePath(picturePath);
 
-            emailService.registerUser(firstName, lastName);
+            emailService.registerUser(email, firstName, lastName);
 
             return userRepository.save(newUser);
         });

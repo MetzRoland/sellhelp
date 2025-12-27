@@ -11,14 +11,13 @@ import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.security.CookieGenerator;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.SuperUserService;
-import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.sellhelp.backend.services.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -30,14 +29,16 @@ public class SuperUserController {
     private final UserService userService;
     private final CookieGenerator cookieGenerator;
     private final EmailService emailService;
+    private final CurrentUser currentUser;
 
     @Autowired
     public SuperUserController(SuperUserService superUserService, UserService userService, CookieGenerator cookieGenerator,
-                               EmailService emailService){
+                               EmailService emailService, CurrentUser currentUser){
         this.superUserService = superUserService;
         this.userService = userService;
         this.cookieGenerator = cookieGenerator;
         this.emailService = emailService;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/info")
@@ -48,6 +49,10 @@ public class SuperUserController {
     @GetMapping("/logout")
     public ResponseEntity<String> logoutHandler(HttpServletRequest request, HttpServletResponse response)
     {
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+
+        emailService.logoutUser(toEmail);
+
         cookieGenerator.deleteLogoutCookies(request, response);
 
         return ResponseEntity.ok("Sikeres kijelentkezés!");
@@ -71,7 +76,8 @@ public class SuperUserController {
 
     @GetMapping("/update/password/send")
     public ResponseEntity<String> sendUserPasswordEmail(){
-        emailService.updatePassword();
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+        emailService.updatePassword(toEmail);
 
         return ResponseEntity.ok("Email a jelszó módosításhoz elküldve!");
     }

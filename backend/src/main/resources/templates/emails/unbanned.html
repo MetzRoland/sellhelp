@@ -6,32 +6,31 @@
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
-            background-color: #f4f6f8;
+            background-color: #3C3B3A;
             margin: 0;
             padding: 0;
+            color: #FAF4E6;
         }
         .container {
             max-width: 600px;
             margin: 30px auto;
-            background-color: #ffffff;
+            background-color: #3C3B3A;
             padding: 25px;
             border-radius: 6px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
         .header {
             text-align: center;
             padding-bottom: 20px;
         }
         .header h1 {
-            color: #27ae60;
+            color: #FAF4E6;
         }
         .content {
-            color: #333333;
+            color: #FAF4E6;
             line-height: 1.6;
         }
         .info-box {
-            background-color: #eafaf1;
-            border-left: 4px solid #27ae60;
+            background-color: #3C3B3A;
             padding: 15px;
             border-radius: 4px;
             margin: 20px 0;
@@ -40,8 +39,16 @@
         .footer {
             margin-top: 30px;
             font-size: 12px;
-            color: #888888;
+            color: #FAF4E6;
             text-align: center;
+        }
+        a {
+            background-color: #212121;
+            color: #FAF4E6;
+            text-decoration: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            display: inline-block;
         }
     </style>
 </head>
@@ -75,8 +82,12 @@
         </p>
 
         <p>
+            Email küldve: <span th:text="${timestamp}">2025-12-27 10:30:00</span>
+        </p>
+
+        <p>
             Üdvözlettel:<br>
-            <strong>A csapat</strong>
+            <strong>A SellHelp csapata</strong>
         </p>
     </div>
 

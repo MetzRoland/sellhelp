@@ -3,7 +3,6 @@ package org.sellhelp.backend.services;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.sellhelp.backend.exceptions.EmailException;
-import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,18 +24,16 @@ public class EmailService {
     private final JavaMailSender javaMailSender;
     private final JWTUtil jwtUtil;
     private final TemplateEngine templateEngine;
-    private final CurrentUser currentUser;
 
     @Value("${spring.mail.from}")
     private String fromEmail;
 
     @Autowired
     public EmailService(JavaMailSender javaMailSender, JWTUtil jwtUtil,
-                        TemplateEngine templateEngine, CurrentUser currentUser){
+                        TemplateEngine templateEngine){
         this.javaMailSender = javaMailSender;
         this.jwtUtil = jwtUtil;
         this.templateEngine = templateEngine;
-        this.currentUser = currentUser;
     }
 
     public void sendSimpleEmail(String to, String subject, String text) {
@@ -75,12 +74,18 @@ public class EmailService {
         }
     }
 
-    public void registerUser(String firstName, String lastName){
-        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+    public String emailSentTimeStamp(){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        return LocalDateTime.now().format(formatter);
+    }
+
+    public void registerUser(String toEmail, String firstName, String lastName){
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("firstName", firstName);
         variables.put("lastName", lastName);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Regisztráció", "emails/registration", variables);
     }
@@ -90,17 +95,17 @@ public class EmailService {
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bejelentkezés", "emails/login", variables);
     }
 
-    public void logoutUser(String accessToken)
+    public void logoutUser(String toEmail)
     {
         Map<String, Object> variables = new HashMap<>();
 
-        String toEmail = jwtUtil.extractEmail(accessToken);
-
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Kijelentkezés", "emails/logout", variables);
     }
@@ -110,6 +115,7 @@ public class EmailService {
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bannolva lett a fiókod", "emails/banned", variables);
     }
@@ -119,19 +125,20 @@ public class EmailService {
         Map<String, Object> variables = new HashMap<>();
 
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "A fiókod újra engedélyezve lett", "emails/unbanned", variables);
     }
 
-    public void updatePassword()
+    public void updatePassword(String toEmail)
     {
-        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
         Map<String, Object> variables = new HashMap<>();
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
                 "http://localhost:3000/reset-password?token=" + token;
         variables.put("resetLink", resetLink);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
     }
@@ -140,6 +147,7 @@ public class EmailService {
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás sikeres", "emails/passwordUpdateSuccess", variables);
     }
@@ -148,6 +156,7 @@ public class EmailService {
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Módosítás történ a felhasználói adatokban", "emails/userDetailsUpdated", variables);
     }
@@ -156,6 +165,7 @@ public class EmailService {
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "Email cím módosítva", "emails/userEmailUpdated", variables);
     }
@@ -164,6 +174,7 @@ public class EmailService {
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés bekapcsolva", "emails/mfaEnabled", variables);
     }
@@ -172,6 +183,7 @@ public class EmailService {
     {
         Map<String, Object> variables = new HashMap<>();
         variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés kikapcsolva", "emails/mfaDisabled", variables);
     }

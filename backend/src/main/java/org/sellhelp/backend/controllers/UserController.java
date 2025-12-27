@@ -9,13 +9,12 @@ import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
 
 @RestController
 @RequestMapping("/user")
@@ -23,14 +22,15 @@ public class UserController {
     private final UserService userService;
     private final EmailService emailService;
     private final CookieGenerator cookieGenerator;
-
+    private final CurrentUser currentUser;
 
     @Autowired
     public UserController(UserService userService, EmailService emailService,
-                          CookieGenerator cookieGenerator){
+                          CookieGenerator cookieGenerator, CurrentUser currentUser){
         this.userService = userService;
         this.emailService = emailService;
         this.cookieGenerator = cookieGenerator;
+        this.currentUser = currentUser;
     }
 
     @GetMapping("/info")
@@ -41,10 +41,9 @@ public class UserController {
     @GetMapping("/logout")
     public ResponseEntity<String> logoutHandler(HttpServletRequest request, HttpServletResponse response)
     {
-        String accessToken = Arrays.stream(request.getCookies()).
-                filter(cookie -> cookie.getName().equals("accessToken")).toString();
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
 
-        emailService.logoutUser(accessToken);
+        emailService.logoutUser(toEmail);
 
         cookieGenerator.deleteLogoutCookies(request, response);
 
@@ -69,7 +68,8 @@ public class UserController {
 
     @GetMapping("/update/password/send")
     public ResponseEntity<String> sendUserPasswordEmail(){
-        emailService.updatePassword();
+        String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+        emailService.updatePassword(toEmail);
 
         return ResponseEntity.ok("Email a jelszó módosításhoz elküldve!");
     }
