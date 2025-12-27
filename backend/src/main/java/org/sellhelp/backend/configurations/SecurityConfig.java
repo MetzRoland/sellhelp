@@ -79,7 +79,14 @@ public class SecurityConfig {
                         .requestMatchers("/auth/login", "/auth/register", "/auth/verify-totp").permitAll()
                         .requestMatchers("/auth/enable2fa", "/auth/disable2fa")
                         .authenticated()
-                        .requestMatchers("/user/**").hasRole("USER")
+                        .requestMatchers("/user/info").hasRole("USER")
+                        .requestMatchers(
+                                "/user/logout",
+                                "user/update/details",
+                                "user/update/email",
+                                "user/update/password/send",
+                                "user/update/password"
+                        ).hasAnyRole("ADMIN", "MODERATOR", "USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
                 )
