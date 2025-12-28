@@ -30,8 +30,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 
@@ -143,9 +142,11 @@ public class AuthServiceTest {
         user.setEmail("test@test.com");
         user.setRole(role);
 
+        when(passwordEncoder.encode("pass")).thenReturn("encodedPass");
+
         UserSecret secret = new UserSecret();
         secret.setMfa(false);
-        secret.setPassword("encodedPass");
+        secret.setPassword(passwordEncoder.encode("pass"));
         user.setUserSecret(secret);
 
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
@@ -156,9 +157,49 @@ public class AuthServiceTest {
 
         TokenDTO tokenDTO = authService.userLogin(loginDTO);
 
+        verify(authenticationManager).authenticate(argThat(token ->
+                token instanceof UsernamePasswordAuthenticationToken &&
+                        token.getName().equals(loginDTO.getEmail()) &&
+                        token.getCredentials().equals(loginDTO.getPassword())
+        ));
+
         assertEquals("access-token", tokenDTO.getAccessToken());
         assertEquals("refresh-token", tokenDTO.getRefreshToken());
     }
+
+    @Test
+    void userLogin_mfaEnabled() {
+        User user = new User();
+        user.setEmail("test@test.com");
+        user.setRole(role);
+
+        when(passwordEncoder.encode("pass")).thenReturn("encodedPass");
+
+        UserSecret secret = new UserSecret();
+        secret.setMfa(true);
+        secret.setPassword(passwordEncoder.encode("pass"));
+        user.setUserSecret(secret);
+
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
+                .thenReturn(mock(Authentication.class));
+//        when(jwtUtil.generateAccessToken("test@test.com")).thenReturn("access-token");
+//        when(jwtUtil.generateRefreshToken("test@test.com")).thenReturn("refresh-token");
+        when(tempTokenService.create(loginDTO.getEmail())).thenReturn("temp-token");
+
+        TokenDTO tokenDTO = authService.userLogin(loginDTO);
+
+        verify(authenticationManager).authenticate(argThat(token ->
+                token instanceof UsernamePasswordAuthenticationToken &&
+                        token.getName().equals(loginDTO.getEmail()) &&
+                        token.getCredentials().equals(loginDTO.getPassword())
+        ));
+
+        assertNull(tokenDTO.getAccessToken());
+        assertNull(tokenDTO.getRefreshToken());
+        assertEquals("temp-token", tokenDTO.getTempToken());
+    }
+
 
     @Test
     void refreshToken_success() {
