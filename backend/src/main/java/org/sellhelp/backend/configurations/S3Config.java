@@ -29,6 +29,9 @@ public class S3Config {
     @Value("${s3.endpoint}")
     private String endpoint;
 
+    @Value("${s3.signedUrlDomain}")
+    private String signedUrlDomain;
+
     @Value("${s3.aws}")
     private boolean isAWS;
 
@@ -71,9 +74,7 @@ public class S3Config {
                                 .pathStyleAccessEnabled(!isAWS) // MinIO only
                                 .build()
                 )
-                // this endpoint is for testing from localhost "http://localhost:9000"
-                // in production this should be `endpoint`
-                .endpointOverride((URI.create(endpoint)))
+                .endpointOverride((URI.create(signedUrlDomain)))
                 .build();
     }
 

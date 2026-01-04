@@ -1,5 +1,6 @@
 package org.sellhelp.backend.services;
 
+import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
@@ -137,6 +138,9 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
+        if (user.getProfilePicturePath() == null)
+        { throw new RuntimeException("Nincs profilkép!");}
+
         return s3Service.getDownloadURL(user.getProfilePicturePath());
     }
 
@@ -161,6 +165,9 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
+        if (user.getProfilePicturePath() == null)
+        { throw new RuntimeException("Nincs profilkép!");}
 
         String key = ppKey(user.getId());
         s3Service.deleteFile(key);

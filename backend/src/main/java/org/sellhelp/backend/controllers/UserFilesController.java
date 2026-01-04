@@ -1,5 +1,6 @@
 package org.sellhelp.backend.controllers;
 
+import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.services.UserFileService;
 import org.springframework.http.HttpStatus;
@@ -80,6 +81,12 @@ public class UserFilesController {
     public ResponseEntity<String> setProfilePicture(MultipartFile file) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
+
+        // Could be faked by setting type manually, but prevents normal accidents
+        if (file.getContentType() == null || !file.getContentType().startsWith("image/")) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("A fájl egy kép kell legyen!");
+        }
+
         userFileService.setProfilePicture(email, file);
 
         return ResponseEntity.ok("Profilkép firssítve");
