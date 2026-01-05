@@ -120,19 +120,6 @@ public class UserFileService {
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
     public String getProfilePicture(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
@@ -177,7 +164,7 @@ public class UserFileService {
     }
 
     private String ppKey(Integer id)
-    {return "users/" + id + "/pp";}
+    {return "users/" + id + "/profilePicture";}
 
     private String fileKey(Integer id, String fileName)
     {return "users/" + id + "/"+fileName;}

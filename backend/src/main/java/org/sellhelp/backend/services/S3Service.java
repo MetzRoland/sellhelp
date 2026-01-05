@@ -14,6 +14,7 @@ import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignReques
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.time.Duration;
 
 @Service
@@ -122,11 +123,15 @@ public class S3Service {
 
 
 
+
     public String getDownloadURL(String objectKey) {
         try {
+            String fileName = Paths.get(objectKey).getFileName().toString();
+
             GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                     .bucket(bucketName)
                     .key(objectKey)
+                    .responseContentDisposition("attachment; filename=\"" + fileName + "\"")
                     .build();
 
             GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
