@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react';
+import { Route, Routes } from 'react-router';
 import axios from 'axios';
 import './App.css';
+
+import TestComponent from './TestComponent';
 
 interface City {
   id: number;
@@ -25,6 +28,10 @@ function App() {
       {cities.map((city) => {
         return <p key={city.id}>{city.cityName}</p>
       })}
+
+      <Routes>
+        <Route path='/hi' element={<TestComponent />} />
+      </Routes>
     </>
   );
 }
