@@ -2,3 +2,4 @@
 minio_data/*
 restartDocker*
 note-*
+protonmail/*
