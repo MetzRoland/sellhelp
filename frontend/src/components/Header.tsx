@@ -1,0 +1,23 @@
+import { Link } from 'react-router';
+import './Header.css';
+
+function Header() {
+    return (
+        <div className="header">
+            <nav className="header-nav">
+                <div className="left-options">
+                    <Link className='nav-link' to="#">Posztok keresése</Link>
+                </div>
+                <div className="middle-options">
+                    <Link className='nav-link main-page-link' to="#">SellHelp</Link>
+                </div>
+                <div className="right-options">
+                    <Link className='nav-link' to="#">Bejelentkezés</Link>
+                    <Link className='nav-link' to="#">Regiszrálás</Link>
+                </div>
+            </nav>
+        </div>
+    );
+}
+
+export default Header;
