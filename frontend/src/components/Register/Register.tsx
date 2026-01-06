@@ -26,6 +26,19 @@ interface RegisterError {
 }
 
 function Register() {
+  const inputs: {
+    name: keyof RegisterForm;
+    type: string;
+    placeholder: string;
+  }[] = [
+    { name: "lastName", type: "text", placeholder: "Vezetéknév" },
+    { name: "firstName", type: "text", placeholder: "Keresztnév" },
+    { name: "birthDate", type: "date", placeholder: "Születési dátum" },
+    { name: "cityName", type: "text", placeholder: "Település" },
+    { name: "email", type: "text", placeholder: "Email" },
+    { name: "password", type: "text", placeholder: "Jelszó" },
+  ];
+
   const [formData, setFormData] = useState<RegisterForm>({
     lastName: "",
     firstName: "",
@@ -35,7 +48,8 @@ function Register() {
     password: "",
   });
 
-  const [validationErrors, setValidationErrors] = useState<RegisterValidationErrors>({});
+  const [validationErrors, setValidationErrors] =
+    useState<RegisterValidationErrors>({});
 
   const [registrationError, setRegistrationError] = useState<RegisterError>({});
 
@@ -113,80 +127,26 @@ function Register() {
           action=""
           onSubmit={handleRequestSubmit}
         >
-          <div className="input-container">
-            <input
-              type="text"
-              name="lastName"
-              value={formData.lastName}
-              placeholder="Vezetéknév"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.lastName && (
-              <span className="error-span">{validationErrors.lastName}</span>
-            )}
-          </div>
-          <div className="input-container">
-            <input
-              type="text"
-              name="firstName"
-              value={formData.firstName}
-              placeholder="Keresztnév"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.firstName && (
-              <span className="error-span">{validationErrors.firstName}</span>
-            )}
-          </div>
-          <div className="input-container">
-            <input
-              type="date"
-              name="birthDate"
-              value={formData.birthDate}
-              placeholder="Születési dátum"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.birthDate && (
-              <span className="error-span">{validationErrors.birthDate}</span>
-            )}
-          </div>
-          <div className="input-container">
-            <input
-              type="text"
-              name="cityName"
-              value={formData.cityName}
-              placeholder="Település"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.cityName && (
-              <span className="error-span">{validationErrors.cityName}</span>
-            )}
-          </div>
-          <div className="input-container">
-            <input
-              type="text"
-              name="email"
-              value={formData.email}
-              placeholder="Email"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.email && (
-              <span className="error-span">{validationErrors.email}</span>
-            )}
-          </div>
-          <div className="input-container">
-            <input
-              type="text"
-              name="password"
-              value={formData.password}
-              placeholder="Jelszó"
-              onChange={handleRegisterInput}
-            />
-            {validationErrors.password && (
-              <span className="error-span">{validationErrors.password}</span>
-            )}
-          </div>
+          {inputs.map((input) => (
+            <div className="input-container" key={input.name}>
+              <input
+                type={input.type}
+                name={input.name}
+                value={formData[input.name] || ""}
+                placeholder={input.placeholder}
+                onChange={handleRegisterInput}
+              />
+              {validationErrors[input.name] && (
+                <span className="error-span">
+                  {validationErrors[input.name]}
+                </span>
+              )}
+            </div>
+          ))}
 
-          <button type="submit" disabled={loading}>Regisztráció</button>
+          <button type="submit" disabled={loading}>
+            Regisztráció
+          </button>
 
           {!success ? (
             <p>{registrationError.message}</p>
