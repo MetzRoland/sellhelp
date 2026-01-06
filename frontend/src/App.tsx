@@ -1,5 +1,5 @@
 import { Route, Routes } from 'react-router';
-import Register from './components/Register';
+import Register from './components/Register/Register';
 import './App.css';
 
 function App() {

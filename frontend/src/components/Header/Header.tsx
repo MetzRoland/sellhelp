@@ -3,7 +3,7 @@ import './Header.css';
 
 function Header() {
     return (
-        <div className="header">
+        <header className="header">
             <nav className="header-nav">
                 <div className="left-options">
                     <Link className='nav-link' to="#">Posztok keresése</Link>
@@ -16,7 +16,7 @@ function Header() {
                     <Link className='nav-link' to="#">Regiszrálás</Link>
                 </div>
             </nav>
-        </div>
+        </header>
     );
 }
 

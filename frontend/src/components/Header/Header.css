@@ -1,7 +1,7 @@
 .header{
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
     color: #fff;
-    height: 20vh;
+    height: 15vh;
 }
 
 .header-nav{
@@ -9,8 +9,8 @@
     font-size: 1.5rem;
     padding: 1em;
 
-    display: flex;
-    justify-content: space-between;
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
     align-items: center;
 }
 
@@ -37,4 +37,16 @@
     display: flex;
     justify-content: space-around;
     gap: 1rem;
+}
+
+.left-options{
+    justify-self: start;
+}
+
+.right-options{
+    justify-self: end;
+}
+
+.middle-options{
+    justify-self: center;
 }
