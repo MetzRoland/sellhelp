@@ -46,13 +46,3 @@ services:
       - 443:443
     depends_on:
       - storage
-
-
-  bridge:
-    image: shenxn/protonmail-bridge
-    ports:
-      - 1025:25/tcp
-      - 1143:143/tcp
-    restart: unless-stopped
-    volumes:
-      - ./protonmail:/root
