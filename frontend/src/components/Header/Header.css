@@ -1,6 +1,5 @@
 .header{
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
-    color: #fff;
     height: 15vh;
 }
 
@@ -47,6 +46,6 @@
     justify-self: end;
 }
 
-.middle-options{
+.title-option{
     justify-self: center;
 }

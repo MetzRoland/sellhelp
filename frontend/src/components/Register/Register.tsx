@@ -1,7 +1,9 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router";
 import Header from "./../Header/Header";
 import { publicAxois } from "../../config/axoisConfig";
+
+import "./Register.css";
 
 interface RegisterForm {
   lastName?: string;
@@ -21,8 +23,10 @@ interface RegisterValidationErrors {
   password?: string;
 }
 
-interface RegisterError {
-  message?: string;
+interface City {
+  id: number;
+  cityName: string;
+  county: string;
 }
 
 function Register() {
@@ -51,13 +55,27 @@ function Register() {
   const [validationErrors, setValidationErrors] =
     useState<RegisterValidationErrors>({});
 
-  const [registrationError, setRegistrationError] = useState<RegisterError>({});
+  const [isRegistrationError, setRegistrationError] = useState<boolean>(false);
 
   const [success, setSuccess] = useState<boolean>(false);
 
   const [loading, setLoading] = useState<boolean>(false);
 
-  const handleRegisterInput = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [cities, setCities] = useState<City[]>([]);
+
+  useEffect(() => {
+    const fetchCities = async () => {
+      const response = await publicAxois.get("/api/public/cities");
+
+      setCities(response.data);
+    };
+
+    fetchCities();
+  }, []);
+
+  const handleRegisterInput = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -67,7 +85,7 @@ function Register() {
 
     setValidationErrors({});
 
-    setRegistrationError({});
+    setRegistrationError(false);
 
     console.log(formData);
   };
@@ -89,7 +107,7 @@ function Register() {
 
         setValidationErrors({});
 
-        setRegistrationError({});
+        setRegistrationError(false);
 
         setFormData({
           lastName: "",
@@ -109,56 +127,79 @@ function Register() {
 
       setValidationErrors(error.response?.data?.errors ?? {});
 
-      setRegistrationError({
-        message:
-          error.response?.data?.message ?? "Hiba törént a regisztráció során!",
-      });
+      setRegistrationError(true);
     }
   };
 
   return (
     <>
       <Header />
-      <div className="register-container">
+      <div className="container register-container">
         <h1>Regisztráció</h1>
 
         <form
-          className="registration-form"
+          className="content-container registration-form"
           action=""
           onSubmit={handleRequestSubmit}
         >
           {inputs.map((input) => (
             <div className="input-container" key={input.name}>
-              <input
-                type={input.type}
-                name={input.name}
-                value={formData[input.name] || ""}
-                placeholder={input.placeholder}
-                onChange={handleRegisterInput}
-              />
               {validationErrors[input.name] && (
-                <span className="error-span">
+                <span className="message error error-span">
                   {validationErrors[input.name]}
                 </span>
+              )}
+              {input.name !== "cityName" ? (
+                <input
+                  type={input.type}
+                  name={input.name}
+                  value={formData[input.name] || ""}
+                  placeholder={input.placeholder}
+                  onChange={handleRegisterInput}
+                  className="input-element"
+                />
+              ) : (
+                <select
+                  name={input.name}
+                  id={input.name}
+                  className="input-element select-input-element"
+                  onChange={handleRegisterInput}
+                  defaultValue="city"
+                >
+                  <option value="city" disabled hidden>
+                    Válasszon települést!
+                  </option>
+                  {cities.map((city) => {
+                    return (
+                      <option key={city.id} value={city.cityName}>
+                        {city.cityName}
+                      </option>
+                    );
+                  })}
+                </select>
               )}
             </div>
           ))}
 
-          <button type="submit" disabled={loading}>
+          <button className="btn" type="submit" disabled={loading}>
             Regisztráció
           </button>
 
-          {!success ? (
-            <p>{registrationError.message}</p>
-          ) : (
-            <p>Sikeres regisztráció!</p>
+          {isRegistrationError && (
+            <p className="message error error-process-status">
+              Sikertelen regisztráció!
+            </p>
           )}
+
+          {success && <p className="message success-message">Sikeres regisztráció!</p>}
         </form>
 
-        <div className="login-container">
+        <div className="content-container login-container">
           <h2>Van már fiókod?</h2>
 
-          <Link to="#">Bejelentkezés</Link>
+          <Link to="#" className="btn">
+            Bejelentkezés
+          </Link>
         </div>
       </div>
     </>

@@ -33,12 +33,12 @@ public class TestRepoController {
         this.roleRepository = roleRepository;
     }
 
-    @GetMapping("/getcities")
+    @GetMapping("/cities")
     public List<City> getCities() {
         return cityRepository.findAll();
     }
 
-    @GetMapping("/getusers")
+    @GetMapping("/users")
     public List<User> getUsers() {
         return userRepository.findAll();
     }

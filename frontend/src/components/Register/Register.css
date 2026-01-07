@@ -1,0 +1,13 @@
+.registration-form {
+  margin: 2em;
+}
+
+select.input-element {
+  background-color: #e03434;
+  color-scheme: dark;
+  color: #000;
+}
+
+.login-container{
+  margin: 2em;
+}

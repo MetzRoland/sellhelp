@@ -8,7 +8,7 @@ function Header() {
                 <div className="left-options">
                     <Link className='nav-link' to="#">Posztok keresése</Link>
                 </div>
-                <div className="middle-options">
+                <div className="title-option">
                     <Link className='nav-link main-page-link' to="#">SellHelp</Link>
                 </div>
                 <div className="right-options">
