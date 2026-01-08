@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
 import Header from "./../Header/Header";
-import { publicAxois } from "../../config/axoisConfig";
+import Footer from "../Footer/Footer";
+import { publicAxios } from "../../config/axiosConfig";
 
 import "./Register.css";
 
@@ -40,7 +41,7 @@ function Register() {
     { name: "birthDate", type: "date", placeholder: "Születési dátum" },
     { name: "cityName", type: "text", placeholder: "Település" },
     { name: "email", type: "text", placeholder: "Email" },
-    { name: "password", type: "text", placeholder: "Jelszó" },
+    { name: "password", type: "password", placeholder: "Jelszó" },
   ];
 
   const [formData, setFormData] = useState<RegisterForm>({
@@ -55,7 +56,7 @@ function Register() {
   const [validationErrors, setValidationErrors] =
     useState<RegisterValidationErrors>({});
 
-  const [isRegistrationError, setRegistrationError] = useState<boolean>(false);
+  const [registrationError, setRegistrationError] = useState<string>("");
 
   const [success, setSuccess] = useState<boolean>(false);
 
@@ -63,9 +64,11 @@ function Register() {
 
   const [cities, setCities] = useState<City[]>([]);
 
+  const navigator = useNavigate();
+
   useEffect(() => {
     const fetchCities = async () => {
-      const response = await publicAxois.get("/api/public/cities");
+      const response = await publicAxios.get("/api/public/cities");
 
       setCities(response.data);
     };
@@ -73,9 +76,7 @@ function Register() {
     fetchCities();
   }, []);
 
-  const handleRegisterInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
+  const handleRegisterInput = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -85,7 +86,7 @@ function Register() {
 
     setValidationErrors({});
 
-    setRegistrationError(false);
+    setRegistrationError("");
 
     console.log(formData);
   };
@@ -96,7 +97,7 @@ function Register() {
     setLoading(true);
 
     try {
-      const response = await publicAxois.post("/auth/register", formData);
+      const response = await publicAxios.post("/auth/register", formData);
 
       if (response.status === 201) {
         console.log(response.status);
@@ -107,7 +108,7 @@ function Register() {
 
         setValidationErrors({});
 
-        setRegistrationError(false);
+        setRegistrationError("");
 
         setFormData({
           lastName: "",
@@ -117,6 +118,10 @@ function Register() {
           email: "",
           password: "",
         });
+
+        setTimeout(() => {
+          navigator("/login");
+        }, 2000);
       }
     } catch (error: unknown) {
       console.log(error.response.data);
@@ -127,7 +132,13 @@ function Register() {
 
       setValidationErrors(error.response?.data?.errors ?? {});
 
-      setRegistrationError(true);
+      if (error.status !== 500) {
+        setRegistrationError(
+          error.response?.data?.message ?? "Sikertelen regisztráció!"
+        );
+      } else {
+        setRegistrationError("Sikertelen regisztráció!");
+      }
     }
   };
 
@@ -135,7 +146,7 @@ function Register() {
     <>
       <Header />
       <div className="container register-container">
-        <h1>Regisztráció</h1>
+        <h1 className="container-title">Regisztráció</h1>
 
         <form
           className="content-container registration-form"
@@ -181,17 +192,19 @@ function Register() {
             </div>
           ))}
 
-          <button className="btn" type="submit" disabled={loading}>
+          <button className="btn border-btn" type="submit" disabled={loading}>
             Regisztráció
           </button>
 
-          {isRegistrationError && (
+          {registrationError && (
             <p className="message error error-process-status">
-              Sikertelen regisztráció!
+              {registrationError}
             </p>
           )}
 
-          {success && <p className="message success-message">Sikeres regisztráció!</p>}
+          {success && (
+            <p className="message success-message">Sikeres regisztráció!</p>
+          )}
         </form>
 
         <div className="content-container login-container">
@@ -202,6 +215,8 @@ function Register() {
           </Link>
         </div>
       </div>
+
+      <Footer />
     </>
   );
 }
