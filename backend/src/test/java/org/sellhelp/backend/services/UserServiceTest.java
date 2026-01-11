@@ -164,7 +164,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
 
-        UserDTO result = userService.getUserDetails();
+        UserDTO result = userService.getUserDetails("accessToken");
 
         assertNotNull(result);
         verify(modelMapper).map(user, UserDTO.class);

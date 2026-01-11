@@ -1,6 +1,5 @@
 package org.sellhelp.backend.controllers;
 
-import org.sellhelp.backend.dtos.responses.SuperUserDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.services.SuperUserService;
@@ -18,11 +17,6 @@ public class SuperUserController {
     @Autowired
     public SuperUserController(SuperUserService superUserService){
         this.superUserService = superUserService;
-    }
-
-    @GetMapping("/info")
-    public SuperUserDTO getSuperUserDetails(){
-        return superUserService.getSuperUserDetails();
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")

@@ -63,10 +63,10 @@ public class AuthController {
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @PostMapping("/login/refresh")
-    public ResponseEntity<TokenDTO> refreshHandler(@Valid @RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
+    @GetMapping("/login/refresh")
+    public ResponseEntity<TokenDTO> refreshHandler(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response)
     {
-        TokenDTO tokenDTO = authService.refresh(refreshDTO);
+        TokenDTO tokenDTO = authService.refresh(refreshToken);
 
         cookieGenerator.refreshAccessTokenCookie(response, tokenDTO.getAccessToken());
 
@@ -110,7 +110,7 @@ public class AuthController {
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:3000/home")
+                .header("Location", "http://localhost:5173/home")
                 .build();
     }
 }

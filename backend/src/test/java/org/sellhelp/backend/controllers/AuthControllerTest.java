@@ -125,11 +125,11 @@ public class AuthControllerTest {
 
     @Test
     void testRefreshHandler() throws Exception {
-        when(authService.refresh(any(RefreshDTO.class))).thenReturn(tokenDTO);
+        when(authService.refresh(any(String.class))).thenReturn(tokenDTO);
 
-        mockMvc.perform(post("/auth/login/refresh")
+        mockMvc.perform(get("/auth/login/refresh")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshDTO)))
+                        )
                 .andExpect(status().isOk());
     }
 

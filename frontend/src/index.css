@@ -121,6 +121,7 @@ body{
     color: #fff;
     padding: 1em;
     min-width: 15rem;
+    max-width: 15rem;
     font-weight: bold;
     font-size: 1.25em;
     border-radius: 15px;
@@ -128,6 +129,9 @@ body{
     text-decoration: none;
 
     margin: 1em;
+
+    white-space: normal;
+    word-break: break-word;
 
     transition: all .4s;
 }

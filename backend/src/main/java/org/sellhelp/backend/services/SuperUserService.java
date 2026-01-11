@@ -1,12 +1,10 @@
 package org.sellhelp.backend.services;
 
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.responses.SuperUserDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
-import org.sellhelp.backend.security.CurrentUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -18,24 +16,14 @@ import java.util.List;
 public class SuperUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
-    private final CurrentUser currentUser;
     private final EmailService emailService;
 
     @Autowired
     public SuperUserService(UserRepository userRepository, ModelMapper modelMapper,
-                            CurrentUser currentUser, EmailService emailService){
+                            EmailService emailService){
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
-        this.currentUser = currentUser;
         this.emailService = emailService;
-    }
-
-    public SuperUserDTO getSuperUserDetails() {
-        String email = currentUser.getCurrentlyLoggedUserEmail();
-
-        SuperUserDTO superUserDTO = modelMapper.map(userRepository.findByEmail(email).orElseThrow(
-                () -> new UserNotFoundException("A felhasználó nem található!")), SuperUserDTO.class);
-        return superUserDTO;
     }
 
     private boolean hasRole(String role) {

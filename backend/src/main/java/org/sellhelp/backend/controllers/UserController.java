@@ -34,8 +34,8 @@ public class UserController {
     }
 
     @GetMapping("/info")
-    public UserDTO getUserDetails(){
-        return userService.getUserDetails();
+    public UserDTO getUserDetails(@CookieValue(name = "accessToken") String accessToken){
+        return userService.getUserDetails(accessToken);
     }
 
     @GetMapping("/logout")

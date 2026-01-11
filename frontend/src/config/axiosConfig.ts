@@ -16,3 +16,8 @@ export const privateAxios = axios.create({
   },
   withCredentials: true
 });
+
+export const refreshAxios = axios.create({
+  baseURL: baseUrl,
+  withCredentials: true,
+});

@@ -29,4 +29,5 @@ public class UserDTO {
     private List<Review> reviews;
     private List<Review> sentReviews;
     private List<UserFile> userFiles;
+    private String accessToken;
 }

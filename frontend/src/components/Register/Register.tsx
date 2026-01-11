@@ -2,47 +2,25 @@ import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import Header from "./../Header/Header";
 import Footer from "../Footer/Footer";
+import InputForm from "../Reusables/InputForm/InputForm";
+import type {
+  RegisterForm,
+  RegisterValidationErrors,
+  City,
+} from "./RegisterTypes";
 import { publicAxios } from "../../config/axiosConfig";
 
 import "./Register.css";
 
-interface RegisterForm {
-  lastName?: string;
-  firstName?: string;
-  birthDate?: string;
-  cityName?: string;
-  email?: string;
-  password?: string;
-}
-
-interface RegisterValidationErrors {
-  lastName?: string;
-  firstName?: string;
-  birthDate?: string;
-  cityName?: string;
-  email?: string;
-  password?: string;
-}
-
-interface City {
-  id: number;
-  cityName: string;
-  county: string;
-}
-
 function Register() {
-  const inputs: {
-    name: keyof RegisterForm;
-    type: string;
-    placeholder: string;
-  }[] = [
-    { name: "lastName", type: "text", placeholder: "Vezetéknév" },
-    { name: "firstName", type: "text", placeholder: "Keresztnév" },
-    { name: "birthDate", type: "date", placeholder: "Születési dátum" },
-    { name: "cityName", type: "text", placeholder: "Település" },
-    { name: "email", type: "text", placeholder: "Email" },
-    { name: "password", type: "password", placeholder: "Jelszó" },
-  ];
+  const registerInputs = [
+  { name: "lastName", type: "text", placeholder: "Vezetéknév" },
+  { name: "firstName", type: "text", placeholder: "Keresztnév" },
+  { name: "birthDate", type: "date", placeholder: "Születési dátum" },
+  { name: "cityName", type: "select", placeholder: "Település" },
+  { name: "email", type: "text", placeholder: "Email" },
+  { name: "password", type: "password", placeholder: "Jelszó" },
+] as const;
 
   const [formData, setFormData] = useState<RegisterForm>({
     lastName: "",
@@ -76,7 +54,15 @@ function Register() {
     fetchCities();
   }, []);
 
-  const handleRegisterInput = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const cityOptions = cities.map((city) => ({
+    id: city.id,
+    value: city.cityName,
+    label: city.cityName,
+  }));
+
+  const handleRegisterInput = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
 
     setFormData((prev) => ({
@@ -153,44 +139,13 @@ function Register() {
           action=""
           onSubmit={handleRequestSubmit}
         >
-          {inputs.map((input) => (
-            <div className="input-container" key={input.name}>
-              {validationErrors[input.name] && (
-                <span className="message error error-span">
-                  {validationErrors[input.name]}
-                </span>
-              )}
-              {input.name !== "cityName" ? (
-                <input
-                  type={input.type}
-                  name={input.name}
-                  value={formData[input.name] || ""}
-                  placeholder={input.placeholder}
-                  onChange={handleRegisterInput}
-                  className="input-element"
-                />
-              ) : (
-                <select
-                  name={input.name}
-                  id={input.name}
-                  className="input-element select-input-element"
-                  onChange={handleRegisterInput}
-                  defaultValue="city"
-                >
-                  <option value="city" disabled hidden>
-                    Válasszon települést!
-                  </option>
-                  {cities.map((city) => {
-                    return (
-                      <option key={city.id} value={city.cityName}>
-                        {city.cityName}
-                      </option>
-                    );
-                  })}
-                </select>
-              )}
-            </div>
-          ))}
+          <InputForm<RegisterForm>
+            inputs={registerInputs}
+            formData={formData}
+            handleFunction={handleRegisterInput}
+            errorMessage={validationErrors}
+            options={{ cityName: cityOptions }}
+          />
 
           <button className="btn border-btn" type="submit" disabled={loading}>
             Regisztráció
@@ -207,7 +162,7 @@ function Register() {
           )}
         </form>
 
-        <div className="content-container login-container">
+        <div className="content-container back-to-login-container">
           <h2>Van már fiókod?</h2>
 
           <Link to="#" className="btn">

@@ -214,7 +214,7 @@ public class AuthServiceTest {
         when(jwtUtil.validateRefreshToken("refresh-token", userDetails)).thenReturn(true);
         when(jwtUtil.generateAccessToken("test@test.com")).thenReturn("new-access-token");
 
-        TokenDTO result = authService.refresh(refreshDTO);
+        TokenDTO result = authService.refresh(refreshDTO.getRefreshToken());
 
         assertEquals("new-access-token", result.getAccessToken());
         assertEquals("refresh-token", result.getRefreshToken());

@@ -148,9 +148,8 @@ public class AuthService {
         return loginHandler(loginDTO, true);
     }
 
-    public TokenDTO refresh(RefreshDTO refreshDTO)
+    public TokenDTO refresh(String refreshToken)
     {
-        String refreshToken = refreshDTO.getRefreshToken();
         String email = jwtUtil.extractEmail(refreshToken);
 
         if(email == null){
@@ -159,9 +158,9 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        if (jwtUtil.validateRefreshToken(refreshDTO.getRefreshToken(), userDetails)) {
+        if (jwtUtil.validateRefreshToken(refreshToken, userDetails)) {
             String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
-            return new TokenDTO(accessToken, refreshDTO.getRefreshToken(), null);
+            return new TokenDTO(accessToken, refreshToken, null);
         }
         else {
             throw new InvalidTokenException("Helytelen refresh token!");

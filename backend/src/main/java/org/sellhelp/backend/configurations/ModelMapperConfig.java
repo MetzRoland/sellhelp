@@ -1,14 +1,17 @@
 package org.sellhelp.backend.configurations;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.responses.SuperUserDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.bind.annotation.CookieValue;
 
 @Configuration
 public class ModelMapperConfig {
+
     @Bean
     public ModelMapper modelMapper() {
         ModelMapper mapper = new ModelMapper();
@@ -33,20 +36,6 @@ public class ModelMapperConfig {
                 .addMapping(
                         src -> src.getRole().getRoleName(),
                         UserDTO::setRole
-                );
-
-        mapper.typeMap(User.class, SuperUserDTO.class)
-                .addMapping(
-                        src -> src.getUserSecret().isMfa(),
-                        SuperUserDTO::setMfa
-                )
-                .addMapping(
-                        src -> src.getRole().getRoleName(),
-                        SuperUserDTO::setRole
-                )
-                .addMapping(
-                        User::isBanned,
-                        SuperUserDTO::setBanned
                 );
 
         return mapper;

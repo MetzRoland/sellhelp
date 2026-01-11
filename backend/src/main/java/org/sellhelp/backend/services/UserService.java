@@ -121,12 +121,14 @@ public class UserService {
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
     }
 
-    public UserDTO getUserDetails()
+    public UserDTO getUserDetails(String accessToken)
     {
         String email = currentUser.getCurrentlyLoggedUserEmail();
 
         UserDTO userDTO = modelMapper.map(userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")), UserDTO.class);
+
+        userDTO.setAccessToken(accessToken);
         return userDTO;
     }
 }

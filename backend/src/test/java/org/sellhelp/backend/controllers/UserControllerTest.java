@@ -73,7 +73,7 @@ class UserControllerTest {
 
     @Test
     void getUserDetails_success() throws Exception {
-        when(userService.getUserDetails()).thenReturn(userDTO);
+        when(userService.getUserDetails("accessToken")).thenReturn(userDTO);
 
         mockMvc.perform(get("/user/info"))
                 .andExpect(status().isOk())
@@ -81,7 +81,7 @@ class UserControllerTest {
                 .andExpect(jsonPath("$.firstName").value("John"))
                 .andExpect(jsonPath("$.lastName").value("Doe"));
 
-        verify(userService).getUserDetails();
+        verify(userService).getUserDetails("accessToken");
     }
 
     @Test
