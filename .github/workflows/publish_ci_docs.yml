@@ -1,0 +1,72 @@
+name: Publish CI Docs to GitHub Pages
+
+on:
+  push:
+    branches:
+      - '**'           # all branches
+  pull_request:
+    branches:
+      - '**'           # all branches
+
+permissions:
+  contents: write    # needed to push to gh-pages
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Set up JDK
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '25'
+          distribution: 'temurin'
+          cache: maven
+
+      # 3️⃣ Run tests and generate reports (even if tests fail)
+      - name: Generate test reports
+        working-directory: backend
+        run: mvn -B verify site
+        continue-on-error: true
+
+      # 4️⃣ Copy reports to timestamped folder
+      - name: Prepare GitHub Pages content
+        run: |
+          TIMESTAMP=$(date +%Y-%m-%d-%H%M)
+          mkdir -p public/$TIMESTAMP
+          cp -r backend/target/site/* public/$TIMESTAMP/
+
+      # 5️⃣ Generate index.html for navigation
+      - name: Generate index
+        run: |
+          echo "<h1>CI Test Reports</h1>" > public/index.html
+          for dir in public/*/; do
+            [[ "$dir" != "public/index.html" ]] || continue
+            echo "<a href=\"$dir\">$dir</a><br>" >> public/index.html
+          done
+
+      # 6️⃣ Deploy to GitHub Pages
+      - name: Deploy to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: public
+          keep_files: true
+
+      # 7️⃣ Update README.md with latest report link
+      - name: Update README.md
+        run: |
+          LATEST=$(ls -dt public/*/ | head -n1)
+          sed -i '/<!-- ci-report-link -->/c\<a href="'"$LATEST"'">View latest CI report</a>' README.md
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add README.md
+          git commit -m "docs: update latest CI report link" || echo "No changes"
+          git push

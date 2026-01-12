@@ -1,18 +1,15 @@
 package org.sellhelp.backend.entities;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Cascade;
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
+import org.sellhelp.backend.enums.AuthProvider;
 
 import java.time.LocalDate;
 import java.time.Instant;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -27,9 +24,6 @@ public class User {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "username", nullable = false, unique = true)
-    private String username;
-
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
@@ -42,12 +36,16 @@ public class User {
     @Column(name = "email", nullable = false, unique = true)
     private String email;
 
+    @Column(name = "profile_picture_path")
+    private String profilePicturePath;
+
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;
 
-    @Column(name = "google_id")
-    private String google_id;
+    @Column(name = "auth_provider", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private AuthProvider authProvider;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
@@ -57,7 +55,7 @@ public class User {
     private boolean banned;
 
     @Column(name = "created_at", nullable = false)
-    @CurrentTimestamp
+    @CreationTimestamp
     private Instant createdAt;
 
     @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST,  CascadeType.MERGE, CascadeType.REMOVE})
@@ -65,6 +63,9 @@ public class User {
 
     @OneToMany(mappedBy = "reviewedUser")
     private List<Review> reviews;
+
+    @OneToMany(mappedBy = "senderUser")
+    private List<Review> sentReviews;
 
     @OneToMany(mappedBy = "notifiedUser", cascade = CascadeType.REMOVE)
     private List<Notification> userNotifications;

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Report;
 import org.sellhelp.backend.entities.ReportType;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import java.time.LocalDate;
@@ -31,19 +32,19 @@ public class ReportRepositoryTest {
     public void init()
     {
         testSenderUser = userRepository.save(User.builder()
-                .username("NagyB")
                 .firstName("Kis")
                 .lastName("Béla")
                 .birthDate(LocalDate.of(2001, 11, 3))
                 .email("kB@newMail.mail")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testReportedUser = userRepository.save(User.builder()
-                .username("fisherman")
                 .firstName("Hanz")
                 .lastName("Fisher")
                 .birthDate(LocalDate.of(1983, 2, 23))
                 .email("h.fisher@gmail.com")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testReportType = reportTypeRepository.save(ReportType.builder()

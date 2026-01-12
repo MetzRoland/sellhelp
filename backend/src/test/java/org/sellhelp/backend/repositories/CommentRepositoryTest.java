@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Comment;
 import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -31,12 +32,13 @@ public class CommentRepositoryTest {
     @BeforeEach
     public void init() {
         testUser = User.builder()
-                .username("john_doe")
                 .firstName("John")
                 .lastName("Doe")
                 .email("john@example.com")
                 .birthDate(LocalDate.of(1990, 1, 1))
+                .authProvider(AuthProvider.LOCAL)
                 .build();
+
         testUser = userRepository.save(testUser);
 
         testPost = Post.builder()

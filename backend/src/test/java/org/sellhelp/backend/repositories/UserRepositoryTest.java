@@ -3,6 +3,7 @@ package org.sellhelp.backend.repositories;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.*;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -55,7 +56,6 @@ public class UserRepositoryTest {
         notificationRepository.save(testNotification);
 
         testUser = User.builder()
-                .username("testuser")
                 .firstName("John")
                 .lastName("Doe")
                 .birthDate(LocalDate.of(1990, 1, 1))
@@ -63,6 +63,7 @@ public class UserRepositoryTest {
                 .userSecret(testSecret)
                 .userFiles(userFiles)
                 .userNotifications(notifications)
+                .authProvider(AuthProvider.LOCAL)
                 .build();
     }
 
@@ -116,7 +117,6 @@ public class UserRepositoryTest {
         assertNotNull(savedUserId);
         assertEquals("John", savedUser.getFirstName());
         assertEquals("Doe", savedUser.getLastName());
-        assertEquals("testuser", savedUser.getUsername());
         assertEquals(LocalDate.of(1990, 1, 1), savedUser.getBirthDate());
         assertEquals("john.doe@test.com", savedUser.getEmail());
         assertEquals(1, savedUser.getUserFiles().size());

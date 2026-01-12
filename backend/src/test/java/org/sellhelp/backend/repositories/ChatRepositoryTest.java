@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatMessage;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
@@ -30,19 +31,19 @@ class ChatRepositoryTest {
     @BeforeEach
     void init() {
         testhost = userRepository.save(User.builder()
-                .username("fisherman")
                 .firstName("Hanz")
                 .lastName("Fisher")
                 .birthDate(LocalDate.of(1983, 2, 23))
                 .email("h.fisher@gmail.com")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testGuest = userRepository.save(User.builder()
-                .username("metzroland")
                 .firstName("Roland")
                 .lastName("Metz")
                 .birthDate(LocalDate.of(2003, 5, 12))
                 .email("a@gmail.com")
+                .authProvider(AuthProvider.LOCAL)
                 .build());
 
         testChat = Chat.builder()
