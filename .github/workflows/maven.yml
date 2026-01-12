@@ -99,4 +99,5 @@ jobs:
 
       - name: Verify / Integration tests
         run: mvn -B verify
-        working-directory: backend
+        woconsole.log(document.body);
+rking-directory: backend
