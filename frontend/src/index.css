@@ -15,10 +15,10 @@ body{
     position: relative;
 }
 
-.container {
-  width: 40%;
-  margin: 5em auto;
+.main-container {
+  width: 100%;
   min-height: 100vh;
+  padding: 3rem;
 
   display: flex;
   flex-direction: column;
@@ -30,8 +30,10 @@ body{
 }
 
 .content-container{
+  margin: 2rem;
   width: 100%;
   background-color: #3C3B3A;
+  width: 30%;
 
   display: flex;
   flex-direction: column;
@@ -80,7 +82,11 @@ body{
     color: rgb(11, 225, 11);
 }
 
-.input-container .input-element {
+.input-container {
+  width: 100%;
+}
+
+.input-element {
   width: 100%;
   padding: 0.75em 1.125em;
 
@@ -102,6 +108,11 @@ body{
     inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
+.input-element:focus {
+  outline: none;
+  border: 1px solid #FAF4E6;
+}
+
 .select-input-element option{
     color: #000;
 }
@@ -118,7 +129,8 @@ body{
 
 .btn{
     background-color: #212121;
-    color: #fff;
+    border: 1px transparent;
+    color: #afafaf;
     padding: 1em;
     min-width: 15rem;
     max-width: 15rem;
@@ -136,8 +148,17 @@ body{
     transition: all .4s;
 }
 
+.btn-highlight{
+  color: #eaeaea;
+  box-shadow: inset -3px 0px 2px 0px rgba(234,234,234,0.5), inset 3px 0px 2px 0px rgba(234,234,234,0.5), inset 0px -3px 2px 0px rgba(234,234,234,0.5), inset 0px 3px 2px 0px rgba(234,234,234,0.5);
+}
+
+.btn-highlight:hover{
+  box-shadow: inset -6px 0px 4px 0px rgba(234,234,234,0.5), inset 6px 0px 4px 0px rgba(234,234,234,0.5), inset 0px -6px 4px 0px rgba(234,234,234,0.5), inset 0px 6px 4px 0px rgba(234,234,234,0.5);
+}
+
 .btn:hover{
-    color: #8D8D8D;
+    color: #eaeaea;
     cursor: pointer;
 }
 
@@ -145,8 +166,4 @@ body{
   color: #8D8D8D;
   background-color: #4e4e4e;
   cursor: no-drop;
-}
-
-.border-btn{
-  border: 1px solid #FAF4E6;
 }

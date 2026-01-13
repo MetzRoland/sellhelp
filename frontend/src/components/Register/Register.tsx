@@ -131,7 +131,7 @@ function Register() {
   return (
     <>
       <Header />
-      <div className="container register-container">
+      <div className="main-container register-container">
         <h1 className="container-title">Regisztráció</h1>
 
         <form
@@ -147,7 +147,7 @@ function Register() {
             options={{ cityName: cityOptions }}
           />
 
-          <button className="btn border-btn" type="submit" disabled={loading}>
+          <button className="btn border-btn btn-highlight" type="submit" disabled={loading}>
             Regisztráció
           </button>
 

@@ -86,7 +86,7 @@ function Login() {
     <>
       <Header />
 
-      <div className="container">
+      <div className="main-container">
         <h1 className="container-title">Bejelentkezés</h1>
 
         <form className="content-container login-form" onSubmit={handleSubmit}>
@@ -106,7 +106,7 @@ function Login() {
             />
           )}
 
-          <button className="btn border-btn" type="submit">
+          <button className="btn border-btn btn-highlight" type="submit">
             {tempToken ? "Ellenőrzés" : "Bejelentkezés"}
           </button>
 
@@ -115,7 +115,7 @@ function Login() {
             type="button"
             onClick={handleGoogleLogin}
           >
-            Folytatás Google‑val
+            Folytatás Google fiókkal
           </button>
 
           {authError && (
