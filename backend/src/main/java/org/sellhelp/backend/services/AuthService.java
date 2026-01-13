@@ -1,8 +1,10 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.requests.GoogleRegisterDTO;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
@@ -17,6 +19,7 @@ import org.sellhelp.backend.exceptions.*;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,13 +49,14 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final TempTokenService tempTokenService;
     private final EmailService emailService;
+    private final CurrentUser currentUser;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       EmailService emailService, TempTokenService tempTokenService){
+                       EmailService emailService, TempTokenService tempTokenService, CurrentUser currentUser){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -63,6 +67,7 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
         this.tempTokenService = tempTokenService;
         this.emailService = emailService;
+        this.currentUser = currentUser;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
@@ -175,6 +180,8 @@ public class AuthService {
         String lastName  = oAuth2User.getAttribute("family_name");
         String picturePath  = oAuth2User.getAttribute("picture");
 
+        TokenDTO tokenDTO = new TokenDTO();
+
         log.info("Email: {}", email);
         log.info("First name: {}", firstName);
         log.info("Last name: {}", lastName);
@@ -197,6 +204,8 @@ public class AuthService {
             newUser.setCity(city);
             newUser.setProfilePicturePath(picturePath);
 
+            tokenDTO.setTempToken(tempTokenService.create(email));
+
             emailService.registerUser(email, firstName, lastName);
 
             return userRepository.save(newUser);
@@ -205,11 +214,56 @@ public class AuthService {
         user.setProfilePicturePath(picturePath);
         userRepository.save(user);
 
+        if(tokenDTO.getTempToken() == null){
+            UserDetails userDetails =
+                    org.springframework.security.core.userdetails.User.builder()
+                            .username(user.getEmail())
+                            .password("")
+                            .authorities(user.getRole().getRoleName())
+                            .build();
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            String accessToken = jwtUtil.generateAccessToken(email);
+            String refreshToken = jwtUtil.generateRefreshToken(email);
+
+            log.info("accessToken: {}", accessToken);
+            log.info("refreshToken: {}", refreshToken);
+
+            tokenDTO.setAccessToken(accessToken);
+            tokenDTO.setRefreshToken(refreshToken);
+
+            emailService.loginUser(email);
+        }
+
+        return tokenDTO;
+    }
+
+    public TokenDTO finishGoogleRegistration(GoogleRegisterDTO googleRegisterDTO, String tempToken) {
+        String cityName = googleRegisterDTO.getCityName();
+        LocalDate birthDate = googleRegisterDTO.getBirthDate();
+
+        City city = cityRepository.findByCityName(cityName)
+                .orElseThrow(() -> new EntityNotFoundException("A város nem található!"));
+
+        String email = tempTokenService.getEmailByTempToken(tempToken);
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        user.setCity(city);
+        user.setBirthDate(birthDate);
+
+        User newUser = userRepository.save(user);
+
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User.builder()
-                        .username(user.getEmail())
+                        .username(newUser.getEmail())
                         .password("")
-                        .authorities(user.getRole().getRoleName())
+                        .authorities(newUser.getRole().getRoleName())
                         .build();
 
         UsernamePasswordAuthenticationToken auth =
@@ -219,12 +273,8 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(email);
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
-        log.info("accessToken: {}", accessToken);
-        log.info("refreshToken: {}", refreshToken);
-
         emailService.loginUser(email);
 
         return new TokenDTO(accessToken, refreshToken, null);
-
     }
 }

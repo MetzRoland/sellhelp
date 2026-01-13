@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router";
+import { useState } from "react";
+import { Link } from "react-router";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
+import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { LoginForm } from "./LoginTypes";
 import InputForm from "../Reusables/InputForm/InputForm";
 
@@ -17,23 +18,16 @@ function Login() {
     setValidationErrors,
     authError,
     user,
+    handleGoogleLogin,
   } = useAuth();
+
+  const { setIsLoading, setLoadingMessage } = useLoading();
 
   const [formData, setFormData] = useState<LoginForm>({
     email: "",
     password: "",
     totpCode: "",
   });
-
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (user) {
-      setTimeout(() => {
-        navigate("/home");
-      }, 2000);
-    }
-  }, [user, navigate]);
 
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -56,6 +50,9 @@ function Login() {
     e.preventDefault();
 
     try {
+      setIsLoading(true);
+      setLoadingMessage("Bejelentkezés...");
+
       await loginLocal({
         email: formData.email,
         password: formData.password,
@@ -66,11 +63,9 @@ function Login() {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setIsLoading(false);
     }
-  };
-
-  const handleGoogleLogin = () => {
-    window.location.href = "http://localhost:8080/auth/login/google";
   };
 
   const loginInputs = [
@@ -87,52 +82,90 @@ function Login() {
       <Header />
 
       <div className="main-container">
-        <h1 className="container-title">Bejelentkezés</h1>
+        {!tempToken ? (
+          <>
+            <h1 className="container-title">Bejelentkezés</h1>
 
-        <form className="content-container login-form" onSubmit={handleSubmit}>
-          {!tempToken ? (
-            <InputForm<LoginForm>
-              inputs={loginInputs}
-              formData={formData}
-              handleFunction={handleInputChange}
-              errorMessage={validationErrors}
-            />
-          ) : (
-            <InputForm<LoginForm>
-              inputs={totpInputs}
-              formData={formData}
-              handleFunction={handleInputChange}
-              errorMessage={validationErrors}
-            />
-          )}
+            <form
+              className="content-container login-form"
+              onSubmit={handleSubmit}
+            >
+              <InputForm<LoginForm>
+                inputs={loginInputs}
+                formData={formData}
+                handleFunction={handleInputChange}
+                errorMessage={validationErrors}
+              />
 
-          <button className="btn border-btn btn-highlight" type="submit">
-            {tempToken ? "Ellenőrzés" : "Bejelentkezés"}
-          </button>
+              <button className="btn btn-highlight" type="submit">
+                Bejelentkezés
+              </button>
 
-          <button
-            className="btn border-btn"
-            type="button"
-            onClick={handleGoogleLogin}
-          >
-            Folytatás Google fiókkal
-          </button>
+              <button
+                className="btn"
+                type="button"
+                onClick={() => {
+                  setIsLoading(true);
+                  setLoadingMessage("Bejelentkezés google fiókkal...");
+                  handleGoogleLogin();
+                }}
+              >
+                Folytatás Google‑val
+              </button>
 
-          {authError && (
-            <p className="message error error-process-status">{authError}</p>
-          )}
+              {authError && (
+                <p className="message error error-process-status">
+                  {authError}
+                </p>
+              )}
 
-          {user && (
-            <p className="message success-message">Sikeres Bejelentkezés!</p>
-          )}
-        </form>
+              {user && (
+                <p className="message success-message">
+                  Sikeres Bejelentkezés!
+                </p>
+              )}
+            </form>
 
-        <div className="content-container back-to-register-container">
-          <h2>Nincs még fiókod?</h2>
-          <Link to="/register" className="btn">
-            Regisztráció
-          </Link>
-        </div>
+            <div className="content-container back-to-register-container">
+              <h2>Nincs még fiókod?</h2>
+              <Link to="/register" className="btn">
+                Regisztráció
+              </Link>
+            </div>
+          </>
+        ) : (
+          <>
+            <h1 className="container-title">Hitelesítő kód ellenörzés</h1>
+
+            <form
+              className="content-container login-form"
+              onSubmit={handleSubmit}
+            >
+              <InputForm<LoginForm>
+                inputs={totpInputs}
+                formData={formData}
+                handleFunction={handleInputChange}
+                errorMessage={validationErrors}
+              />
+
+              <button className="btn border-btn" type="submit">
+                {tempToken ? "Ellenőrzés" : "Bejelentkezés"}
+              </button>
+
+              {authError && (
+                <p className="message error error-process-status">
+                  {authError}
+                </p>
+              )}
+
+              {user && (
+                <p className="message success-message">
+                  Sikeres Bejelentkezés!
+                </p>
+              )}
+            </form>
+          </>
+        )}
       </div>
 
       <Footer />

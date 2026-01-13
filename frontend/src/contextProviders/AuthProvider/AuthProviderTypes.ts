@@ -12,7 +12,17 @@ export interface User {
   firstName: string;
   lastName: string;
   mfa: boolean;
+  birthDate: Date;
+  banned: boolean;
+  cityName: string;
+  role: string;
+  createdAt: Date;
   accessToken: string;
+}
+
+export interface GoogleRegister{
+  cityName: string;
+  birthDate: string;
 }
 
 export interface LoginCredentials {
@@ -31,6 +41,7 @@ export interface AuthContextType {
   authLoading: boolean;
   loginLocal: (credentials: LoginCredentials) => Promise<void>;
   verifyTotp: (credentials: TotpCredentials) => Promise<void>;
+  finishGoogleRegistration: (registerData: GoogleRegister) => Promise<void>;
   logout: () => Promise<void>;
   authError: string | null;
   setAuthError: (error: string | null) => void;
@@ -38,6 +49,9 @@ export interface AuthContextType {
   setTempToken: (tempToken: string | null) => void;
   validationErrors: LoginForm;
   setValidationErrors: (validationErrors: LoginForm) => void;
+  googleRegisterErrors: GoogleRegister;
+  setGoogleRegisterErrors: (validationErrors: GoogleRegister) => void;
   accessToken: string | null;
   setAccessToken: (accessToken: string | null) => void;
+  handleGoogleLogin: () => void
 }

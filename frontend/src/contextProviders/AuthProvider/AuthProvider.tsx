@@ -6,9 +6,10 @@ import {
 } from "react";
 import type { AxiosError } from "axios";
 import { privateAxios, refreshAxios } from "../../config/axiosConfig";
-import type { LoginForm } from "../../components/Login/LoginTypes";
-import type {InternalAxiosRequestConfigWithRetry, User, LoginCredentials, TotpCredentials, AuthContextType} from "./AuthProviderTypes";
+import type { GoogleRegisterForm, LoginForm } from "../../components/Login/LoginTypes";
+import type {InternalAxiosRequestConfigWithRetry, User, LoginCredentials, TotpCredentials, AuthContextType, GoogleRegister} from "./AuthProviderTypes";
 import { AuthContext } from "./AuthContext";
+import { useLocation } from "react-router";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -19,8 +20,13 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: "",
     totpCode: "",
   });
+  const [googleRegisterErrors, setGoogleRegisterErrors] = useState<GoogleRegisterForm>({
+    cityName: "",
+    birthDate: "",
+  });
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const location = useLocation();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -152,6 +158,36 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const handleGoogleLogin = async () => {
+    window.location.href = "http://localhost:8080/auth/login/google";
+  };
+
+  const finishGoogleRegistration = async (registerData: GoogleRegister) => {
+    try{
+      await privateAxios.get("/auth/loginSuccess");
+
+      const queryParams = new URLSearchParams(location.search);
+      const tempToken = queryParams.get("tempToken");
+      setTempToken(tempToken);
+
+      await privateAxios.post(`/auth/google/register?tempToken=${tempToken}`, registerData);
+
+      const userInfo = await privateAxios.get<User>("/user/info");
+      setUser(userInfo.data);
+      setAccessToken(userInfo.data.accessToken);
+
+      setAuthError(null);
+      setGoogleRegisterErrors({ cityName: "", birthDate: "" });
+    }
+    catch(error){
+      const err = error as AxiosError<{ message?: string; errors?: GoogleRegister }>;
+      setAuthError(err.response?.data?.message ?? "Sikertelen google fiók regisztráció!");
+      setGoogleRegisterErrors(
+        err.response?.data?.errors ?? {cityName: "", birthDate: ""}
+      );
+    }
+  };
+
   const logout = async () => {
     try {
       await privateAxios.get("/user/logout");
@@ -181,6 +217,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setValidationErrors,
     accessToken,
     setAccessToken,
+    finishGoogleRegistration,
+    googleRegisterErrors,
+    setGoogleRegisterErrors,
+    handleGoogleLogin
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -2,10 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
-import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.enums.UserRole;
@@ -106,6 +103,25 @@ public class AuthController {
     @GetMapping("/loginSuccess")
     public ResponseEntity<Void> handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
         TokenDTO tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
+
+        String redirectUrl = "";
+
+        if(tokenDTO.getTempToken() == null){
+            cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
+            redirectUrl = "http://localhost:5173/home";
+        }
+        else{
+            redirectUrl = "http://localhost:5173/finishGoogleRegistration?tempToken=" + tokenDTO.getTempToken();
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", redirectUrl)
+                .build();
+    }
+
+    @PostMapping("/google/register")
+    public ResponseEntity<Void> finishGoogleRegistration(@Valid @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
+        TokenDTO tokenDTO = authService.finishGoogleRegistration(googleRegisterDTO, tempToken);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 

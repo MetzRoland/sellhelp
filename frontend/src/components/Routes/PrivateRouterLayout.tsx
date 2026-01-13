@@ -1,11 +1,12 @@
 import { Outlet, Navigate } from "react-router";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
+import ProccessLoad from "../ProcessLoad/ProccessLoad";
 
 const PrivateRouterLayout = () => {
   const { isAuthenticated, authLoading } = useAuth();
 
   if (authLoading) {
-    return <div>Loading...</div>;
+    return <ProccessLoad />;
   }
 
   if (!isAuthenticated) {

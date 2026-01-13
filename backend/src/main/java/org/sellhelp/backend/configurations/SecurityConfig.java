@@ -106,7 +106,8 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain oauth2FilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/auth/login/google", "/auth/loginSuccess", "/oauth2/**", "/login/oauth2/**")
+                .securityMatcher("/auth/login/google", "/auth/loginSuccess", "/oauth2/**", "/login/oauth2/**",
+                        "/auth/google/register")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

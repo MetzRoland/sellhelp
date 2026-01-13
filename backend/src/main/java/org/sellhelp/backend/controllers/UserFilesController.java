@@ -78,7 +78,7 @@ public class UserFilesController {
     }
 
     @PostMapping("/pp")
-    public ResponseEntity<String> setProfilePicture(MultipartFile file) {
+    public ResponseEntity<String> setProfilePicture(@RequestParam("file") MultipartFile file) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
 

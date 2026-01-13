@@ -1,3 +1,4 @@
+import type { GoogleRegister } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import type { FormFields } from "../genericTypes/FormFields";
 
 export interface LoginFields {
@@ -13,3 +14,5 @@ export interface LoginValidationErrors {
 }
 
 export type LoginForm = FormFields<LoginFields>;
+
+export type GoogleRegisterForm = FormFields<GoogleRegister>;

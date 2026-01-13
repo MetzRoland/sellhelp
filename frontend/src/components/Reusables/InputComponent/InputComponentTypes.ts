@@ -4,5 +4,5 @@ export interface InputComponentType{
     inputName: string,
     inputValue?: string,
     inputPlaceholder: string,
-    handleFunction: (e: React.ChangeEvent<HTMLInputElement>) => void
+    handleFunction: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => void
 }

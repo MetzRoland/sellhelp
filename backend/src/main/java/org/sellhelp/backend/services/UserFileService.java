@@ -4,6 +4,7 @@ import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserFileRepository;
@@ -124,6 +125,8 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
+        if(user.getAuthProvider().equals(AuthProvider.GOOGLE)) return user.getProfilePicturePath();
 
         if (user.getProfilePicturePath() == null)
         { throw new RuntimeException("Nincs profilkép!");}
