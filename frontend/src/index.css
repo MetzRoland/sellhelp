@@ -115,6 +115,7 @@ body{
 
 .select-input-element option{
     color: #000;
+    background-color: #fff;
 }
 
 .input-container .input-element::placeholder {

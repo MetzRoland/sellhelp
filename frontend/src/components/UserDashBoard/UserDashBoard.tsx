@@ -14,7 +14,7 @@ function UserDashboard({ user }: UserDashboardProps) {
   return (
     <>
       <Header />
-      <div className="container">
+      <div className="main-container">
         <h1>Üdv, {user.lastName} {user.firstName}</h1>
 
         <p>Email: {user.email}</p>
