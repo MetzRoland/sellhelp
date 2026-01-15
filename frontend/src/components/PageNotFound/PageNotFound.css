@@ -1,0 +1,26 @@
+.page-not-found{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.page-not-found-container{
+    width: 50%;
+    height: 40vh;
+
+    font-size: 2rem;
+    font-weight: bold;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.page-not-found-status{
+    font-size: 3rem;
+    font-style: italic;
+}
+
+.page-not-found-title{
+    font-size: 2rem;
+}

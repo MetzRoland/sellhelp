@@ -39,7 +39,7 @@ export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   authLoading: boolean;
-  loginLocal: (credentials: LoginCredentials) => Promise<void>;
+  loginLocal: (endpoint: string, credentials: LoginCredentials) => Promise<void>;
   verifyTotp: (credentials: TotpCredentials) => Promise<void>;
   finishGoogleRegistration: (registerData: GoogleRegister) => Promise<void>;
   logout: () => Promise<void>;

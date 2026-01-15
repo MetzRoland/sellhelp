@@ -16,3 +16,7 @@ export interface LoginValidationErrors {
 export type LoginForm = FormFields<LoginFields>;
 
 export type GoogleRegisterForm = FormFields<GoogleRegister>;
+
+export interface IsAdminLogin{
+  isAdminLogin?: boolean;
+}

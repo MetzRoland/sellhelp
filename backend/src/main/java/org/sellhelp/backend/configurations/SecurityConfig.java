@@ -68,8 +68,13 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login", "/auth/register"
-                , "/auth/enable2fa", "/auth/disable2fa", "/auth/verify-totp", "/auth/login/refresh")
+                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login",
+                        "/auth/login/superuser",
+                        "/auth/register",
+                        "/auth/enable2fa",
+                        "/auth/disable2fa",
+                        "/auth/verify-totp",
+                        "/auth/login/refresh")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -77,7 +82,7 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
+                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
                         .requestMatchers("/auth/enable2fa", "/auth/disable2fa")
                         .authenticated()
                         .requestMatchers(

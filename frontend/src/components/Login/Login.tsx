@@ -6,10 +6,11 @@ import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { LoginForm } from "./LoginTypes";
 import InputForm from "../Reusables/InputForm/InputForm";
+import type { IsAdminLogin } from "./LoginTypes";
 
 import "./Login.css";
 
-function Login() {
+function Login({ isAdminLogin }: IsAdminLogin) {
   const {
     loginLocal,
     tempToken,
@@ -17,6 +18,7 @@ function Login() {
     validationErrors,
     setValidationErrors,
     authError,
+    setAuthError,
     user,
     handleGoogleLogin,
   } = useAuth();
@@ -44,6 +46,8 @@ function Login() {
       password: "",
       totpCode: "",
     });
+
+    setAuthError("");
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -53,7 +57,11 @@ function Login() {
       setIsLoading(true);
       setLoadingMessage("Bejelentkezés...");
 
-      await loginLocal({
+      const loginEndpoint = !isAdminLogin
+        ? "/auth/login"
+        : "/auth/login/superuser";
+
+      await loginLocal(loginEndpoint, {
         email: formData.email,
         password: formData.password,
       });
@@ -84,7 +92,9 @@ function Login() {
       <div className="main-container">
         {!tempToken ? (
           <>
-            <h1 className="container-title">Bejelentkezés</h1>
+            <h1 className="container-title">
+              {!isAdminLogin ? "Bejelentkezés" : "Admin Belépés"}
+            </h1>
 
             <form
               className="content-container login-form"
@@ -101,17 +111,31 @@ function Login() {
                 Bejelentkezés
               </button>
 
-              <button
-                className="btn"
-                type="button"
-                onClick={() => {
-                  setIsLoading(true);
-                  setLoadingMessage("Bejelentkezés google fiókkal...");
-                  handleGoogleLogin();
-                }}
-              >
-                Folytatás Google‑val
-              </button>
+              {!isAdminLogin && (
+                <>
+                  <button
+                    className="btn"
+                    type="button"
+                    onClick={() => {
+                      setIsLoading(true);
+                      setLoadingMessage("Bejelentkezés google fiókkal...");
+                      handleGoogleLogin();
+                    }}
+                  >
+                    Folytatás Google‑val
+                  </button>
+
+                  <Link to="/adminLogin" className="btn">
+                    Admin belépés
+                  </Link>
+                </>
+              )}
+
+              {isAdminLogin && (
+                <Link to="/login" className="btn">
+                    Felhasználói oldal
+                </Link>
+              )}
 
               {authError && (
                 <p className="message error error-process-status">
@@ -126,12 +150,14 @@ function Login() {
               )}
             </form>
 
-            <div className="content-container back-to-register-container">
-              <h2>Nincs még fiókod?</h2>
-              <Link to="/register" className="btn">
-                Regisztráció
-              </Link>
-            </div>
+            {!isAdminLogin && (
+              <div className="content-container back-to-register-container">
+                <h2>Nincs még fiókod?</h2>
+                <Link to="/register" className="btn">
+                  Regisztráció
+                </Link>
+              </div>
+            )}
           </>
         ) : (
           <>

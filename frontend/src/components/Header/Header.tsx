@@ -17,11 +17,21 @@ function Header() {
 
   useEffect(() => {
     if (!isAuthenticated) return;
+    if (profilePicture) return;
+
+    const cachedPp = localStorage.getItem("profilePicture");
+
+    if (cachedPp) {
+      setProfilePicture(cachedPp);
+      setPpLoading(false);
+      return;
+    }
 
     const fetchProfilePicture = async () => {
       try {
         const response = await privateAxios.get("/user/files/pp");
         setProfilePicture(response.data);
+        localStorage.setItem("profilePicture", response.data);
       } catch {
         setProfilePicture(null);
       } finally {
@@ -30,7 +40,7 @@ function Header() {
     };
 
     fetchProfilePicture();
-  }, [isAuthenticated]);
+  }, [isAuthenticated, profilePicture]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {

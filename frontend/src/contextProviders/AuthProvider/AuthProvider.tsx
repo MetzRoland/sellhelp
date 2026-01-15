@@ -114,9 +114,9 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const loginLocal = async (credentials: LoginCredentials) => {
+  const loginLocal = async (endpoint: string, credentials: LoginCredentials) => {
     try {
-      const res = await privateAxios.post("/auth/login", credentials);
+      const res = await privateAxios.post(endpoint, credentials);
 
       if (res.data.tempToken) setTempToken(res.data.tempToken);
 
@@ -199,6 +199,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setAuthError(null);
       setAccessToken(null);
       setValidationErrors({ email: "", password: "", totpCode: "" });
+
+      localStorage.removeItem("profilePicture");
     }
   };
 
