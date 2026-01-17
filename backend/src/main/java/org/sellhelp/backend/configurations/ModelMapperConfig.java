@@ -18,12 +18,12 @@ public class ModelMapperConfig {
 
         mapper.typeMap(User.class, UserDTO.class)
                 .addMapping(
-                        src -> src.getUserSecret().isMfa(),
-                        UserDTO::setMfa
+                        User::getId,
+                        UserDTO::setId
                 )
                 .addMapping(
-                        src -> src.getUserSecret().getTotpSecret(),
-                        UserDTO::setTotpSecret
+                        src -> src.getUserSecret().isMfa(),
+                        UserDTO::setMfa
                 )
                 .addMapping(
                         src -> src.getCity().getCityName(),
@@ -36,6 +36,10 @@ public class ModelMapperConfig {
                 .addMapping(
                         src -> src.getRole().getRoleName(),
                         UserDTO::setRole
+                )
+                .addMapping(
+                        User::getProfilePicturePath,
+                        UserDTO::setProfilePicture
                 );
 
         return mapper;

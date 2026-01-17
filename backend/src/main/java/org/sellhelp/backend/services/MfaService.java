@@ -37,7 +37,7 @@ public class MfaService {
         this.emailService = emailService;
     }
 
-    public TotpSecretDTO enableMfa(){
+    public TotpSecretDTO generateMfa(){
         String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
@@ -49,9 +49,6 @@ public class MfaService {
         }
 
         String totpSecret = totpService.generateSecret();
-
-        user.getUserSecret().setMfa(true);
-        user.getUserSecret().setTotpSecret(totpSecret);
 
         String issuer = "SellHelp";
         String otpauthUrl = String.format(
@@ -69,13 +66,22 @@ public class MfaService {
             throw new RuntimeException("QR kód generálása sikertelen", e);
         }
 
-        userRepository.save(user);
+        return new TotpSecretDTO(true, totpSecret, qrBase64);
+    }
 
-        TotpSecretDTO totpSecretDTO = new TotpSecretDTO(true, totpSecret, qrBase64);
+    public void enableMfa(TotpSecretDTO totpSecretDTO){
+        String email = currentUser.getCurrentlyLoggedUserEmail();
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        user.getUserSecret().setMfa(true);
+        user.getUserSecret().setTotpSecret(totpSecretDTO.getTotpSecret());
 
         emailService.mfaEnabled(email);
 
-        return totpSecretDTO;
+        userRepository.save(user);
     }
 
     public TotpSecretDTO disableMfa(){

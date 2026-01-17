@@ -142,7 +142,7 @@ public class S3Service {
             return s3Presigner.presignGetObject(presignRequest).url().toString();
 
         } catch (NoSuchKeyException e) {
-            throw new RuntimeException("Key not found: " + objectKey, e);
+            return null;
         } catch (S3Exception e) {
             throw new RuntimeException("Error downloading file: " + objectKey, e);
         }

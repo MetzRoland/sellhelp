@@ -10,6 +10,7 @@ import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.User;
+import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.InvalidTokenException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.CityRepository;
@@ -20,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -32,11 +36,13 @@ public class UserService {
     private final JWTUtil jwtUtil;
     private final CurrentUser currentUser;
     private final EmailService emailService;
+    private final S3Service s3Service;
 
     @Autowired
     public UserService(UserRepository userRepository, ModelMapper modelMapper,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
-                       JWTUtil jwtUtil, CurrentUser currentUser, EmailService emailService)
+                       JWTUtil jwtUtil, CurrentUser currentUser, EmailService emailService,
+                       S3Service s3Service)
     {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
@@ -45,6 +51,7 @@ public class UserService {
         this.jwtUtil = jwtUtil;
         this.currentUser = currentUser;
         this.emailService = emailService;
+        this.s3Service = s3Service;
     }
 
     public void updateUserDetails(UserDetailsUpdateDTO userDetailsUpdateDTO)
@@ -129,6 +136,41 @@ public class UserService {
                 () -> new UserNotFoundException("A felhasználó nem található!")), UserDTO.class);
 
         userDTO.setAccessToken(accessToken);
+
         return userDTO;
+    }
+
+    public List<UserDTO> getAllUserAccounts(){
+        return userRepository.findAll()
+                .stream()
+                .map(user -> {
+                    UserDTO userDTO = modelMapper.map(user, UserDTO.class);
+                    userDTO.setProfilePicture(getUserProfilePicture(user.getId()));
+
+                    return userDTO;
+                })
+                .toList();
+    }
+
+    public UserDTO getUserAccount(Integer userId) {
+        return getAllUserAccounts().stream()
+                .filter(userDTO -> Objects.equals(userDTO.getId(), userId)).findFirst()
+                .orElseThrow(() -> new UserNotFoundException("A felhasználó nem található!"));
+    }
+
+    public String getUserProfilePicture(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("A felhasználó nem található!"));
+
+        if (user.getProfilePicturePath() == null) {
+            return null;
+        }
+
+        if (user.getAuthProvider() == AuthProvider.GOOGLE
+                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
+            return user.getProfilePicturePath();
+        }
+
+        return s3Service.getDownloadURL(user.getProfilePicturePath());
     }
 }

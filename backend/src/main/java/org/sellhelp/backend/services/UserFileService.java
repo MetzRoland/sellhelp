@@ -126,7 +126,9 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
-        if(user.getAuthProvider().equals(AuthProvider.GOOGLE)) return user.getProfilePicturePath();
+        if(user.getAuthProvider().equals(AuthProvider.GOOGLE) && s3Service.getDownloadURL(user.getProfilePicturePath()) == null){
+            return user.getProfilePicturePath();
+        }
 
         if (user.getProfilePicturePath() == null)
         { throw new RuntimeException("Nincs profilkép!");}

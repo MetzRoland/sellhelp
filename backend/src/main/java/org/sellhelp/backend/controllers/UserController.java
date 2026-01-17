@@ -14,7 +14,10 @@ import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -81,5 +84,15 @@ public class UserController {
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 
         return ResponseEntity.ok("Sikeres frissítés!");
+    }
+
+    @GetMapping("/users")
+    public List<UserDTO> showAllUserAccounts(){
+        return userService.getAllUserAccounts();
+    }
+
+    @GetMapping("/users/{userId}")
+    public UserDTO showUserAccount(@PathVariable Integer userId){
+        return userService.getUserAccount(userId);
     }
 }

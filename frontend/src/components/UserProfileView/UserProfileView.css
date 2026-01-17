@@ -1,0 +1,33 @@
+.user-profile-container{
+    transition: all .4s;
+}
+
+.user-profile-container:hover{
+    transform: scale(1.05);
+    box-shadow: 1px 1px 10px #fff;
+    cursor: pointer;
+}
+
+.user-info-container{
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    gap: 10px;
+}
+
+.user-infos{
+    margin: 1em;
+    text-align: center;
+}
+
+.user-profile-name{
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.user-profile-email{
+    font-size: 1rem;
+    font-style: italic;
+}

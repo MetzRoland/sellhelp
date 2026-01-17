@@ -1,5 +1,6 @@
 package org.sellhelp.backend.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -58,7 +59,7 @@ public class User {
     @CreationTimestamp
     private Instant createdAt;
 
-    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST,  CascadeType.MERGE, CascadeType.REMOVE})
+    @OneToOne(mappedBy = "user", cascade = {CascadeType.PERSIST,  CascadeType.MERGE, CascadeType.REMOVE}, fetch = FetchType.LAZY)
     private UserSecret userSecret;
 
     @OneToMany(mappedBy = "reviewedUser")

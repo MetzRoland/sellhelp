@@ -70,11 +70,18 @@ public class AuthController {
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @GetMapping("/enable2fa")
-    public ResponseEntity<TotpSecretDTO> enableMfa(){
-        TotpSecretDTO totpSecretDTO = mfaService.enableMfa();
+    @GetMapping("/setup2fa")
+    public ResponseEntity<TotpSecretDTO> setupMfa(){
+        TotpSecretDTO totpSecretDTO = mfaService.generateMfa();
 
         return ResponseEntity.ok(totpSecretDTO);
+    }
+
+    @PostMapping("/enable2fa")
+    public ResponseEntity<String> enableMfa(@RequestBody TotpSecretDTO totpSecretDTO){
+        mfaService.enableMfa(totpSecretDTO);
+
+        return ResponseEntity.ok("Kétfaktoros hitelesítés bekapcsolva!");
     }
 
     @GetMapping("/disable2fa")
