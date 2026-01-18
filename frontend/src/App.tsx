@@ -11,6 +11,7 @@ import PageNotFound from "./components/PageNotFound/PageNotFound";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import SuperUserRouterLayout from "./components/Routes/SuperUserRouterLayout";
 import UserBanning from "./components/UserBanning/UserBanning";
+import ProfileBanned from "./components/ProfileBanned/ProfileBanned";
 
 import "./App.css";
 
@@ -32,6 +33,7 @@ function App() {
               path="/finishGoogleRegistration"
               element={<FinishGoogleRegister />}
             />
+            <Route path="/profileInactive" element={<ProfileBanned />} />
           </Route>
 
           <Route element={<AuthenticatedRouterLayout />}>

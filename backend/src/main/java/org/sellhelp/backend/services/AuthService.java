@@ -107,7 +107,7 @@ public class AuthService {
             authenticationManager.authenticate(authInputToken);
         }
         catch (DisabledException e) {
-            throw new UserBannedException("A felhasználó levan tiltva van!");
+            throw new UserBannedException("A felhasználó le van tiltva!");
         }
         catch(AuthenticationException authExc){
             throw new LoginCredentialsException("Helytelen email vagy jelszó!");

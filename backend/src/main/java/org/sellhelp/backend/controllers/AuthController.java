@@ -117,7 +117,7 @@ public class AuthController {
         try{
             tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
         } catch (Exception e) {
-            redirectUrl = "http://localhost:5173/login";
+            response.sendRedirect("http://localhost:5173/profileInactive");
         }
 
         if(tokenDTO.getTempToken() == null){

@@ -9,6 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
+import org.sellhelp.backend.dtos.requests.FirstTotpValidationDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserSecret;
 import org.sellhelp.backend.exceptions.InvalidTokenException;
@@ -62,7 +63,7 @@ class MfaServiceTest {
         when(totpService.generateSecret()).thenReturn("SECRET");
         when(qrCodeService.generateQrBase64(anyString())).thenReturn("QR_CODE");
 
-        TotpSecretDTO dto = mfaService.enableMfa();
+        TotpSecretDTO dto = mfaService.enableMfa(new FirstTotpValidationDTO());
 
         assertTrue(dto.isMfa());
         assertEquals("SECRET", dto.getTotpSecret());

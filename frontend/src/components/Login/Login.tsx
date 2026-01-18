@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Link } from "react-router";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
@@ -31,8 +31,10 @@ function Login({ isAdminLogin }: IsAdminLogin) {
     totpCode: "",
   });
 
+  const navigate = useNavigate();
+
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
     const { name, value } = e.target;
 
@@ -75,6 +77,12 @@ function Login({ isAdminLogin }: IsAdminLogin) {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (authError === "A felhasználó le van tiltva!") {
+      navigate("/profileInactive");
+    }
+  }, [authError, navigate]);
 
   const loginInputs = [
     { name: "email", type: "text", placeholder: "Email" },
@@ -133,7 +141,7 @@ function Login({ isAdminLogin }: IsAdminLogin) {
 
               {isAdminLogin && (
                 <Link to="/login" className="btn">
-                    Felhasználói oldal
+                  Felhasználói oldal
                 </Link>
               )}
 
