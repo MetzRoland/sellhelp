@@ -1,6 +1,8 @@
 package org.sellhelp.backend.services;
 
+import org.sellhelp.backend.dtos.requests.FirstTotpValidationDTO;
 import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.entities.User;
@@ -37,7 +39,7 @@ public class MfaService {
         this.emailService = emailService;
     }
 
-    public TotpSecretDTO generateMfa(){
+    public GenerateTotpDTO generateMfa(){
         String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
@@ -60,24 +62,36 @@ public class MfaService {
         );
 
         String qrBase64;
+        String tempToken;
         try {
             qrBase64 = qrCodeService.generateQrBase64(otpauthUrl);
+            tempToken = tempTokenService.create(email);
         } catch (Exception e) {
             throw new RuntimeException("QR kód generálása sikertelen", e);
         }
 
-        return new TotpSecretDTO(true, totpSecret, qrBase64);
+        return new GenerateTotpDTO(totpSecret, qrBase64, tempToken);
     }
 
-    public void enableMfa(TotpSecretDTO totpSecretDTO){
+    public void enableMfa(FirstTotpValidationDTO firstTotpValidationDTO){
         String email = currentUser.getCurrentlyLoggedUserEmail();
 
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
+        if (!tempTokenService.validate(firstTotpValidationDTO.getTempToken())) {
+            throw new InvalidTokenException("Helytelen temp token!");
+        }
+
+        if(!totpService.verify(firstTotpValidationDTO.getTotpSecret(), firstTotpValidationDTO.getTotpCode())){
+            throw new InvalidTotpException("Helytelen hitelesítő kód!");
+        }
+
         user.getUserSecret().setMfa(true);
-        user.getUserSecret().setTotpSecret(totpSecretDTO.getTotpSecret());
+        user.getUserSecret().setTotpSecret(firstTotpValidationDTO.getTotpSecret());
+
+        tempTokenService.removeToken(firstTotpValidationDTO.getTempToken());
 
         emailService.mfaEnabled(email);
 

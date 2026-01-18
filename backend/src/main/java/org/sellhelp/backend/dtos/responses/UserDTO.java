@@ -22,7 +22,6 @@ public class UserDTO {
     private String email;
     private LocalDate birthDate;
     private String cityName;
-    private String profilePicture;
     private boolean isMfa;
     private boolean banned;
     private String role;

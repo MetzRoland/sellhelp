@@ -3,6 +3,7 @@ package org.sellhelp.backend.controllers;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.*;
+import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.enums.UserRole;
@@ -71,15 +72,15 @@ public class AuthController {
     }
 
     @GetMapping("/setup2fa")
-    public ResponseEntity<TotpSecretDTO> setupMfa(){
-        TotpSecretDTO totpSecretDTO = mfaService.generateMfa();
+    public ResponseEntity<GenerateTotpDTO> setupMfa(){
+        GenerateTotpDTO generateTotpDTO = mfaService.generateMfa();
 
-        return ResponseEntity.ok(totpSecretDTO);
+        return ResponseEntity.ok(generateTotpDTO);
     }
 
     @PostMapping("/enable2fa")
-    public ResponseEntity<String> enableMfa(@RequestBody TotpSecretDTO totpSecretDTO){
-        mfaService.enableMfa(totpSecretDTO);
+    public ResponseEntity<String> enableMfa(@RequestBody @Valid FirstTotpValidationDTO firstTotpValidationDTO){
+        mfaService.enableMfa(firstTotpValidationDTO);
 
         return ResponseEntity.ok("Kétfaktoros hitelesítés bekapcsolva!");
     }

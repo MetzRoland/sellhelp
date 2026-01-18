@@ -36,10 +36,6 @@ public class ModelMapperConfig {
                 .addMapping(
                         src -> src.getRole().getRoleName(),
                         UserDTO::setRole
-                )
-                .addMapping(
-                        User::getProfilePicturePath,
-                        UserDTO::setProfilePicture
                 );
 
         return mapper;

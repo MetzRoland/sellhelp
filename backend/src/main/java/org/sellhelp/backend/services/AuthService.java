@@ -176,16 +176,10 @@ public class AuthService {
         OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
 
         String email = oAuth2User.getAttribute("email");
-        String firstName = oAuth2User.getAttribute("given_name");
-        String lastName  = oAuth2User.getAttribute("family_name");
-        String picturePath  = oAuth2User.getAttribute("picture");
 
         TokenDTO tokenDTO = new TokenDTO();
 
         log.info("Email: {}", email);
-        log.info("First name: {}", firstName);
-        log.info("Last name: {}", lastName);
-        log.info("Picture url: {}", picturePath);
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             Role role = roleRepository.findByRoleName("ROLE_USER")
@@ -193,6 +187,14 @@ public class AuthService {
 
             City city = cityRepository.findByCityName("Pécs")
                     .orElseThrow(() -> new EntityNotFoundException("A város nem található!"));
+
+            String firstName = oAuth2User.getAttribute("given_name");
+            String lastName  = oAuth2User.getAttribute("family_name");
+            String picturePath  = oAuth2User.getAttribute("picture");
+
+            log.info("First name: {}", firstName);
+            log.info("Last name: {}", lastName);
+            log.info("Picture url: {}", picturePath);
 
             User newUser = new User();
             newUser.setFirstName(firstName);
@@ -210,9 +212,6 @@ public class AuthService {
 
             return userRepository.save(newUser);
         });
-
-        user.setProfilePicturePath(picturePath);
-        userRepository.save(user);
 
         if(tokenDTO.getTempToken() == null){
             UserDetails userDetails =

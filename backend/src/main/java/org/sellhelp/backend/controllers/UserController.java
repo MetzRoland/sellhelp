@@ -6,6 +6,7 @@ import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
 import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
+import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
@@ -16,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
 import java.util.List;
 
@@ -94,5 +96,10 @@ public class UserController {
     @GetMapping("/users/{userId}")
     public UserDTO showUserAccount(@PathVariable Integer userId){
         return userService.getUserAccount(userId);
+    }
+
+    @GetMapping("/users/{userId}/pp")
+    public ResponseEntity<ProfilePictureDTO> showUserProfilePicture(@PathVariable Integer userId){
+        return ResponseEntity.ok(userService.getUserProfilePicture(userId));
     }
 }

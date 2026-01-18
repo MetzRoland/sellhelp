@@ -31,7 +31,7 @@ function InputForm<T extends object>({
         input.type !== "select" ? (
           <InputComponent
             key={String(input.name)}
-            errorMessage={errorMessage?.[input.name]}
+            errorMessage={errorMessage?.[input.name] || ""}
             inputType={input.type}
             inputName={input.name}
             inputValue={formData[input.name]}
@@ -41,7 +41,7 @@ function InputForm<T extends object>({
         ) : (
           <SelectComponent
             key={String(input.name)}
-            errorMessage={errorMessage?.[input.name]}
+            errorMessage={errorMessage?.[input.name] || ""}
             inputName={input.name}
             handleFunction={handleFunction}
             options={options?.[input.name] ?? []}

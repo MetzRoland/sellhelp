@@ -11,14 +11,14 @@ function UserBanning() {
     { name: "userName", type: "text", placeholder: "Felhasználónév" },
     { name: "email", type: "text", placeholder: "Email" },
     { name: "banned", type: "select", placeholder: "Fiók állapota" },
-    { name: "role", type: "select", placeholder: "Szerepkör" }
+    { name: "role", type: "select", placeholder: "Szerepkör" },
   ] as const;
 
   const [formData, setFormData] = useState<RegisterForm>({
     userName: "",
     email: "",
     banned: "",
-    role: ""
+    role: "",
   });
 
   const { setIsLoading, setLoadingMessage } = useLoading();
@@ -32,6 +32,13 @@ function UserBanning() {
       try {
         const response = await privateAxios.get("/user/users");
         const users: User[] = response.data;
+
+        await Promise.all(
+          users.map(async (user) => {
+            user.profilePicture = await fetchProfilePicture(user.id);
+          }),
+        );
+
         setUserAccounts(users);
       } catch (error) {
         console.error(error);
@@ -45,14 +52,20 @@ function UserBanning() {
     fetchUserAccounts();
   }, [setIsLoading, setLoadingMessage]);
 
+  const fetchProfilePicture = async (userId: number) => {
+    const response = await privateAxios.get(`/user/users/${userId}/pp`);
+
+    return response.data.profilePictureUrl;
+  };
+
   const handleUserBanning = async (userId: number, isBanned: boolean) => {
     setIsLoading(true);
     setLoadingMessage(!isBanned ? "Fiók tiltása..." : "Fiók engedélyezése...");
 
     setUserAccounts((prev) =>
       prev.map((user) =>
-        user.id === userId ? { ...user, banned: !isBanned } : user
-      )
+        user.id === userId ? { ...user, banned: !isBanned } : user,
+      ),
     );
 
     try {
@@ -65,8 +78,8 @@ function UserBanning() {
       if (response.data) {
         setUserAccounts((prev) =>
           prev.map((user) =>
-            user.id === userId ? { ...user, ...response.data } : user
-          )
+            user.id === userId ? { ...user, ...response.data } : user,
+          ),
         );
       }
     } catch (error) {
@@ -74,8 +87,8 @@ function UserBanning() {
 
       setUserAccounts((prev) =>
         prev.map((user) =>
-          user.id === userId ? { ...user, banned: isBanned } : user
-        )
+          user.id === userId ? { ...user, banned: isBanned } : user,
+        ),
       );
     } finally {
       setIsLoading(false);

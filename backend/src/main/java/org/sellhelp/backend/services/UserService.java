@@ -6,6 +6,7 @@ import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
 import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
+import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.City;
@@ -145,7 +146,6 @@ public class UserService {
                 .stream()
                 .map(user -> {
                     UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-                    userDTO.setProfilePicture(getUserProfilePicture(user.getId()));
 
                     return userDTO;
                 })
@@ -158,19 +158,19 @@ public class UserService {
                 .orElseThrow(() -> new UserNotFoundException("A felhasználó nem található!"));
     }
 
-    public String getUserProfilePicture(Integer userId) {
+    public ProfilePictureDTO getUserProfilePicture(Integer userId) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new UserNotFoundException("A felhasználó nem található!"));
 
         if (user.getProfilePicturePath() == null) {
-            return null;
+            return new ProfilePictureDTO(null);
         }
 
         if (user.getAuthProvider() == AuthProvider.GOOGLE
                 && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
-            return user.getProfilePicturePath();
+            return new ProfilePictureDTO(user.getProfilePicturePath());
         }
 
-        return s3Service.getDownloadURL(user.getProfilePicturePath());
+        return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
     }
 }
