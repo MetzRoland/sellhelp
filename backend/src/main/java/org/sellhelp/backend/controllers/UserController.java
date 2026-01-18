@@ -97,9 +97,4 @@ public class UserController {
     public UserDTO showUserAccount(@PathVariable Integer userId){
         return userService.getUserAccount(userId);
     }
-
-    @GetMapping("/users/{userId}/pp")
-    public ResponseEntity<ProfilePictureDTO> showUserProfilePicture(@PathVariable Integer userId){
-        return ResponseEntity.ok(userService.getUserProfilePicture(userId));
-    }
 }

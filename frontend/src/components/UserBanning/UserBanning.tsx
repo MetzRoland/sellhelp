@@ -53,7 +53,7 @@ function UserBanning() {
   }, [setIsLoading, setLoadingMessage]);
 
   const fetchProfilePicture = async (userId: number) => {
-    const response = await privateAxios.get(`/user/users/${userId}/pp`);
+    const response = await privateAxios.get(`/user/files/users/${userId}/pp`);
 
     return response.data.profilePictureUrl;
   };

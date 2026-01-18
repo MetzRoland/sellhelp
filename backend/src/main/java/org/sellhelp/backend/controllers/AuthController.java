@@ -110,9 +110,15 @@ public class AuthController {
 
     @GetMapping("/loginSuccess")
     public ResponseEntity<Void> handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
-        TokenDTO tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
+        TokenDTO tokenDTO = new TokenDTO();
 
         String redirectUrl = "";
+
+        try{
+            tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
+        } catch (Exception e) {
+            redirectUrl = "http://localhost:5173/login";
+        }
 
         if(tokenDTO.getTempToken() == null){
             cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());

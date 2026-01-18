@@ -213,6 +213,8 @@ public class AuthService {
             return userRepository.save(newUser);
         });
 
+        if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
+
         if(tokenDTO.getTempToken() == null){
             UserDetails userDetails =
                     org.springframework.security.core.userdetails.User.builder()

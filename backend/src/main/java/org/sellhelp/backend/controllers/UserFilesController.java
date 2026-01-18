@@ -2,6 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
+import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.services.UserFileService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -69,12 +70,17 @@ public class UserFilesController {
 
 
     @GetMapping("/pp")
-    public ResponseEntity<String> getProfilePicture() {
+    public ResponseEntity<ProfilePictureDTO> getProfilePicture() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
-        String url = userFileService.getProfilePicture(email);
+        ProfilePictureDTO profilePictureDTO = userFileService.getOwnProfilePicture(email);
 
-        return ResponseEntity.ok(url);
+        return ResponseEntity.ok(profilePictureDTO);
+    }
+
+    @GetMapping("/users/{userId}/pp")
+    public ResponseEntity<ProfilePictureDTO> showUserProfilePicture(@PathVariable Integer userId){
+        return ResponseEntity.ok(userFileService.getUserProfilePicture(userId));
     }
 
     @PostMapping("/pp")

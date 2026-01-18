@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
+import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
 import org.sellhelp.backend.enums.AuthProvider;
@@ -121,19 +122,32 @@ public class UserFileService {
         }
     }
 
-    public String getProfilePicture(String email) {
+    public ProfilePictureDTO getProfilePictureByUser(User user){
+        if (user.getProfilePicturePath() == null) {
+            return new ProfilePictureDTO(null);
+        }
+
+        if (user.getAuthProvider() == AuthProvider.GOOGLE
+                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
+            return new ProfilePictureDTO(user.getProfilePicturePath());
+        }
+
+        return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
+    }
+
+    public ProfilePictureDTO getUserProfilePicture(Integer userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("A felhasználó nem található!"));
+
+        return getProfilePictureByUser(user);
+    }
+
+    public ProfilePictureDTO getOwnProfilePicture(String email) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
-        if(user.getAuthProvider().equals(AuthProvider.GOOGLE) && s3Service.getDownloadURL(user.getProfilePicturePath()) == null){
-            return user.getProfilePicturePath();
-        }
-
-        if (user.getProfilePicturePath() == null)
-        { throw new RuntimeException("Nincs profilkép!");}
-
-        return s3Service.getDownloadURL(user.getProfilePicturePath());
+        return getProfilePictureByUser(user);
     }
 
     public void setProfilePicture(String email, MultipartFile file) {
