@@ -20,6 +20,7 @@ function Header() {
     if (profilePicture) return;
 
     const cachedPp = localStorage.getItem("profilePicture");
+    console.log(cachedPp);
 
     if (cachedPp) {
       setProfilePicture(cachedPp);
@@ -30,8 +31,11 @@ function Header() {
     const fetchProfilePicture = async () => {
       try {
         const response = await privateAxios.get("/user/files/pp");
-        setProfilePicture(response.data);
-        localStorage.setItem("profilePicture", response.data);
+        setProfilePicture(response.data.profilePictureUrl);
+
+        if(response.data.profilePictureUrl){
+          localStorage.setItem("profilePicture", response.data.profilePictureUrl);
+        }
       } catch {
         setProfilePicture(null);
       } finally {
