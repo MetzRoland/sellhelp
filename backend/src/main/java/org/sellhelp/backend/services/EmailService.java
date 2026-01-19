@@ -39,6 +39,8 @@ public class EmailService {
         this.templateEngine = templateEngine;
     }
 
+    Logger logger = LoggerFactory.getLogger(EmailService.class);
+
     private void sendHTMLTemplateEmail(String to, String subject, String templateName, Map<String, Object> variables){
         try{
             Context context = new Context();
@@ -58,6 +60,7 @@ public class EmailService {
             javaMailSender.send(message);
         }
         catch (MessagingException | MailException e){
+            logger.error("Failed sending email to {} with subject: {}", to, subject);
             throw new EmailException("Az email elküldése sikertelen: " + e.getMessage());
         }
     }
