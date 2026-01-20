@@ -8,7 +8,11 @@ import Footer from "../Footer/Footer";
 import { privateAxios } from "../../config/axiosConfig";
 import PageNotFound from "../PageNotFound/PageNotFound";
 
-function FullUserProfile() {
+interface FullUserProfileProps{
+  settings?: boolean;
+}
+
+function FullUserProfile({ settings }: FullUserProfileProps) {
   const { user: authUser } = useAuth();
   const { id } = useParams();
 
@@ -63,6 +67,9 @@ function FullUserProfile() {
         </h1>
 
         <p>Email: {user.email}</p>
+        {settings && (
+          <button>Módosít</button>
+        )}
         <p>Vezetéknév: {user.lastName}</p>
         <p>Keresztnév: {user.firstName}</p>
         <p>Születési dátum: {user.birthDate.toString().split("-").join(".")}</p>

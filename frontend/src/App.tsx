@@ -36,7 +36,7 @@ function App() {
 
           <Route element={<AuthenticatedRouterLayout />}>
             <Route path="/home" element={<FullUserProfile />} />
-            <Route path="/home/settings" element={<FullUserProfile />} />
+            <Route path="/home/settings" element={<FullUserProfile settings={true} />} />
             <Route path="/profile" element={<FullUserProfile />} />
             <Route path="/users/:id" element={<FullUserProfile />} />
           </Route>
