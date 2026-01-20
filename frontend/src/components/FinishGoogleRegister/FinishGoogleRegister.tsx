@@ -82,7 +82,7 @@ function FinishGoogleRegister() {
   return (
     <>
       <Header />
-      <div className="container register-container">
+      <div className="main-container register-container">
         <h1 className="container-title">Regisztráció</h1>
 
         <form
