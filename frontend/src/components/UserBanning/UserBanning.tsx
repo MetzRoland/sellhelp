@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { privateAxios } from "../../config/axiosConfig";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
@@ -23,6 +24,8 @@ function UserBanning() {
 
   const { setIsLoading, setLoadingMessage } = useLoading();
   const [userAccounts, setUserAccounts] = useState<User[]>([]);
+
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchUserAccounts = async () => {
@@ -107,6 +110,7 @@ function UserBanning() {
             adminMode={true}
             userAccount={userAccount}
             handleUserBanning={handleUserBanning}
+            handleRedirectToProfile={() => navigate(`/users/${userAccount.id}`)}
           />
         ))}
       </div>

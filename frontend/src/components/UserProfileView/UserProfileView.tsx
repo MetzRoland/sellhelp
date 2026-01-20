@@ -6,9 +6,10 @@ function UserProfileView({
   userAccount,
   handleUserBanning,
   adminMode,
+  handleRedirectToProfile
 }: UserProfileProps) {
   return (
-    <div className="content-container user-profile-container">
+    <div className="content-container user-profile-container" onClick={handleRedirectToProfile}>
       <div className="user-info-container">
         <img
           className="profile-picture-img"
@@ -25,7 +26,10 @@ function UserProfileView({
       {adminMode && (
         <button
           className="btn btn-highlight"
-          onClick={() => handleUserBanning(userAccount.id, userAccount.banned)}
+          onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
+            e.stopPropagation();
+            handleUserBanning(userAccount.id, userAccount.banned)
+          }}
         >
           {!userAccount.banned ? "Fiók tiltása" : "Fiók engedélyezése"}
         </button>

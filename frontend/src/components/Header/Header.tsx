@@ -144,6 +144,7 @@ function Header() {
                     setLoadingMessage("Kijelentkezés...");
                     await logout();
                     setIsLoading(false);
+                    setLoadingMessage("");
                   }}
                 >
                   Kijelentkezés

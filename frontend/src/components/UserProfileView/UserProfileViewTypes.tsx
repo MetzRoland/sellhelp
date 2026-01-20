@@ -4,4 +4,5 @@ export interface UserProfileProps {
   userAccount: User;
   handleUserBanning: (userId: number, isBanned: boolean) => void;
   adminMode?: boolean;
+  handleRedirectToProfile: () => void;
 }
