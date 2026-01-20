@@ -1,6 +1,7 @@
 package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
@@ -75,7 +76,8 @@ class UserControllerTest {
     void getUserDetails_success() throws Exception {
         when(userService.getUserDetails("accessToken")).thenReturn(userDTO);
 
-        mockMvc.perform(get("/user/info"))
+        mockMvc.perform(get("/user/info")
+                        .cookie(new Cookie("accessToken", "accessToken")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.email").value("test@example.com"))
                 .andExpect(jsonPath("$.firstName").value("John"))
