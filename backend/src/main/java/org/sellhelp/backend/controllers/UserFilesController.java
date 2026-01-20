@@ -78,7 +78,7 @@ public class UserFilesController {
         return ResponseEntity.ok(profilePictureDTO);
     }
 
-    @GetMapping("/users/{userId}/pp")
+    @GetMapping("{userId}/pp")
     public ResponseEntity<ProfilePictureDTO> showUserProfilePicture(@PathVariable Integer userId){
         return ResponseEntity.ok(userFileService.getUserProfilePicture(userId));
     }
