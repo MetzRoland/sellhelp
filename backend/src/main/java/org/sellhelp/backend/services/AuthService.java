@@ -50,13 +50,15 @@ public class AuthService {
     private final TempTokenService tempTokenService;
     private final EmailService emailService;
     private final CurrentUser currentUser;
+    private S3Service s3Service;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       EmailService emailService, TempTokenService tempTokenService, CurrentUser currentUser){
+                       EmailService emailService, TempTokenService tempTokenService, CurrentUser currentUser,
+                       S3Service s3Service){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -68,6 +70,7 @@ public class AuthService {
         this.tempTokenService = tempTokenService;
         this.emailService = emailService;
         this.currentUser = currentUser;
+        this.s3Service = s3Service;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
@@ -204,6 +207,8 @@ public class AuthService {
             newUser.setBirthDate(LocalDate.of(2000, 12, 23));
             newUser.setRole(role);
             newUser.setCity(city);
+
+            //s3Service.uploadFileWithKey();
             newUser.setProfilePicturePath(picturePath);
 
             tokenDTO.setTempToken(tempTokenService.create(email));

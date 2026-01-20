@@ -137,12 +137,13 @@ function Header() {
                 </Link>
                 <button
                   className="user-profile-option"
-                  onClick={() => {
+                  onClick={async () => {
                     handleProfileDropDown();
                     setIsProfileOpen(false);
                     setIsLoading(true);
                     setLoadingMessage("Kijelentkezés...");
-                    logout();
+                    await logout();
+                    setIsLoading(false);
                   }}
                 >
                   Kijelentkezés

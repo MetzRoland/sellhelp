@@ -3,10 +3,8 @@ import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
 import FinishGoogleRegister from "./components/FinishGoogleRegister/FinishGoogleRegister";
 import FullUserProfile from "./components/FullUserProfile/FullUserProfile";
-import { useAuth } from "./contextProviders/AuthProvider/AuthContext";
 import AuthenticatedRouterLayout from "./components/Routes/AuthenticatedRouterLayout";
 import PublicRouterLayout from "./components/Routes/PublicRouterLayout";
-import { PageLoaderWrapper } from "./components/PageLoaderWrapper/PageLoaderWrapper";
 import PageNotFound from "./components/PageNotFound/PageNotFound";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import SuperUserRouterLayout from "./components/Routes/SuperUserRouterLayout";
@@ -14,16 +12,16 @@ import UserBanning from "./components/UserBanning/UserBanning";
 import ProfileBanned from "./components/ProfileBanned/ProfileBanned";
 
 import "./App.css";
+import DelayedLayout from "./components/DelayedLayout";
 
 function App() {
-  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   return (
     <>
-      <PageLoaderWrapper duration={1000} message="Az oldal betöltése...">
-        <ScrollToTop />
-        <Routes location={location} key={location.pathname}>
+      <ScrollToTop />
+      <Routes location={location} key={location.pathname}>
+        <Route element={<DelayedLayout />}>
           <Route element={<PublicRouterLayout />}>
             <Route index element={<div>Főoldal</div>} />
             <Route path="/login" element={<Login />} />
@@ -37,19 +35,19 @@ function App() {
           </Route>
 
           <Route element={<AuthenticatedRouterLayout />}>
-            <Route path="/home" element={<FullUserProfile user={user} />} />
-            <Route path="/home/settings" element={<FullUserProfile user={user} />} />
+            <Route path="/home" element={<FullUserProfile />} />
+            <Route path="/home/settings" element={<FullUserProfile />} />
+            <Route path="/profile" element={<FullUserProfile />} />
+            <Route path="/users/:id" element={<FullUserProfile />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
             <Route path="/banningPage" element={<UserBanning />} />
           </Route>
 
-          <Route path="/user/:id" element={<FullUserProfile user={null} />} />
-
           <Route path="*" element={<PageNotFound />} />
-        </Routes>
-      </PageLoaderWrapper>
+        </Route>
+      </Routes>
     </>
   );
 }

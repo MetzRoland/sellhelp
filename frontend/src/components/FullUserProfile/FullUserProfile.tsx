@@ -1,52 +1,77 @@
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
+import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
+import { useParams } from "react-router";
+import { useEffect, useState } from "react";
+import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
-import { useLocation } from "react-router";
 import { privateAxios } from "../../config/axiosConfig";
-import { useEffect, useState } from "react";
-import { useParams } from "react-router";
-import axios from "axios";
+import PageNotFound from "../PageNotFound/PageNotFound";
 
-interface FullUserProfileProps {
-  user: User | null;
-}
-
-function FullUserProfile({ user }: FullUserProfileProps) {
+function FullUserProfile() {
+  const { user: authUser } = useAuth();
   const { id } = useParams();
-  const location = useLocation();
-  if (!user &&  !location.pathname.startsWith("/user/")) {
-    return <div>Nincs bejelentkezve</div>;
-  }
 
-  const [localUser, setLocalUser] = useState<User | null>(null);
-  
-  useEffect( () => {
-    const fetchUser = async () => {
-      const response = await privateAxios.get(`/users/${id}`);
-      setLocalUser(response.data);
+  const [user, setUser] = useState<User | null>(null);
+
+  const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
+
+  useEffect(() => {
+    if (!id) {
+      if (!authUser) return;
+
+      setIsLoading(true);
+      setLoadingMessage("A fiók adatainak betöltése...");
+
+      setUser(authUser);
+
+      setIsLoading(false);
+      return;
     }
-    fetchUser();
-  });
 
-  if (!user)
-  {
-    user = {...localUser};
+    const fetchUserById = async () => {
+      setIsLoading(true);
+      try {
+        setLoadingMessage("A fiók adatainak betöltése...");
+
+        const response = await privateAxios.get(`/user/users/${id}`);
+        setUser(response.data);
+      } catch {
+        setUser(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserById();
+  }, [id, authUser, setIsLoading, setLoadingMessage]);
+
+  if(isLoading && !user){
+    return;
   }
 
-
+  if(!user){
+    return <PageNotFound message="A fiók nem található!"/>;
+  }
 
   return (
     <>
       <Header />
       <div className="main-container">
-        <h1>Üdv, {user.lastName} {user.firstName}</h1>
+        <h1>
+          Üdv, {user.lastName} {user.firstName}
+        </h1>
 
         <p>Email: {user.email}</p>
-        <p>Vezekéknév: {user.lastName}</p>
+        <p>Vezetéknév: {user.lastName}</p>
         <p>Keresztnév: {user.firstName}</p>
         <p>Születési dátum: {user.birthDate.toString().split("-").join(".")}</p>
         <p>Város: {user.cityName}</p>
-        <p>{user.mfa ? "Kétfaktoros hitelesítés bekapcsolva" : "Kétfaktoros hitelesítés kipapcsolva"}</p>
+        <p>
+          {user.mfa
+            ? "Kétfaktoros hitelesítés bekapcsolva"
+            : "Kétfaktoros hitelesítés kikapcsolva"}
+        </p>
         <p>Szerepkör: {user.role}</p>
         <p>{!user.banned ? "A fiók aktív" : "A fiók letiltva adminok által"}</p>
       </div>
