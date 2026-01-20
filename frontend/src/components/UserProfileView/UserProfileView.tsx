@@ -1,3 +1,4 @@
+
 import type { UserProfileProps } from "./UserProfileViewTypes";
 
 import "./UserProfileView.css";

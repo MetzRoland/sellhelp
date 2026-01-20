@@ -2,7 +2,7 @@ import { Route, Routes, useLocation } from "react-router";
 import Register from "./components/Register/Register";
 import Login from "./components/Login/Login";
 import FinishGoogleRegister from "./components/FinishGoogleRegister/FinishGoogleRegister";
-import UserDashboard from "./components/UserDashBoard/UserDashBoard";
+import FullUserProfile from "./components/FullUserProfile/FullUserProfile";
 import { useAuth } from "./contextProviders/AuthProvider/AuthContext";
 import AuthenticatedRouterLayout from "./components/Routes/AuthenticatedRouterLayout";
 import PublicRouterLayout from "./components/Routes/PublicRouterLayout";
@@ -16,7 +16,7 @@ import ProfileBanned from "./components/ProfileBanned/ProfileBanned";
 import "./App.css";
 
 function App() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
   const location = useLocation();
 
   return (
@@ -37,12 +37,15 @@ function App() {
           </Route>
 
           <Route element={<AuthenticatedRouterLayout />}>
-            <Route path="/home" element={<UserDashboard user={user} />} />
+            <Route path="/home" element={<FullUserProfile user={user} />} />
+            <Route path="/home/settings" element={<FullUserProfile user={user} />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
             <Route path="/banningPage" element={<UserBanning />} />
           </Route>
+
+          <Route path="/user/:id" element={<FullUserProfile user={null} />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Routes>
