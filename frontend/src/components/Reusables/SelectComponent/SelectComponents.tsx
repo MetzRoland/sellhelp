@@ -1,6 +1,12 @@
 import type { SelectComponentType } from "./SelectComponentTypes";
 
-function SelectComponent({errorMessage, inputName, handleFunction, options, defaultOption}: SelectComponentType) {
+function SelectComponent({
+  errorMessage,
+  inputName,
+  handleFunction,
+  options,
+  defaultOption,
+}: SelectComponentType) {
   return (
     <div className="input-container">
       {errorMessage && (
@@ -11,15 +17,15 @@ function SelectComponent({errorMessage, inputName, handleFunction, options, defa
         id={inputName}
         className="input-element select-input-element"
         onChange={handleFunction}
-        defaultValue="city"
+        defaultValue=""
       >
-        <option value={defaultOption} disabled hidden>
+        <option value="" className="default-select-option" disabled hidden selected>
           {defaultOption}
         </option>
         {options.map((option) => {
           return (
             <option key={option.id} value={option.value}>
-              {option.value}
+              {option.label}
             </option>
           );
         })}

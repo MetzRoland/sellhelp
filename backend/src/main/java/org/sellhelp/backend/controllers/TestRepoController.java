@@ -43,6 +43,11 @@ public class TestRepoController {
         return userRepository.findAll();
     }
 
+    @GetMapping("/roles")
+    public List<Role> getRoles() {
+        return roleRepository.findAll();
+    }
+
     @PostMapping("adduser")
     public ResponseEntity<User> addUser(@RequestBody CreateUserDTO dto) {
         City city = cityRepository.findByCityName(dto.getCity().getCityName()).get();

@@ -19,7 +19,7 @@ function Register() {
         { name: "lastName", type: "text", placeholder: "Vezetéknév" },
         { name: "firstName", type: "text", placeholder: "Keresztnév" },
         { name: "birthDate", type: "date", placeholder: "Születési dátum" },
-        { name: "cityName", type: "select", placeholder: "Település" },
+        { name: "cityName", type: "select", placeholder: "Válasszon települést" },
         { name: "email", type: "text", placeholder: "Email" },
         { name: "password", type: "password", placeholder: "Jelszó" },
     ] as const;

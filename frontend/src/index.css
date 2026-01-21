@@ -113,13 +113,22 @@ body{
   border: 1px solid #FAF4E6;
 }
 
+.select-input-element {
+    color: #3C3B3A;
+    background-color: #fff;
+}
+
 .select-input-element option{
     color: #000;
     background-color: #fff;
 }
 
-.input-container .input-element::placeholder {
+.input-container {
   color: #fff;
+}
+
+.input-element::placeholder{
+  color: #3C3B3A;
 }
 
 .input-container .input-element:focus {
