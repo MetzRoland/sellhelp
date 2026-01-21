@@ -1,5 +1,6 @@
 .header{
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
+    min-height: 10vh;
     height: 20vh;
 }
 
@@ -122,7 +123,7 @@
 }
 
 .profile-picture-img:hover{
-    box-shadow: 1px 1px 10px #fff;
+    box-shadow: 0px 0px 10px #fff;
 
     transform: scale(1.05);
 }

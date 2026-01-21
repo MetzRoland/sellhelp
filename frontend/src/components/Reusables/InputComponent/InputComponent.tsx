@@ -1,6 +1,6 @@
 import type { InputComponentType } from "./InputComponentTypes";
 
-function InputComponent({errorMessage, inputType, inputName, inputValue, inputPlaceholder, handleFunction}: InputComponentType){
+function InputComponent({errorMessage, inputType, inputName, inputValue, inputPlaceholder, handleFunction, isDisabled}: InputComponentType){
     return (
         <div className="input-container">
               {errorMessage && (
@@ -14,6 +14,7 @@ function InputComponent({errorMessage, inputType, inputName, inputValue, inputPl
                   value={inputValue || ""}
                   placeholder={inputPlaceholder}
                   onChange={handleFunction}
+                  disabled={isDisabled}
                   className="input-element"
                 />
         </div>

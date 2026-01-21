@@ -5,9 +5,10 @@ export interface SelectOption {
 }
 
 export interface SelectComponentType{
-    errorMessage?: string,
-    inputName: string,
-    handleFunction: (e: React.ChangeEvent<HTMLSelectElement>) => void,
-    options: SelectOption[],
-    defaultOption: string
+  errorMessage?: string,
+  inputName: string,
+  handleFunction: (e: React.ChangeEvent<HTMLSelectElement>) => void,
+  options: SelectOption[],
+  defaultOption: string,
+  isDisabled?: boolean
 }

@@ -1,5 +1,6 @@
 .footer{
     width: 100%;
+    min-height: 10vh;
     height: 15vh;
     padding: 1.5em;
 

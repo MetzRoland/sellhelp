@@ -21,10 +21,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
   const [user, setUser] = useState<User | null>(null);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
-  const [userUpdateError, setUserUpdateError] = useState("");
-  const [success, setSuccess] = useState(false);
-  const [validationErrors, setValidationErrors] =
-    useState<UserUpdateValidationErrors>({});
 
   const userUpdateInputs = [
     { name: "lastName", type: "text", placeholder: "Vezetéknév" },
@@ -37,13 +33,18 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     { name: "isBanned", type: "text", placeholder: "Fiók hozzáférés" }
   ] as const;
 
-  // <p>
-  //   {user.mfa
-  //     ? "Kétfaktoros hitelesítés bekapcsolva"
-  //     : "Kétfaktoros hitelesítés kikapcsolva"}
-  // </p>
-  // <p>Szerepkör: {getUserRoleLabel(user.role)}</p>
-  // <p>{!user.banned ? "A fiók aktív" : "A fiók letiltva adminok által"}</p>
+  const [disabledInputs, setDisabledInputs] = useState(
+    userUpdateInputs.reduce((acc, input) => {
+      acc[input.name] = true; // or false if you want them enabled initially
+      return acc;
+    }, {})
+  );
+
+  const [userUpdateError, setUserUpdateError] = useState("");
+  const [success, setSuccess] = useState(false);
+  const [validationErrors, setValidationErrors] =
+    useState<UserUpdateValidationErrors>({});
+
 
   const [formData, setFormData] = useState<UserUpdateForm>({
     lastName: "",
@@ -74,10 +75,20 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       try {
         setLoadingMessage("A fiók adatainak betöltése...");
 
-        const response = await privateAxios.get(`/user/users/${id}`);
+        const response = await privateAxios.get<User>(`/user/users/${id}`);
         setUser(response.data);
+
+          setFormData({
+            lastName: user?.lastName,
+            firstName: user?.firstName,
+            birthDate: user?.birthDate.toString(),
+            cityName: user?.cityName,
+            email: user?.email,
+          });
+
       } catch {
         setUser(null);
+        // more error handling
       } finally {
         setIsLoading(false);
       }
@@ -85,6 +96,16 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
     fetchUserById();
   }, [id, authUser, setIsLoading, setLoadingMessage]);
+
+useEffect(()=> {
+  setFormData({
+    lastName: user?.lastName,
+    firstName: user?.firstName,
+    birthDate: user?.birthDate.toString(),
+    cityName: user?.cityName,
+    email: user?.email,
+  });
+}, [user]);
 
   if(isLoading && !user){
     return;
@@ -94,6 +115,13 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     return <PageNotFound message="A fiók nem található!"/>;
   }
 
+
+  const toggleDisabled = (inputName: string) => {
+    setDisabledInputs(prev => ({
+      ...prev,
+      [inputName]: !prev[inputName]  // flip the boolean
+    }));
+};
 
 
 
@@ -175,6 +203,30 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }
   }
 
+  const sendPassUpdate = async () =>
+  {
+    try {
+      setIsLoading(true);
+      setLoadingMessage("Email küldése...");
+
+      const response = await privateAxios.get("/user/update/password/send");
+      console.log("From the endpoint: /user/update/password/send")
+      console.log(response);
+
+      if (response.status === 200)
+      {
+        setSuccess(true);
+        setValidationErrors({});
+        setUserUpdateError("");
+      }
+
+    } catch (err) {
+      // error handling
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   return (
     <>
       <Header />
@@ -183,7 +235,10 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
           Üdv, {user.lastName} {user.firstName}
         </h1>
 
-
+        <form
+          className="content-container login-form"
+          onSubmit={handleUpdateSubmit}
+        >
         {userUpdateError && (
             <p className="message error error-process-status">
                 {userUpdateError}
@@ -192,22 +247,28 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
         {success && (
             <p className="message success-message">
-                Sikeres regisztráció!
+                Frissítés sikeres
             </p>
         )}
-
-        <form
-          className="content-container login-form"
-          onSubmit={handleUpdateSubmit}
-        >
-
+        
           {/* If settings, Add disable and button */}
           <InputForm<UserUpdateForm>
             inputs={userUpdateInputs}
             formData={formData}
             handleFunction={handleUpdateInput}
             errorMessage={validationErrors}
+            disabledInputsMap={disabledInputs}
+            isSettings={settings}
           />
+          <p>
+            {user.mfa
+              ? "Kétfaktoros hitelesítés bekapcsolva"
+              : "Kétfaktoros hitelesítés kikapcsolva"}
+          </p>
+          <p>Szerepkör: {getUserRoleLabel(user.role)}</p>
+          <p>{!user.banned ? "A fiók aktív" : "A fiók letiltva adminok által"}</p>
+          
+          <button className="btn" type="button" onClick={sendPassUpdate}>Jelszó frissítése</button>
 
         </form>
         {/* 

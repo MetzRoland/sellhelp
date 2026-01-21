@@ -6,7 +6,9 @@ function SelectComponent({
   handleFunction,
   options,
   defaultOption,
+  isDisabled,
 }: SelectComponentType) {
+
   return (
     <div className="input-container">
       {errorMessage && (
@@ -18,6 +20,7 @@ function SelectComponent({
         className="input-element select-input-element"
         onChange={handleFunction}
         defaultValue=""
+        disabled={isDisabled}
       >
         <option value="" className="default-select-option" disabled hidden selected>
           {defaultOption}

@@ -16,6 +16,8 @@ interface InputFormProps<T extends object> {
   options?: {
     [K in keyof FormFields<T>]?: { id: number; value: string; label: string }[];
   };
+  disabledInputsMap?: Partial<Record<keyof FormFields<T>, boolean>>;
+  isSettings?: boolean;
 }
 
 function InputForm<T extends object>({
@@ -23,6 +25,7 @@ function InputForm<T extends object>({
   errorMessage,
   handleFunction,
   formData,
+  disabledInputsMap,
   options,
 }: InputFormProps<T>) {
   return (
@@ -36,6 +39,7 @@ function InputForm<T extends object>({
             inputName={input.name}
             inputValue={formData[input.name]}
             inputPlaceholder={input.placeholder}
+            isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
             handleFunction={handleFunction}
           />
         ) : (
@@ -44,6 +48,7 @@ function InputForm<T extends object>({
             errorMessage={errorMessage?.[input.name] || ""}
             inputName={input.name}
             handleFunction={handleFunction}
+            isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
             options={options?.[input.name] ?? []}
             defaultOption={input.placeholder}
           />

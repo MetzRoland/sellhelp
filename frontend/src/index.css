@@ -17,7 +17,7 @@ body{
 
 .main-container {
   width: 100%;
-  min-height: 100vh;
+  min-height: 80vh;
   padding: 3rem;
 
   display: flex;
