@@ -22,7 +22,7 @@ function SelectComponent({
         defaultValue=""
         disabled={isDisabled}
       >
-        <option value="" className="default-select-option" disabled hidden selected>
+        <option value="" id="default-select-option" disabled hidden>
           {defaultOption}
         </option>
         {options.map((option) => {
