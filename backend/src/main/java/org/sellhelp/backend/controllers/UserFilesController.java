@@ -18,7 +18,7 @@ import java.util.List;
 public class UserFilesController {
     private final UserFileService userFileService;
 
-    UserFilesController(UserFileService userFileService) {
+    public UserFilesController(UserFileService userFileService) {
         this.userFileService = userFileService;
     }
 
@@ -56,18 +56,6 @@ public class UserFilesController {
 
         return ResponseEntity.ok("Profilkép törölve!");
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     @GetMapping("/pp")
     public ResponseEntity<ProfilePictureDTO> getProfilePicture() {

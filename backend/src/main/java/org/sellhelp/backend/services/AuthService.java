@@ -208,8 +208,7 @@ public class AuthService {
             newUser.setRole(role);
             newUser.setCity(city);
 
-            //s3Service.uploadFileWithKey();
-            newUser.setProfilePicturePath(picturePath);
+            newUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
 
             tokenDTO.setTempToken(tempTokenService.create(email));
 

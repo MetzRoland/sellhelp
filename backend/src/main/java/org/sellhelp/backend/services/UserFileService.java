@@ -1,11 +1,9 @@
 package org.sellhelp.backend.services;
 
-import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
-import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserFileRepository;
@@ -26,7 +24,7 @@ public class UserFileService {
     private final UserFileRepository userFileRepository;
 
     @Autowired
-    UserFileService(S3Service s3Service, UserRepository userRepository,
+    public UserFileService(S3Service s3Service, UserRepository userRepository,
                     UserFileRepository userFileRepository) {
         this.s3Service = s3Service;
         this.userRepository = userRepository;
@@ -48,13 +46,15 @@ public class UserFileService {
                 fileDtos.add(new FileDTO(file.getId(), url));
             }
 
-        } catch (NoSuchKeyException e) {
+        }
+        catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
         }
         catch (Exception e) {
             System.out.println(e.toString());
             throw new RuntimeException("A művelet sikertelen!");
         }
+
         return fileDtos;
     }
 
@@ -62,13 +62,15 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
         UserFile file = userFileRepository.findById(fileId).orElseThrow(
                 () -> new RuntimeException("A fájl nem található!")
         );
 
         // check ownership
-        if (file.getUser().getId() != user.getId())
-        {throw new InvalidPermissionException("Nincs hozzáférés");}
+        if (file.getUser().getId() != user.getId()) {
+            throw new InvalidPermissionException("Nincs hozzáférés");
+        }
 
         try {
             return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
@@ -85,14 +87,18 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
         UserFile newFile = UserFile.builder()
                 .user(user)
-                .filePath(fileKey(user.getId(), file.getOriginalFilename()))
+                .filePath(s3Service.fileKey(user.getId(), file.getOriginalFilename()))
                 .build();
+
         userFileRepository.save(newFile);
+
         try {
             s3Service.uploadFileWithKey(newFile.getFilePath(), file);
-        } catch (IOException e) {
+        }
+        catch (IOException e) {
             throw new RuntimeException("A fájlt nem sikerült feltölteni!");
         }
     }
@@ -107,8 +113,9 @@ public class UserFileService {
         );
 
         // check ownership
-        if (file.getUser().getId() != user.getId())
-        {throw new InvalidPermissionException("Nincs hozzáférés");}
+        if (file.getUser().getId() != user.getId()) {
+            throw new InvalidPermissionException("Nincs hozzáférés");
+        }
 
         try {
             s3Service.deleteFile(file.getFilePath());
@@ -127,10 +134,10 @@ public class UserFileService {
             return new ProfilePictureDTO(null);
         }
 
-        if (user.getAuthProvider() == AuthProvider.GOOGLE
-                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
-            return new ProfilePictureDTO(user.getProfilePicturePath());
-        }
+//        if (user.getAuthProvider() == AuthProvider.GOOGLE
+//                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
+//            return new ProfilePictureDTO(user.getProfilePicturePath());
+//        }
 
         return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
     }
@@ -155,7 +162,7 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
-        String key = ppKey(user.getId());
+        String key = s3Service.ppKey(user.getId());
 
         try {
             s3Service.uploadFileWithKey(key, file);
@@ -172,19 +179,14 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
-        if (user.getProfilePicturePath() == null)
-        { throw new RuntimeException("Nincs profilkép!");}
+        if (user.getProfilePicturePath() == null) {
+            throw new RuntimeException("Nincs profilkép!");
+        }
 
-        String key = ppKey(user.getId());
+        String key = s3Service.ppKey(user.getId());
         s3Service.deleteFile(key);
 
         user.setProfilePicturePath(null);
         userRepository.save(user);
     }
-
-    private String ppKey(Integer id)
-    {return "users/" + id + "/profilePicture";}
-
-    private String fileKey(Integer id, String fileName)
-    {return "users/" + id + "/"+fileName;}
 }
