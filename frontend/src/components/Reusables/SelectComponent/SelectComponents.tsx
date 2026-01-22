@@ -7,6 +7,7 @@ function SelectComponent({
   options,
   defaultOption,
   isDisabled,
+  selectValue
 }: SelectComponentType) {
 
   return (
@@ -22,8 +23,8 @@ function SelectComponent({
         defaultValue=""
         disabled={isDisabled}
       >
-        <option value="" id="default-select-option" disabled hidden>
-          {defaultOption}
+        <option value={selectValue ? selectValue : ""} id="default-select-option" disabled hidden>
+          {selectValue ? selectValue : defaultOption}
         </option>
         {options.map((option) => {
           return (

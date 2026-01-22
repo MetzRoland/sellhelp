@@ -11,4 +11,5 @@ export interface SelectComponentType{
   options: SelectOption[],
   defaultOption: string,
   isDisabled?: boolean
+  selectValue?: string
 }

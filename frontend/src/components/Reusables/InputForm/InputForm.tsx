@@ -51,6 +51,7 @@ function InputForm<T extends object>({
             isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
             options={options?.[input.name] ?? []}
             defaultOption={input.placeholder}
+            selectValue={formData[input.name]}
           />
         )
       )}
