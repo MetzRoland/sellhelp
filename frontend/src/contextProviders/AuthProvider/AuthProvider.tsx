@@ -99,6 +99,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           } catch {
             setAccessToken(null);
             setUser(null);
+            localStorage.removeItem("profilePicture");
           } finally {
             isRefreshing = false;
             setAuthLoading(false);

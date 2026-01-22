@@ -5,6 +5,11 @@ import { useLoading } from "../../contextProviders/ProccessLoadProvider/Proccess
 import { privateAxios } from "../../config/axiosConfig";
 import "./Header.css";
 
+type CachedProfilePicture = {
+  url: string;
+  expiresAt: number;
+};
+
 function Header() {
   const { isAuthenticated, logout } = useAuth();
   const [profilePicture, setProfilePicture] = useState<string | null>(null);
@@ -20,12 +25,18 @@ function Header() {
     if (profilePicture) return;
 
     const cachedPp = localStorage.getItem("profilePicture");
-    console.log(cachedPp);
 
     if (cachedPp) {
-      setProfilePicture(cachedPp);
-      setPpLoading(false);
-      return;
+      const parsed: CachedProfilePicture = JSON.parse(cachedPp);
+
+      if (Date.now() < parsed.expiresAt) {
+        setProfilePicture(parsed.url);
+        setPpLoading(false);
+        return;
+      } 
+      else {
+        localStorage.removeItem("profilePicture");
+      }
     }
 
     const fetchProfilePicture = async () => {
@@ -33,8 +44,16 @@ function Header() {
         const response = await privateAxios.get("/user/files/pp");
         setProfilePicture(response.data.profilePictureUrl);
 
-        if(response.data.profilePictureUrl){
-          localStorage.setItem("profilePicture", response.data.profilePictureUrl);
+        if (response.data.profilePictureUrl) {
+          const expiresInMs = 15 * 60 * 1000;
+
+          localStorage.setItem(
+            "profilePicture",
+            JSON.stringify({
+              url: response.data.profilePictureUrl,
+              expiresAt: Date.now() + expiresInMs,
+            }),
+          );
         }
       } catch {
         setProfilePicture(null);
