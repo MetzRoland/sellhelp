@@ -31,7 +31,11 @@ function Header() {
 
       if (Date.now() < parsed.expiresAt) {
         setProfilePicture(parsed.url);
-        setPpLoading(false);
+
+        setTimeout(() => {
+          setPpLoading(false);
+        }, 1000);
+
         return;
       } 
       else {
@@ -131,17 +135,10 @@ function Header() {
             >
               {ppLoading ? (
                 <div className="profile-picture-skeleton" />
-              ) : profilePicture ? (
-                <img
-                  className="profile-picture-img"
-                  src={profilePicture}
-                  alt="Profile picture"
-                  onClick={handleProfileDropDown}
-                />
               ) : (
                 <img
                   className="profile-picture-img"
-                  src="/images/profile.svg"
+                  src={profilePicture || "images/profile.svg"}
                   alt="Profile picture"
                   onClick={handleProfileDropDown}
                 />

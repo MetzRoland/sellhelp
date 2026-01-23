@@ -217,6 +217,21 @@ public class AuthService {
             return userRepository.save(newUser);
         });
 
+        /*
+        if(!user.getFirstName().equals(firstName)){
+            user.setFirstName(firstName);
+        }
+
+        if(!user.getLastName().equals(lastName)){
+            user.setLastName(lastName);
+        }
+
+        user.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, user.getId()));
+
+        userRepository.save(user);
+        */
+
+
         if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
 
         if(tokenDTO.getTempToken() == null){
