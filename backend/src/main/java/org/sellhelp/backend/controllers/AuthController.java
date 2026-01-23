@@ -6,6 +6,7 @@ import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
+import org.sellhelp.backend.dtos.validationGroups.ValidationOrder;
 import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -34,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterDTO> registerLocalUser(@Valid @RequestBody RegisterDTO registerDTO,
+    public ResponseEntity<RegisterDTO> registerLocalUser(@Validated(ValidationOrder.class) @RequestBody RegisterDTO registerDTO,
                                                          @RequestParam(defaultValue = "ROLE_USER") UserRole userRole){
         authService.registerLocalUser(registerDTO, userRole);
 
@@ -42,7 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> loginUserHandler(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> loginUserHandler(@Validated(ValidationOrder.class) @RequestBody LoginDTO loginDTO,
+                                                     HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.userLogin(loginDTO);
 
@@ -52,7 +55,8 @@ public class AuthController {
     }
 
     @PostMapping("/login/superuser")
-    public ResponseEntity<TokenDTO> loginSuperUserHandler(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> loginSuperUserHandler(@Validated(ValidationOrder.class) @RequestBody LoginDTO loginDTO,
+                                                          HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.superUserLogin(loginDTO);
 
@@ -79,7 +83,7 @@ public class AuthController {
     }
 
     @PostMapping("/enable2fa")
-    public ResponseEntity<String> enableMfa(@RequestBody @Valid FirstTotpValidationDTO firstTotpValidationDTO){
+    public ResponseEntity<String> enableMfa(@Validated(ValidationOrder.class) @RequestBody FirstTotpValidationDTO firstTotpValidationDTO){
         mfaService.enableMfa(firstTotpValidationDTO);
 
         return ResponseEntity.ok("Kétfaktoros hitelesítés bekapcsolva!");
@@ -93,7 +97,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify-totp")
-    public ResponseEntity<TokenDTO> verifyTotp(@Valid @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
+    public ResponseEntity<TokenDTO> verifyTotp(@Validated(ValidationOrder.class) @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
         TokenDTO tokenDTO = mfaService.validateTotpCode(totpCodeDTO);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
@@ -134,7 +138,7 @@ public class AuthController {
     }
 
     @PostMapping("/google/register")
-    public ResponseEntity<Void> finishGoogleRegistration(@Valid @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
+    public ResponseEntity<Void> finishGoogleRegistration(@Validated(ValidationOrder.class) @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
         TokenDTO tokenDTO = authService.finishGoogleRegistration(googleRegisterDTO, tempToken);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());

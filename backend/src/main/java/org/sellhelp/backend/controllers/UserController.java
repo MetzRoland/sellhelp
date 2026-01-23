@@ -9,6 +9,7 @@ import org.sellhelp.backend.dtos.requests.UserDetailsUpdateDTO;
 import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
+import org.sellhelp.backend.dtos.validationGroups.ValidationOrder;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.services.EmailService;
@@ -16,6 +17,7 @@ import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import software.amazon.awssdk.services.s3.endpoints.internal.Value;
 
@@ -56,14 +58,14 @@ public class UserController {
     }
 
     @PatchMapping("/update/details")
-    public ResponseEntity<String> updateUserDetails(@Valid @RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
+    public ResponseEntity<String> updateUserDetails(@Validated(ValidationOrder.class) @RequestBody UserDetailsUpdateDTO userDetailsUpdateDTO){
         userService.updateUserDetails(userDetailsUpdateDTO);
 
         return ResponseEntity.ok("Sikeres frissítés!");
     }
 
     @PatchMapping("/update/email")
-    public ResponseEntity<String> updateUserEmail(HttpServletResponse response, @Valid @RequestBody EmailUpdateDTO emailUpdateDTO){
+    public ResponseEntity<String> updateUserEmail(HttpServletResponse response, @Validated(ValidationOrder.class) @RequestBody EmailUpdateDTO emailUpdateDTO){
         TokenDTO tokenDTO = userService.updateUserEmail(emailUpdateDTO);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
@@ -80,7 +82,7 @@ public class UserController {
     }
 
     @PatchMapping("/update/password")
-    public ResponseEntity<String> updateUserPassword(HttpServletResponse response, @Valid @RequestBody PasswordUpdateDTO passwordUpdateDTO){
+    public ResponseEntity<String> updateUserPassword(HttpServletResponse response, @Validated(ValidationOrder.class) @RequestBody PasswordUpdateDTO passwordUpdateDTO){
         TokenDTO tokenDTO = userService.updateUserPassword(passwordUpdateDTO);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
