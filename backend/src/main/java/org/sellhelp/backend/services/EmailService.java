@@ -78,7 +78,7 @@ public class EmailService {
         variables.put("lastName", lastName);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Regisztráció", "emails/registration", variables);
+        sendHTMLTemplateEmail(toEmail, "Regisztráció", "emails/registration", variables);
     }
 
     public void loginUser(String toEmail)
@@ -88,7 +88,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bejelentkezés", "emails/login", variables);
+        sendHTMLTemplateEmail(toEmail, "Bejelentkezés", "emails/login", variables);
     }
 
     public void logoutUser(String toEmail)
@@ -98,7 +98,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Kijelentkezés", "emails/logout", variables);
+        sendHTMLTemplateEmail(toEmail, "Kijelentkezés", "emails/logout", variables);
     }
 
     public void banUser(String toEmail)
@@ -108,7 +108,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Bannolva lett a fiókod", "emails/banned", variables);
+        sendHTMLTemplateEmail(toEmail, "Bannolva lett a fiókod", "emails/banned", variables);
     }
 
     public void unbanUser(String toEmail)
@@ -118,7 +118,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A fiókod újra engedélyezve lett", "emails/unbanned", variables);
+        sendHTMLTemplateEmail(toEmail, "A fiókod újra engedélyezve lett", "emails/unbanned", variables);
     }
 
     public void updatePassword(String toEmail)
@@ -131,7 +131,7 @@ public class EmailService {
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
+        sendHTMLTemplateEmail(toEmail, "Jelszó módosítás", "emails/passwordUpdate", variables);
     }
 
     public void updatePasswordSuccess(String toEmail)
@@ -140,7 +140,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás sikeres", "emails/passwordUpdateSuccess", variables);
+        sendHTMLTemplateEmail(toEmail, "Jelszó módosítás sikeres", "emails/passwordUpdateSuccess", variables);
     }
 
     public void updateUserDetailsSuccess(String toEmail)
@@ -149,7 +149,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Módosítás történ a felhasználói adatokban", "emails/userDetailsUpdated", variables);
+        sendHTMLTemplateEmail(toEmail, "Módosítás történ a felhasználói adatokban", "emails/userDetailsUpdated", variables);
     }
 
     public void updateUserEmailSuccess(String toEmail)
@@ -158,7 +158,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Email cím módosítva", "emails/userEmailUpdated", variables);
+        sendHTMLTemplateEmail(toEmail, "Email cím módosítva", "emails/userEmailUpdated", variables);
     }
 
     public void mfaEnabled(String toEmail)
@@ -167,7 +167,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés bekapcsolva", "emails/mfaEnabled", variables);
+        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés bekapcsolva", "emails/mfaEnabled", variables);
     }
 
     public void mfaDisabled(String toEmail)
@@ -176,6 +176,6 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "A kétfaktoros hitelesítés kikapcsolva", "emails/mfaDisabled", variables);
+        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés kikapcsolva", "emails/mfaDisabled", variables);
     }
 }
