@@ -45,8 +45,9 @@ body {
 
 .content-container {
   margin: 1.5rem auto;
+  min-width: 25vw;
   width: 100%;
-  max-width: 420px;
+  max-width: 90vw;
 
   background-color: #3C3B3A;
 
@@ -58,6 +59,11 @@ body {
   padding: 1.5em;
 
   box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25);
+}
+
+.content-title
+{
+  font-size: 300%;
 }
 
 /* ===================== */
@@ -99,7 +105,6 @@ body {
 
 .input-container {
   width: 100%;
-  margin: 1em 0;
 
   display: flex;
   flex-direction: column;
@@ -218,6 +223,45 @@ body {
     inset 6px 0px 4px rgba(234, 234, 234, 0.5),
     inset 0px -6px 4px rgba(234, 234, 234, 0.5),
     inset 0px 6px 4px rgba(234, 234, 234, 0.5);
+}
+
+/* ========================= */
+/* BUTTONS FOR SETTINGS      */
+/* ========================= */
+
+.setting-container{
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.setting-btn{
+  background-color: #212121;
+  border: 1px transparent;
+  color: #afafaf;
+  padding: 1em;
+  width: 30%;
+  font-weight: bold;
+  border-radius: 15px;
+  text-align: center;
+  text-decoration: none;
+
+  white-space: normal;
+  word-break: break-word;
+
+  transition: all .4s;
+}
+
+.setting-btn:hover{
+    color: #eaeaea;
+    cursor: pointer;
+}
+
+.setting-btn:disabled{
+  color: #8D8D8D;
+  background-color: #4e4e4e;
+  cursor: no-drop;
 }
 
 /* ===================== */

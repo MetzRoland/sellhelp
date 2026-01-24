@@ -16,8 +16,9 @@ interface InputFormProps<T extends object> {
   options?: {
     [K in keyof FormFields<T>]?: { id: number; value: string; label: string }[];
   };
-  disabledInputsMap?: Partial<Record<keyof FormFields<T>, boolean>>;
-  isSettings?: boolean;
+  disabledInputsMap?;
+  disabledToggle?;
+  settingInputsMap?;
 }
 
 function InputForm<T extends object>({
@@ -27,11 +28,14 @@ function InputForm<T extends object>({
   formData,
   disabledInputsMap,
   options,
+  settingInputsMap,
+  disabledToggle,
 }: InputFormProps<T>) {
   return (
     <>
       {inputs.map((input) =>
         input.type !== "select" ? (
+          <div className="setting-container">
           <InputComponent
             key={String(input.name)}
             errorMessage={errorMessage?.[input.name] || ""}
@@ -42,17 +46,38 @@ function InputForm<T extends object>({
             isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
             handleFunction={handleFunction}
           />
+
+          {settingInputsMap?.[String(input.name)] &&
+          <button
+            type="button"
+            className="setting-btn"
+            onClick={() => disabledToggle(String(input.name))}
+          >{disabledInputsMap[input.name] ? "Módosítás" : "Mentés"}
+          </button>}
+          </div>
         ) : (
-          <SelectComponent
-            key={String(input.name)}
-            errorMessage={errorMessage?.[input.name] || ""}
-            inputName={input.name}
-            handleFunction={handleFunction}
-            isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
-            options={options?.[input.name] ?? []}
-            defaultOption={input.placeholder}
-            selectValue={formData[input.name]}
-          />
+          <>
+          <div className="setting-container">
+            <SelectComponent
+              key={String(input.name)}
+              errorMessage={errorMessage?.[input.name] || ""}
+              inputName={input.name}
+              handleFunction={handleFunction}
+              isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
+              options={options?.[input.name] ?? []}
+              defaultOption={input.placeholder}
+              selectValue={formData[input.name]}
+              />
+
+            {settingInputsMap?.[String(input.name)] &&
+            <button
+            type="button"
+            className="setting-btn"
+            onClick={() => disabledToggle(String(input.name))}
+            >{disabledInputsMap[input.name] ? "Módosítás" : "Mentés"}
+            </button>}
+          </div>
+          </>
         )
       )}
     </>

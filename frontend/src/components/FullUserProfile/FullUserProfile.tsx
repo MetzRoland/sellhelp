@@ -6,6 +6,7 @@ import { useLoading } from "../../contextProviders/ProccessLoadProvider/Proccess
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import { privateAxios } from "../../config/axiosConfig";
+import { publicAxios } from "../../config/axiosConfig";
 import PageNotFound from "../PageNotFound/PageNotFound";
 import InputForm from "../Reusables/InputForm/InputForm";
 import type {
@@ -13,6 +14,7 @@ import type {
   UserUpdateValidationErrors,
 } from "./UserUpdateTypes";
 import { AxiosError } from "axios";
+import { type City } from "../Register/RegisterTypes";
 
 interface FullUserProfileProps {
   settings?: boolean;
@@ -24,6 +26,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
   const [user, setUser] = useState<User | null>(null);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
+  const [cities, setCities] = useState<City[]>([]);
 
   const userUpdateInputs = [
     { name: "lastName", type: "text", placeholder: "Vezetéknév" },
@@ -31,17 +34,31 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     { name: "birthDate", type: "date", placeholder: "Születési dátum" },
     { name: "cityName", type: "select", placeholder: "Település" },
     { name: "email", type: "text", placeholder: "Email" },
-    { name: "mfa", type: "text", placeholder: "Kétfaktoros hitelesítés" },
     { name: "role", type: "text", placeholder: "Szerepkör" },
     { name: "isBanned", type: "text", placeholder: "Fiók hozzáférés" },
   ] as const;
 
-  const [disabledInputs, setDisabledInputs] = useState(
+  const [disabledInputsMap, setDisabledInputsMap] = useState(
     userUpdateInputs.reduce((acc, input) => {
       acc[input.name] = true; // or false if you want them enabled initially
       return acc;
     }, {}),
   );
+
+
+  const settingInputsMap = userUpdateInputs.reduce((acc, input) => {
+
+    if (input.name == "role")
+      {acc[input.name] = false;}
+    else if (input.name == "isBanned")
+      {acc[input.name] = false;}    
+    else if (!settings)
+      {acc[input.name] = false;}
+    else
+      {acc[input.name] = true;}
+    return acc;
+    }, {});
+
 
   const [userUpdateError, setUserUpdateError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -54,7 +71,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     birthDate: "",
     cityName: "",
     email: "",
-    mfa: "",
     role: "",
     isBanned: "",
   });
@@ -80,13 +96,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         const response = await privateAxios.get<User>(`/user/users/${id}`);
         setUser(response.data);
 
-        setFormData({
-          lastName: user?.lastName,
-          firstName: user?.firstName,
-          birthDate: user?.birthDate.toString(),
-          cityName: user?.cityName,
-          email: user?.email,
-        });
       } catch {
         setUser(null);
         // more error handling
@@ -98,6 +107,22 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchUserById();
   }, [id, authUser, setIsLoading, setLoadingMessage]);
 
+    useEffect(() => {
+    if (!settings) return;
+
+    const fetchCities = async () => {
+      try {
+        setIsLoading(true);
+        const response = await publicAxios.get("/api/public/cities");
+        setCities(response.data);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCities();
+  }, [setIsLoading]);
+
   useEffect(() => {
     setFormData({
       lastName: user?.lastName,
@@ -105,6 +130,8 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       birthDate: user?.birthDate.toString(),
       cityName: user?.cityName,
       email: user?.email,
+      role: getUserRoleLabel(user?.role),
+      isBanned: user?.banned ? "A fiók bannolva" : "A fiók aktív",
     });
   }, [user]);
 
@@ -116,16 +143,15 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     return <PageNotFound message="A fiók nem található!" />;
   }
 
-  const toggleDisabled = (inputName: string) => {
-    setDisabledInputs((prev) => ({
-      ...prev,
-      [inputName]: !prev[inputName], // flip the boolean
-    }));
-  };
+  const cityOptions = cities.map((city) => ({
+      id: city.id,
+      value: city.cityName,
+      label: city.cityName,
+  }));
 
-  const handleUpdateSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
 
+  const handleUpdateSubmit = async () => {
+    console.log("UPDATE---UPDATE---UPDATE---UPDATE---UPDATE---UPDATE---UPDATE");
     try {
       setIsLoading(true);
       setLoadingMessage("Adatok frissítése...");
@@ -142,13 +168,13 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         setValidationErrors({});
         setUserUpdateError("");
 
-        setFormData({
-          lastName: "",
-          firstName: "",
-          birthDate: "",
-          cityName: "",
-          email: "",
-        });
+        // setFormData({
+        //   lastName: "",
+        //   firstName: "",
+        //   birthDate: "",
+        //   cityName: "",
+        //   email: "",
+        // });
       }
     } catch (err) {
       const error = err as AxiosError<{
@@ -181,7 +207,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     setUserUpdateError("");
   };
 
-  function getUserRoleLabel(role: string): string {
+  function getUserRoleLabel(role: string | undefined): string {
     switch (role) {
       case "ROLE_USER":
         return "Felhasználó";
@@ -196,6 +222,13 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         return "Hiba";
     }
   }
+  
+  const toggleDisabled = (inputName: string) => {
+  setDisabledInputsMap((prev) => ({
+    ...prev,
+    [inputName]: !prev[inputName], // flip the boolean
+  }));
+  };
 
   const sendPassUpdate = async () => {
     try {
@@ -208,7 +241,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
       if (response.status === 200) {
         setSuccess(true);
-        setValidationErrors({});
+        // setValidationErrors({});
         setUserUpdateError("");
       }
     } catch (err) {
@@ -218,12 +251,16 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }
   };
 
+  const title = settings ?
+    "Adatok módosítása" :
+    `${user.lastName} ${user.firstName}`
+
   return (
     <>
       <Header />
       <div className="main-container">
-        <h1>
-          Üdv, {user.lastName} {user.firstName}
+        <h1 className="content-title">
+          {title}
         </h1>
 
         <form
@@ -240,65 +277,29 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             <p className="message success-message">Frissítés sikeres</p>
           )}
 
-          {/* If settings, Add disable and button */}
+          {/* If settings, Add buttons */}
           <InputForm<UserUpdateForm>
             inputs={userUpdateInputs}
             formData={formData}
             handleFunction={handleUpdateInput}
             errorMessage={validationErrors}
-            disabledInputsMap={disabledInputs}
-            isSettings={settings}
+            disabledInputsMap={disabledInputsMap}
+            settingInputsMap={settingInputsMap}
+            disabledToggle={toggleDisabled}
+            options={{ cityName: cityOptions}}
           />
-          <p>
-            {user.mfa
-              ? "Kétfaktoros hitelesítés bekapcsolva"
-              : "Kétfaktoros hitelesítés kikapcsolva"}
-          </p>
-          <p>Szerepkör: {getUserRoleLabel(user.role)}</p>
-          <p>
-            {!user.banned ? "A fiók aktív" : "A fiók letiltva adminok által"}
-          </p>
 
-          <button className="btn" type="button" onClick={sendPassUpdate}>
-            Jelszó frissítése
-          </button>
+          {settings && 
+          <>
+            <button className="btn" type="button" onClick={sendPassUpdate}>
+              Jelszó módosítása
+            </button>
+            <button className="btn" type="button">
+              Két faktoros hitelesítés módosítása
+            </button>
+          </>
+          }
         </form>
-        {/* 
-        <input
-          type="text"
-          value={user.email}
-          disabled
-        />
-        {settings && (<button className="btn" type="button">Módosít</button>)}
-
-        <input
-          type="text"
-          value={user.lastName}
-          disabled
-        />
-        {settings && (<button className="btn" type="button">Módosít</button>)}
-
-        <input
-          type="text"
-          value={user.firstName}
-          disabled
-        />
-        {settings && (<button className="btn" type="button">Módosít</button>)}
-
-        <input
-          type="text"
-          value={user.birthDate.toString().split("-").join(".")}
-          disabled
-        />
-        {settings && (<button className="btn" type="button">Módosít</button>)}
-
-        <input
-          type="text"
-          value={user.cityName}
-          disabled
-        />
-        {settings && (<button className="btn" type="button">Módosít</button>)}
-        */}
       </div>
       <Footer />
     </>
