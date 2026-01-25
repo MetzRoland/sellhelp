@@ -12,7 +12,7 @@ import InputForm from "../Reusables/InputForm/InputForm";
 import type {
   UserUpdateForm,
   UserUpdateValidationErrors,
-} from "./UserUpdateTypes";
+} from "./FullUserProfileTypes";
 import { AxiosError } from "axios";
 import { type City } from "../Register/RegisterTypes";
 
@@ -151,14 +151,20 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
 
   const handleUpdateSubmit = async () => {
-    console.log("UPDATE---UPDATE---UPDATE---UPDATE---UPDATE---UPDATE---UPDATE");
+    const payload = getUpdatedFields(user, formData);
+
+    if (Object.keys(payload).length === 0) {
+      console.log("No changes to update");
+      return;
+    }
+
     try {
       setIsLoading(true);
       setLoadingMessage("Adatok frissítése...");
 
       const response = await privateAxios.patch(
         "/user/update/details",
-        formData,
+        payload,
       );
       console.log("PATCH /user/update/details-ből:");
       console.log(response);
@@ -193,6 +199,27 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }
   };
 
+  const getUpdatedFields = (
+    original: User,
+    updated: Record<string, any>
+  ): Partial<User> => {
+    return Object.keys(updated).reduce((acc, key) => {
+      const typedKey = key as keyof User;
+
+      if (
+        typedKey !== "role" &&
+        typedKey !== "isBanned" &&
+        updated[typedKey] !== "" && // ignore empty fields
+        updated[typedKey] !== original[typedKey]
+      ) {
+        acc[typedKey] = updated[typedKey];
+      }
+
+      return acc;
+    }, {} as Partial<User>);
+  };
+  
+
   const handleUpdateInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
   ) => {
@@ -224,6 +251,8 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   }
   
   const toggleDisabled = (inputName: string) => {
+  if (!disabledInputsMap[inputName]) handleUpdateSubmit();
+
   setDisabledInputsMap((prev) => ({
     ...prev,
     [inputName]: !prev[inputName], // flip the boolean
@@ -265,7 +294,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
         <form
           className="content-container login-form"
-          onSubmit={handleUpdateSubmit}
         >
           {userUpdateError && (
             <p className="message error error-process-status">

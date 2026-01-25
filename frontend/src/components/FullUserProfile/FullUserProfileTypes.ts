@@ -4,8 +4,6 @@ export interface UserUpdateForm {
   birthDate?: string;
   cityName?: string;
   email?: string;
-  role?: string;
-  isBanned?: string;
 }
 
 export interface UserUpdateValidationErrors {
@@ -14,6 +12,4 @@ export interface UserUpdateValidationErrors {
   birthDate?: string;
   cityName?: string;
   email?: string;
-  role?: string;
-  isBanned?: string;
 }
