@@ -1,6 +1,6 @@
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
-import { useParams } from "react-router";
+import { useParams, useNavigate } from "react-router";
 import { useEffect, useState } from "react";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import Header from "../Header/Header";
@@ -28,6 +28,8 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
   const [cities, setCities] = useState<City[]>([]);
 
+  const navigator = useNavigate();
+
   const userUpdateInputs = [
     { name: "lastName", type: "text", placeholder: "Vezetéknév" },
     { name: "firstName", type: "text", placeholder: "Keresztnév" },
@@ -35,7 +37,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     { name: "cityName", type: "select", placeholder: "Település" },
     { name: "email", type: "text", placeholder: "Email" },
     { name: "role", type: "text", placeholder: "Szerepkör" },
-    { name: "isBanned", type: "text", placeholder: "Fiók hozzáférés" },
   ] as const;
 
   const [disabledInputsMap, setDisabledInputsMap] = useState(
@@ -45,20 +46,18 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }, {}),
   );
 
-
   const settingInputsMap = userUpdateInputs.reduce((acc, input) => {
-
-    if (input.name == "role")
-      {acc[input.name] = false;}
-    else if (input.name == "isBanned")
-      {acc[input.name] = false;}    
-    else if (!settings)
-      {acc[input.name] = false;}
-    else
-      {acc[input.name] = true;}
+    if (input.name == "role") {
+      acc[input.name] = false;
+    } else if (input.name == "isBanned") {
+      acc[input.name] = false;
+    } else if (!settings) {
+      acc[input.name] = false;
+    } else {
+      acc[input.name] = true;
+    }
     return acc;
-    }, {});
-
+  }, {});
 
   const [userUpdateError, setUserUpdateError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -95,7 +94,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
         const response = await privateAxios.get<User>(`/user/users/${id}`);
         setUser(response.data);
-
       } catch {
         setUser(null);
         // more error handling
@@ -107,7 +105,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchUserById();
   }, [id, authUser, setIsLoading, setLoadingMessage]);
 
-    useEffect(() => {
+  useEffect(() => {
     if (!settings) return;
 
     const fetchCities = async () => {
@@ -123,16 +121,19 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchCities();
   }, [setIsLoading]);
 
-  useEffect(() => {
+  const setUserData = () => {
     setFormData({
       lastName: user?.lastName,
       firstName: user?.firstName,
-      birthDate: user?.birthDate.toString(),
+      birthDate: user?.birthDate?.toString(),
       cityName: user?.cityName,
       email: user?.email,
       role: getUserRoleLabel(user?.role),
-      isBanned: user?.banned ? "A fiók bannolva" : "A fiók aktív",
     });
+  };
+
+  useEffect(() => {
+    setUserData();
   }, [user]);
 
   if (isLoading && !user) {
@@ -144,28 +145,30 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   }
 
   const cityOptions = cities.map((city) => ({
-      id: city.id,
-      value: city.cityName,
-      label: city.cityName,
+    id: city.id,
+    value: city.cityName,
+    label: city.cityName,
   }));
-
 
   const handleUpdateSubmit = async () => {
     const payload = getUpdatedFields(user, formData);
+    let endpoint = "/user/update/details";
 
     if (Object.keys(payload).length === 0) {
       console.log("No changes to update");
       return;
     }
 
+    if (Object.keys(payload).length === 1 && payload.email) {
+      console.log("No changes to update");
+      endpoint = "/user/update/email";
+    }
+
     try {
       setIsLoading(true);
       setLoadingMessage("Adatok frissítése...");
 
-      const response = await privateAxios.patch(
-        "/user/update/details",
-        payload,
-      );
+      const response = await privateAxios.patch(endpoint, payload);
       console.log("PATCH /user/update/details-ből:");
       console.log(response);
 
@@ -174,13 +177,8 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         setValidationErrors({});
         setUserUpdateError("");
 
-        // setFormData({
-        //   lastName: "",
-        //   firstName: "",
-        //   birthDate: "",
-        //   cityName: "",
-        //   email: "",
-        // });
+        // setuser payload alapján
+        setUser(prev => prev ? { ...prev, ...payload } : prev);
       }
     } catch (err) {
       const error = err as AxiosError<{
@@ -196,20 +194,21 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       );
     } finally {
       setIsLoading(false);
+
+      //setUserData();
     }
   };
 
   const getUpdatedFields = (
     original: User,
-    updated: Record<string, any>
+    updated: Record<string, any>,
   ): Partial<User> => {
     return Object.keys(updated).reduce((acc, key) => {
       const typedKey = key as keyof User;
 
       if (
         typedKey !== "role" &&
-        typedKey !== "isBanned" &&
-        updated[typedKey] !== "" && // ignore empty fields
+        updated[typedKey] !== "" &&
         updated[typedKey] !== original[typedKey]
       ) {
         acc[typedKey] = updated[typedKey];
@@ -218,7 +217,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       return acc;
     }, {} as Partial<User>);
   };
-  
 
   const handleUpdateInput = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
@@ -249,14 +247,14 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         return "Hiba";
     }
   }
-  
-  const toggleDisabled = (inputName: string) => {
-  if (!disabledInputsMap[inputName]) handleUpdateSubmit();
 
-  setDisabledInputsMap((prev) => ({
-    ...prev,
-    [inputName]: !prev[inputName], // flip the boolean
-  }));
+  const toggleDisabled = (inputName: string) => {
+    if (!disabledInputsMap[inputName]) handleUpdateSubmit();
+
+    setDisabledInputsMap((prev) => ({
+      ...prev,
+      [inputName]: !prev[inputName], // flip the boolean
+    }));
   };
 
   const sendPassUpdate = async () => {
@@ -280,21 +278,43 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }
   };
 
-  const title = settings ?
-    "Adatok módosítása" :
-    `${user.lastName} ${user.firstName}`
+  const disableMfa = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingMessage("Kétfaktoros hitelesítés kikapcsolása...");
+
+      const response = await privateAxios.get("/auth/disable2fa");
+      console.log(response.data);
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const mfaToggle = async () => {
+    if (!user.mfa) {
+      navigator("/setupmfa");
+      return;
+    }
+
+    await disableMfa();
+
+    const userInfo = await privateAxios.get<User>("/user/info");
+    setUser(userInfo.data);
+  };
+
+  const title = settings
+    ? "Adatok módosítása"
+    : `${user.lastName} ${user.firstName}`;
 
   return (
     <>
       <Header />
       <div className="main-container">
-        <h1 className="content-title">
-          {title}
-        </h1>
+        <h1 className="content-title">{title}</h1>
 
-        <form
-          className="content-container login-form"
-        >
+        <form className="content-container login-form">
           {userUpdateError && (
             <p className="message error error-process-status">
               {userUpdateError}
@@ -314,19 +334,21 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             disabledInputsMap={disabledInputsMap}
             settingInputsMap={settingInputsMap}
             disabledToggle={toggleDisabled}
-            options={{ cityName: cityOptions}}
+            options={{ cityName: cityOptions }}
           />
 
-          {settings && 
-          <>
-            <button className="btn" type="button" onClick={sendPassUpdate}>
-              Jelszó módosítása
-            </button>
-            <button className="btn" type="button">
-              Két faktoros hitelesítés módosítása
-            </button>
-          </>
-          }
+          {settings && (
+            <>
+              <button className="btn" type="button" onClick={sendPassUpdate}>
+                Jelszó módosítása
+              </button>
+              <button className="btn" type="button" onClick={mfaToggle}>
+                {user.mfa
+                  ? "Két faktoros hitelesítés kikapcsolása"
+                  : "Két faktoros hitelesítés bekapcsolása"}
+              </button>
+            </>
+          )}
         </form>
       </div>
       <Footer />

@@ -73,6 +73,7 @@ public class SecurityConfig {
                         "/auth/register",
                         "/auth/enable2fa",
                         "/auth/disable2fa",
+                        "/auth/setup2fa",
                         "/auth/verify-totp",
                         "/auth/login/refresh")
                 .csrf(AbstractHttpConfigurer::disable)
@@ -83,7 +84,7 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
-                        .requestMatchers("/auth/enable2fa", "/auth/disable2fa")
+                        .requestMatchers("/auth/enable2fa", "/auth/disable2fa", "/auth/setup2fa")
                         .authenticated()
                         .requestMatchers(
                                 "/user/logout",

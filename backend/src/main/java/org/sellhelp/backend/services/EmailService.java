@@ -127,11 +127,11 @@ public class EmailService {
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
-                "http://localhost:3000/reset-password?token=" + token;
+                "http://localhost:5173/resetPassword?token=" + token;
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Jelszó módosítás", "emails/passwordUpdate", variables);
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
     }
 
     public void updatePasswordSuccess(String toEmail)

@@ -1,0 +1,7 @@
+.qr-code-container{
+    display: flex;
+    flex-direction: column;
+    gap: 1em;
+    
+    margin: 2em;
+}

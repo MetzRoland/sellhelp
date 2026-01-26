@@ -100,6 +100,10 @@ public class UserService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!"));
 
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg a jelenlegi jelszóval!");
+        }
+
         if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getLastUsedPassword())){
             throw new RuntimeException("Az új jelszó nem egyezhet meg az előző jelszóval!");
         }

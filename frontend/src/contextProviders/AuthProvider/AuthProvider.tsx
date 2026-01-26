@@ -1,13 +1,18 @@
-import {
-  useState,
-  useEffect,
-  useLayoutEffect,
-  type ReactNode,
-} from "react";
+import { useState, useEffect, useLayoutEffect, type ReactNode } from "react";
 import type { AxiosError } from "axios";
 import { privateAxios, refreshAxios } from "../../config/axiosConfig";
-import type { GoogleRegisterForm, LoginForm } from "../../components/Login/LoginTypes";
-import type {InternalAxiosRequestConfigWithRetry, User, LoginCredentials, TotpCredentials, AuthContextType, GoogleRegister} from "./AuthProviderTypes";
+import type {
+  GoogleRegisterForm,
+  LoginForm,
+} from "../../components/Login/LoginTypes";
+import type {
+  InternalAxiosRequestConfigWithRetry,
+  User,
+  LoginCredentials,
+  TotpCredentials,
+  AuthContextType,
+  GoogleRegister,
+} from "./AuthProviderTypes";
 import { AuthContext } from "./AuthContext";
 import { useLocation } from "react-router";
 
@@ -20,10 +25,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     password: "",
     totpCode: "",
   });
-  const [googleRegisterErrors, setGoogleRegisterErrors] = useState<GoogleRegisterForm>({
-    cityName: "",
-    birthDate: "",
-  });
+  const [googleRegisterErrors, setGoogleRegisterErrors] =
+    useState<GoogleRegisterForm>({
+      cityName: "",
+      birthDate: "",
+    });
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const location = useLocation();
@@ -54,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           console.log(accessToken);
         }
         return config;
-      }
+      },
     );
 
     return () => {
@@ -72,6 +78,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           | InternalAxiosRequestConfigWithRetry
           | undefined;
 
+        const url = originalRequest?.url;
+
+        const isMfaEndpoint =
+          url?.includes("/auth/enable2fa") || url?.includes("/user/update/password");
+
+        if (isMfaEndpoint) {
+          return Promise.reject(error);
+        }
+
         if (
           error.response &&
           originalRequest &&
@@ -88,7 +103,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
             console.log(refreshRes.data.accessToken);
             setAccessToken(refreshRes.data.accessToken);
-            originalRequest.headers.set("Authorization", `Bearer ${refreshRes.data.accessToken}`);
+            originalRequest.headers.set(
+              "Authorization",
+              `Bearer ${refreshRes.data.accessToken}`,
+            );
 
             const userInfo = await privateAxios.get<User>("/user/info");
             setUser(userInfo.data);
@@ -107,7 +125,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
 
         return Promise.reject(error);
-      }
+      },
     );
 
     return () => {
@@ -115,7 +133,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const loginLocal = async (endpoint: string, credentials: LoginCredentials) => {
+  const loginLocal = async (
+    endpoint: string,
+    credentials: LoginCredentials,
+  ) => {
     try {
       const res = await privateAxios.post(endpoint, credentials);
 
@@ -133,7 +154,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const err = error as AxiosError<{ message?: string; errors?: LoginForm }>;
       setAuthError(err.response?.data?.message ?? "Sikertelen bejelentkezés!");
       setValidationErrors(
-        err.response?.data?.errors ?? { email: "", password: "", totpCode: "" }
+        err.response?.data?.errors ?? { email: "", password: "", totpCode: "" },
       );
     }
   };
@@ -154,7 +175,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const err = error as AxiosError<{ message?: string; errors?: LoginForm }>;
       setAuthError(err.response?.data?.message ?? "Helytelen hitelesítő kód!");
       setValidationErrors(
-        err.response?.data?.errors ?? { email: "", password: "", totpCode: "" }
+        err.response?.data?.errors ?? { email: "", password: "", totpCode: "" },
       );
     }
   };
@@ -164,14 +185,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const finishGoogleRegistration = async (registerData: GoogleRegister) => {
-    try{
+    try {
       await privateAxios.get("/auth/loginSuccess");
 
       const queryParams = new URLSearchParams(location.search);
       const tempToken = queryParams.get("tempToken");
       setTempToken(tempToken);
 
-      await privateAxios.post(`/auth/google/register?tempToken=${tempToken}`, registerData);
+      await privateAxios.post(
+        `/auth/google/register?tempToken=${tempToken}`,
+        registerData,
+      );
 
       const userInfo = await privateAxios.get<User>("/user/info");
       setUser(userInfo.data);
@@ -179,12 +203,16 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setAuthError(null);
       setGoogleRegisterErrors({ cityName: "", birthDate: "" });
-    }
-    catch(error){
-      const err = error as AxiosError<{ message?: string; errors?: GoogleRegister }>;
-      setAuthError(err.response?.data?.message ?? "Sikertelen google fiók regisztráció!");
+    } catch (error) {
+      const err = error as AxiosError<{
+        message?: string;
+        errors?: GoogleRegister;
+      }>;
+      setAuthError(
+        err.response?.data?.message ?? "Sikertelen google fiók regisztráció!",
+      );
       setGoogleRegisterErrors(
-        err.response?.data?.errors ?? {cityName: "", birthDate: ""}
+        err.response?.data?.errors ?? { cityName: "", birthDate: "" },
       );
     }
   };
@@ -223,7 +251,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     finishGoogleRegistration,
     googleRegisterErrors,
     setGoogleRegisterErrors,
-    handleGoogleLogin
+    handleGoogleLogin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

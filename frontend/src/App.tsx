@@ -10,9 +10,11 @@ import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import SuperUserRouterLayout from "./components/Routes/SuperUserRouterLayout";
 import UserBanning from "./components/UserBanning/UserBanning";
 import ProfileBanned from "./components/ProfileBanned/ProfileBanned";
+import DelayedLayout from "./components/DelayedLayout";
+import SetupMfa from "./components/SetupMfa/SetupMfa";
+import ResetPassword from "./components/ResetPassword/ResetPassword";
 
 import "./App.css";
-import DelayedLayout from "./components/DelayedLayout";
 
 function App() {
   const location = useLocation();
@@ -39,6 +41,8 @@ function App() {
             <Route path="/home/settings" element={<FullUserProfile settings={true} />} />
             <Route path="/profile" element={<FullUserProfile />} />
             <Route path="/users/:id" element={<FullUserProfile />} />
+            <Route path="/setupmfa" element={<SetupMfa />} />
+            <Route path="/resetPassword" element={<ResetPassword />}/>
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
