@@ -36,6 +36,10 @@ public class ModelMapperConfig {
                 .addMapping(
                         src -> src.getRole().getRoleName(),
                         UserDTO::setRole
+                )
+                .addMapping(
+                        User::getAuthProvider,
+                        UserDTO::setAuthProvider
                 );
 
         return mapper;

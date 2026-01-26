@@ -337,7 +337,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
-          {settings && (
+          {(settings && user.authProvider === "LOCAL") && (
             <>
               <button className="btn" type="button" onClick={sendPassUpdate}>
                 Jelszó módosítása

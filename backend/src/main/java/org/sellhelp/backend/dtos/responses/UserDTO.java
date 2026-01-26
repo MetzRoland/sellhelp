@@ -25,6 +25,7 @@ public class UserDTO {
     private boolean isMfa;
     private boolean banned;
     private String role;
+    private String authProvider;
     private Instant createdAt;
     private String accessToken;
 }

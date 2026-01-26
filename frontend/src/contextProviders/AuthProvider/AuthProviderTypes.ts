@@ -18,6 +18,7 @@ export interface User {
   role: string;
   createdAt: Date;
   profilePicture: string;
+  authProvider: string;
   accessToken: string;
 }
 
