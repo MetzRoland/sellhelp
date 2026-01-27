@@ -1,0 +1,50 @@
+name: Deploy Vitest Report
+
+on:
+  push:
+    branches: '**'  # run on pushes to main
+  workflow_dispatch:   # allow manual run
+
+jobs:
+  test-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout code
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2️⃣ Setup Node
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 20
+
+      # 3️⃣ Install dependencies
+      - name: Install dependencies
+        working-directory: ./frontend
+        run: npm ci
+
+      # 4️⃣ Run Vitest and generate HTML report
+      - name: Run tests
+        working-directory: ./frontend
+        run: npx vitest run --reporter=html
+
+      # 5️⃣ Create timestamped folder
+      - name: Prepare report folder
+        run: |
+          TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+          REPORT_FOLDER="html/$TIMESTAMP"
+          echo "REPORT_FOLDER=$REPORT_FOLDER" >> $GITHUB_ENV
+          mkdir -p $REPORT_FOLDER
+          mv frontend/html/* $REPORT_FOLDER/
+
+      # 6️⃣ Deploy to gh-pages
+      - name: Deploy Vitest HTML report
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: html
+          publish_branch: gh-pages
+          keep_files: true        # IMPORTANT: keep old reports
+          commit_message: "Add Vitest report ${{ env.REPORT_FOLDER }}"
