@@ -17,9 +17,9 @@ interface InputFormProps<T extends object> {
   options?: {
     [K in keyof FormFields<T>]?: { id: number; value: string; label: string }[];
   };
-  disabledInputsMap?;
-  disabledToggle?;
-  settingInputsMap?;
+  disabledInputsMap?: Record<string, boolean>;
+  disabledToggle?: (inputName: string) => void;
+  settingInputsMap?: Record<string, boolean>;
 }
 
 function InputForm<T extends object>({
@@ -27,10 +27,10 @@ function InputForm<T extends object>({
   errorMessage,
   handleFunction,
   formData,
-  disabledInputsMap,
+  disabledInputsMap = {},
   options,
-  settingInputsMap,
-  disabledToggle,
+  settingInputsMap = {},
+  disabledToggle = () => {},
 }: InputFormProps<T>) {
   const { user } = useAuth();
 
@@ -43,7 +43,7 @@ function InputForm<T extends object>({
               key={String(input.name)}
               errorMessage={errorMessage?.[input.name] || ""}
               inputType={input.type}
-              inputName={input.name}
+              inputName={String(input.name)}
               inputValue={formData[input.name]}
               inputPlaceholder={input.placeholder}
               isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
@@ -69,7 +69,7 @@ function InputForm<T extends object>({
               <SelectComponent
                 key={String(input.name)}
                 errorMessage={errorMessage?.[input.name] || ""}
-                inputName={input.name}
+                inputName={String(input.name)}
                 handleFunction={handleFunction}
                 isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
                 options={options?.[input.name] ?? []}

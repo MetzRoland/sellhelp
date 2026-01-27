@@ -39,25 +39,26 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     { name: "role", type: "text", placeholder: "Szerepkör" },
   ] as const;
 
-  const [disabledInputsMap, setDisabledInputsMap] = useState(
+  const [disabledInputsMap, setDisabledInputsMap] = useState<Record<string, boolean>>(
     userUpdateInputs.reduce((acc, input) => {
-      acc[input.name] = true; // or false if you want them enabled initially
+      acc[input.name] = true;
       return acc;
-    }, {}),
+    }, {} as Record<string, boolean>),
   );
 
-  const settingInputsMap = userUpdateInputs.reduce((acc, input) => {
-    if (input.name == "role") {
-      acc[input.name] = false;
-    } else if (input.name == "isBanned") {
-      acc[input.name] = false;
-    } else if (!settings) {
-      acc[input.name] = false;
-    } else {
-      acc[input.name] = true;
-    }
-    return acc;
-  }, {});
+  const settingInputsMap: Record<string, boolean> = userUpdateInputs.reduce(
+    (acc, input) => {
+      if (input.name == "role") {
+        acc[input.name] = false;
+      } else if (!settings) {
+        acc[input.name] = false;
+      } else {
+        acc[input.name] = true;
+      }
+      return acc;
+    },
+    {} as Record<string, boolean>,
+  );
 
   const [userUpdateError, setUserUpdateError] = useState("");
   const [success, setSuccess] = useState(false);
@@ -71,7 +72,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     cityName: "",
     email: "",
     role: "",
-    isBanned: "",
   });
 
   useEffect(() => {
@@ -119,7 +119,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     };
 
     fetchCities();
-  }, [setIsLoading]);
+  }, [setIsLoading, settings]);
 
   const setUserData = () => {
     setFormData({
@@ -178,7 +178,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         setUserUpdateError("");
 
         // setuser payload alapján
-        setUser(prev => prev ? { ...prev, ...payload } : prev);
+        setUser((prev) => (prev ? { ...prev, ...payload } : prev));
       }
     } catch (err) {
       const error = err as AxiosError<{
@@ -201,21 +201,18 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
   const getUpdatedFields = (
     original: User,
-    updated: Record<string, any>,
-  ): Partial<User> => {
-    return Object.keys(updated).reduce((acc, key) => {
-      const typedKey = key as keyof User;
-
+    updated: Partial<UserUpdateForm>,
+  ): Partial<UserUpdateForm> => {
+    return (Object.keys(updated) as (keyof UserUpdateForm)[]).reduce((acc, key) => {
       if (
-        typedKey !== "role" &&
-        updated[typedKey] !== "" &&
-        updated[typedKey] !== original[typedKey]
+        key !== "role" &&
+        updated[key] !== "" &&
+        updated[key] !== original[key]
       ) {
-        acc[typedKey] = updated[typedKey];
+        acc[key] = updated[key];
       }
-
       return acc;
-    }, {} as Partial<User>);
+    }, {} as Partial<UserUpdateForm>);
   };
 
   const handleUpdateInput = (
@@ -271,8 +268,9 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         // setValidationErrors({});
         setUserUpdateError("");
       }
-    } catch (err) {
+    } catch {
       // error handling
+      setUserUpdateError("Jelszó modósító email elküldése sikertelen!");
     } finally {
       setIsLoading(false);
     }
@@ -337,7 +335,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
-          {(settings && user.authProvider === "LOCAL") && (
+          {settings && user.authProvider === "LOCAL" && (
             <>
               <button className="btn" type="button" onClick={sendPassUpdate}>
                 Jelszó módosítása

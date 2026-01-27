@@ -4,6 +4,7 @@ export interface UserUpdateForm {
   birthDate?: string;
   cityName?: string;
   email?: string;
+  role?: string;
 }
 
 export interface UserUpdateValidationErrors {
