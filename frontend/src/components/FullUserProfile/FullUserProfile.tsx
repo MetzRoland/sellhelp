@@ -15,6 +15,7 @@ import type {
 } from "./FullUserProfileTypes";
 import { AxiosError } from "axios";
 import { type City } from "../Register/RegisterTypes";
+import type { UserUpdateFormFields } from "./FullUserProfileTypes";
 
 interface FullUserProfileProps {
   settings?: boolean;
@@ -39,11 +40,16 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     { name: "role", type: "text", placeholder: "Szerepkör" },
   ] as const;
 
-  const [disabledInputsMap, setDisabledInputsMap] = useState<Record<string, boolean>>(
-    userUpdateInputs.reduce((acc, input) => {
-      acc[input.name] = true;
-      return acc;
-    }, {} as Record<string, boolean>),
+  const [disabledInputsMap, setDisabledInputsMap] = useState<
+    Record<string, boolean>
+  >(
+    userUpdateInputs.reduce(
+      (acc, input) => {
+        acc[input.name] = true;
+        return acc;
+      },
+      {} as Record<string, boolean>,
+    ),
   );
 
   const settingInputsMap: Record<string, boolean> = userUpdateInputs.reduce(
@@ -65,7 +71,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const [validationErrors, setValidationErrors] =
     useState<UserUpdateValidationErrors>({});
 
-  const [formData, setFormData] = useState<UserUpdateForm>({
+  const [formData, setFormData] = useState<UserUpdateFormFields>({
     lastName: "",
     firstName: "",
     birthDate: "",
@@ -150,69 +156,22 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     label: city.cityName,
   }));
 
-  const handleUpdateSubmit = async () => {
-    const payload = getUpdatedFields(user, formData);
-    let endpoint = "/user/update/details";
-
-    if (Object.keys(payload).length === 0) {
-      console.log("No changes to update");
-      return;
-    }
-
-    if (Object.keys(payload).length === 1 && payload.email) {
-      console.log("No changes to update");
-      endpoint = "/user/update/email";
-    }
-
-    try {
-      setIsLoading(true);
-      setLoadingMessage("Adatok frissítése...");
-
-      const response = await privateAxios.patch(endpoint, payload);
-      console.log("PATCH /user/update/details-ből:");
-      console.log(response);
-
-      if (response.status === 200) {
-        setSuccess(true);
-        setValidationErrors({});
-        setUserUpdateError("");
-
-        // setuser payload alapján
-        setUser((prev) => (prev ? { ...prev, ...payload } : prev));
-      }
-    } catch (err) {
-      const error = err as AxiosError<{
-        message?: string;
-        errors?: UserUpdateForm;
-      }>;
-
-      setSuccess(false);
-      setValidationErrors(error.response?.data?.errors ?? {});
-
-      setUserUpdateError(
-        error.response?.data?.message ?? "Sikertelen frissítés!",
-      );
-    } finally {
-      setIsLoading(false);
-
-      //setUserData();
-    }
-  };
-
-  const getUpdatedFields = (
+  const getUpdatedField = (
     original: User,
-    updated: Partial<UserUpdateForm>,
-  ): Partial<UserUpdateForm> => {
-    return (Object.keys(updated) as (keyof UserUpdateForm)[]).reduce((acc, key) => {
-      if (
-        key !== "role" &&
-        updated[key] !== "" &&
-        updated[key] !== original[key]
-      ) {
-        acc[key] = updated[key];
-      }
-      return acc;
-    }, {} as Partial<UserUpdateForm>);
+    updated: Partial<UserUpdateFormFields>,
+    fieldName: keyof UserUpdateFormFields,
+  ): Partial<UserUpdateFormFields> => {
+    if (fieldName === "role") return {};
+
+    const newValue = updated[fieldName];
+
+    if (typeof newValue === "string" && newValue.trim() === "") return {};
+
+    if (newValue === original[fieldName]) {
+      return {  };
+    }
+
+    return { [fieldName]: newValue };
   };
 
   const handleUpdateInput = (
@@ -245,13 +204,52 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     }
   }
 
-  const toggleDisabled = (inputName: string) => {
-    if (!disabledInputsMap[inputName]) handleUpdateSubmit();
+  const toggleDisabled = async (inputName: keyof UserUpdateFormFields) => {
+    const isCurrentlyDisabled = disabledInputsMap[inputName];
 
     setDisabledInputsMap((prev) => ({
       ...prev,
-      [inputName]: !prev[inputName], // flip the boolean
+      [inputName]: !isCurrentlyDisabled,
     }));
+
+    if (!isCurrentlyDisabled && user) {
+      const payload = getUpdatedField(user, formData, inputName);
+
+      if (Object.keys(payload).length === 0) {
+        setFormData(prev => ({ ...prev, [inputName]: user[inputName] }));
+        return;
+      }
+
+      const endpoint =
+        inputName === "email" ? "/user/update/email" : "/user/update/details";
+
+      try {
+        setIsLoading(true);
+        setLoadingMessage("Adatok frissítése...");
+
+        const response = await privateAxios.patch(endpoint, payload);
+
+        if (response.status === 200) {
+          setSuccess(true);
+          setUser(prev => prev ? { ...prev, ...payload } as User : prev);
+          setUserUpdateError("");
+          setValidationErrors({});
+        }
+      } catch (err) {
+        const error = err as AxiosError<{
+          message?: string;
+          errors?: UserUpdateFormFields;
+        }>;
+
+        setSuccess(false);
+        setValidationErrors(error.response?.data?.errors ?? {});
+        setUserUpdateError(
+          error.response?.data?.message ?? "Sikertelen frissítés!",
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    }
   };
 
   const sendPassUpdate = async () => {
@@ -265,11 +263,10 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
       if (response.status === 200) {
         setSuccess(true);
-        // setValidationErrors({});
+        setValidationErrors({});
         setUserUpdateError("");
       }
     } catch {
-      // error handling
       setUserUpdateError("Jelszó modósító email elküldése sikertelen!");
     } finally {
       setIsLoading(false);

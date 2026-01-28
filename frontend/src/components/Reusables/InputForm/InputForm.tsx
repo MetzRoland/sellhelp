@@ -18,7 +18,7 @@ interface InputFormProps<T extends object> {
     [K in keyof FormFields<T>]?: { id: number; value: string; label: string }[];
   };
   disabledInputsMap?: Record<string, boolean>;
-  disabledToggle?: (inputName: string) => void;
+  disabledToggle?: (inputName: keyof FormFields<T>) => Promise<void>;
   settingInputsMap?: Record<string, boolean>;
 }
 
@@ -30,7 +30,7 @@ function InputForm<T extends object>({
   disabledInputsMap = {},
   options,
   settingInputsMap = {},
-  disabledToggle = () => {},
+  disabledToggle = async () => {},
 }: InputFormProps<T>) {
   const { user } = useAuth();
 
