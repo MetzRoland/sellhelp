@@ -193,7 +193,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       case "ROLE_USER":
         return "Felhasználó";
 
-      case "ROLE_MANAGER":
+      case "ROLE_MODERATOR":
         return "Moderátor";
 
       case "ROLE_ADMIN":

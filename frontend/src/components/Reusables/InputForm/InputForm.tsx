@@ -38,9 +38,8 @@ function InputForm<T extends object>({
     <>
       {inputs.map((input) =>
         input.type !== "select" ? (
-          <div className="setting-container">
+          <div className="setting-container" key={String(input.name)}>
             <InputComponent
-              key={String(input.name)}
               errorMessage={errorMessage?.[input.name] || ""}
               inputType={input.type}
               inputName={String(input.name)}
@@ -57,37 +56,34 @@ function InputForm<T extends object>({
                 disabled={
                   user?.authProvider === "GOOGLE" && input.name === "email"
                 }
-                onClick={() => disabledToggle(String(input.name))}
+                onClick={() => disabledToggle(input.name)}
               >
-                {disabledInputsMap[input.name] ? "Módosítás" : "Mentés"}
+                {disabledInputsMap[String(input.name)] ? "Módosítás" : "Mentés"}
               </button>
             )}
           </div>
         ) : (
-          <>
-            <div className="setting-container">
-              <SelectComponent
-                key={String(input.name)}
-                errorMessage={errorMessage?.[input.name] || ""}
-                inputName={String(input.name)}
-                handleFunction={handleFunction}
-                isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
-                options={options?.[input.name] ?? []}
-                defaultOption={input.placeholder}
-                selectValue={formData[input.name]}
-              />
+          <div className="setting-container" key={String(input.name)}>
+            <SelectComponent
+              errorMessage={errorMessage?.[input.name] || ""}
+              inputName={String(input.name)}
+              handleFunction={handleFunction}
+              isDisabled={disabledInputsMap?.[String(input.name)] ?? false}
+              options={options?.[input.name] ?? []}
+              defaultOption={input.placeholder}
+              selectValue={formData[input.name]}
+            />
 
-              {settingInputsMap?.[String(input.name)] && (
-                <button
-                  type="button"
-                  className="setting-btn"
-                  onClick={() => disabledToggle(String(input.name))}
-                >
-                  {disabledInputsMap[input.name] ? "Módosítás" : "Mentés"}
-                </button>
-              )}
-            </div>
-          </>
+            {settingInputsMap?.[String(input.name)] && (
+              <button
+                type="button"
+                className="setting-btn"
+                onClick={() => disabledToggle(input.name)}
+              >
+                {disabledInputsMap[String(input.name)] ? "Módosítás" : "Mentés"}
+              </button>
+            )}
+          </div>
         ),
       )}
     </>
