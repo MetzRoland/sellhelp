@@ -1,9 +1,7 @@
 package org.sellhelp.backend.configurations;
 
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
-import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -39,24 +37,6 @@ public class ModelMapperConfig {
                 .addMapping(
                         User::getAuthProvider,
                         UserDTO::setAuthProvider
-                );
-
-        mapper.typeMap(Post.class, CreatePostDTO.class)
-                .addMapping(
-                        Post::getTitle,
-                        CreatePostDTO::setTitle
-                )
-                .addMapping(
-                        src -> src.getCity().getCityName(),
-                        CreatePostDTO::setCityName
-                )
-                .addMapping(
-                        Post::getDescription,
-                        CreatePostDTO::setDescription
-                )
-                .addMapping(
-                        Post::getReward,
-                        CreatePostDTO::setReward
                 );
 
         return mapper;
