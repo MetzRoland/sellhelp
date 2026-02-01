@@ -3,7 +3,6 @@ package org.sellhelp.backend.dtos.responses;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.sellhelp.backend.entities.JobApplication;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,7 +20,7 @@ public class OwnedPostResponseDTO implements PostResponseInterface {
     private Instant createdAt;
 
     private UserDTO publisher;
-    public List<JobApplication> jobApplications;
+    public List<JobApplicationResponseDTO> jobApplications;
     private List<PostCommentResponseDTO> comments;
     public UserDTO selectedUser;
 }

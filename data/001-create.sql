@@ -92,10 +92,13 @@ CREATE TABLE "posts" (
 
 CREATE TABLE "job_applications" (
   "id" SERIAL,
-  "user_id" INT UNIQUE,
-  "post_id" INT UNIQUE,
+  "user_id" INT,
+  "post_id" INT,
   "applied_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
+  
+  CONSTRAINT "job_applications_user_post_unique"
+    UNIQUE ("user_id", "post_id"),
 
   CONSTRAINT "FK_applications_user_id"
     FOREIGN KEY ("user_id")

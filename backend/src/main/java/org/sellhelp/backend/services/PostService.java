@@ -1,14 +1,12 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.requests.PostCommentDTO;
 import org.sellhelp.backend.dtos.requests.UpdatePostDTO;
-import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
-import org.sellhelp.backend.dtos.responses.PostCommentResponseDTO;
-import org.sellhelp.backend.dtos.responses.PostResponseInterface;
-import org.sellhelp.backend.dtos.responses.PostResponseDTO;
+import org.sellhelp.backend.dtos.responses.*;
 import org.sellhelp.backend.entities.*;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
@@ -27,6 +25,7 @@ public class PostService {
     private final CityRepository cityRepository;
     private final PostStatusRepository postStatusRepository;
     private final CommentRepository commentRepository;
+    private final JobApplicationRepository jobApplicationRepository;
     private final ModelMapper modelMapper;
     private final CurrentUser currentUser;
 
@@ -34,12 +33,13 @@ public class PostService {
     public PostService(PostRepository postRepository, UserRepository userRepository,
                        ModelMapper modelMapper, CityRepository cityRepository,
                        CurrentUser currentUser, PostStatusRepository postStatusRepository,
-                       CommentRepository commentRepository){
+                       CommentRepository commentRepository, JobApplicationRepository jobApplicationRepository){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.cityRepository = cityRepository;
         this.postStatusRepository = postStatusRepository;
         this.commentRepository = commentRepository;
+        this.jobApplicationRepository = jobApplicationRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
     }
@@ -55,7 +55,9 @@ public class PostService {
                 () -> new EntityNotFoundException("A város nem található!")
         );
 
-        PostStatus postStatus = postStatusRepository.findByStatusName("new");
+        PostStatus postStatus = postStatusRepository.findByStatusName("new").orElseThrow(
+                () -> new EntityNotFoundException("A poszt státusz nem létezik!")
+        );
 
         Post post = modelMapper.map(createPostDTO, Post.class);
 
@@ -124,9 +126,19 @@ public class PostService {
         return Objects.equals(user.getId(), post.getPostPublisher().getId());
     }
 
-    public List<PostResponseDTO> getAllPosts(){
+    public List<PostResponseDTO> getAvailablePosts(){
         return postRepository.findAll().stream()
-                .map(post -> modelMapper.map(post, PostResponseDTO.class)).toList();
+                .map(post -> modelMapper.map(post, PostResponseDTO.class))
+                .filter(postResponseDTO -> Objects.equals(postResponseDTO.getStatusName(), "new"))
+                .toList();
+    }
+
+    public List<PostResponseDTO> getInvolvedPosts(){
+        return postRepository.findAll().stream()
+                .map(post -> modelMapper.map(post, PostResponseDTO.class))
+                .filter(postResponseDTO -> !Objects.equals(postResponseDTO.getStatusName(), "new"))
+                .filter(postResponseDTO -> !postOwned(postResponseDTO.getId()))
+                .toList();
     }
 
     public List<OwnedPostResponseDTO> getOwnPosts(){
@@ -181,5 +193,130 @@ public class PostService {
 
             return postResponseDTO;
         }
+    }
+
+    public JobApplicationResponseDTO applyToPost(Integer postId) {
+        if(postOwned(postId)){
+            throw new InvalidPermissionException("Saját poszthoz nem lehet jelentkezni!");
+        }
+
+        String publisherEmail = currentUser.getCurrentlyLoggedUserEmail();
+
+        User user = userRepository.findByEmail(publisherEmail).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        if(post.getSelectedUser() != null){
+            throw new RuntimeException("Már nem lehet jelentkezni a posztra!");
+        }
+
+        if (jobApplicationRepository.existsByApplicantAndJobPost(user, post)) {
+            throw new IllegalStateException("Már jelentkeztél erre a posztra!");
+        }
+
+        JobApplication jobApplication = JobApplication.builder()
+                .applicant(user)
+                .jobPost(post)
+                .build();
+
+        post.getJobApplications().add(jobApplication);
+
+        jobApplication.setJobPost(post);
+        jobApplicationRepository.save(jobApplication);
+        postRepository.save(post);
+
+        return modelMapper.map(jobApplication, JobApplicationResponseDTO.class);
+    }
+
+    public void cancelApply(Integer postId){
+        if(postOwned(postId)){
+            throw new InvalidPermissionException("Saját posztnál nem lehet visszavonni a jelentkezést!");
+        }
+
+        String publisherEmail = currentUser.getCurrentlyLoggedUserEmail();
+
+        User user = userRepository.findByEmail(publisherEmail).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        JobApplication jobApplication = jobApplicationRepository.findByApplicantAndJobPost(user, post).orElseThrow(
+                () -> new EntityNotFoundException("Még nem adtál be jelentkezést az alábbi poszthoz!")
+        );
+
+        jobApplicationRepository.delete(jobApplication);
+    }
+
+    @Transactional
+    public OwnedPostResponseDTO chooseApplicantForPost(Integer jobApplicationId){
+        JobApplication jobApplication = jobApplicationRepository.findById(jobApplicationId).orElseThrow(
+                () -> new EntityNotFoundException("A jelentkezés nem létezik!")
+        );
+
+        Post post = postRepository.findById(jobApplication.getJobPost().getId()).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        if(!postOwned(post.getId())){
+            throw new InvalidPermissionException("Nincs hozzáférésed a poszthoz!");
+        }
+
+        PostStatus postStatus = postStatusRepository.findByStatusName("accepted").orElseThrow(
+                () -> new EntityNotFoundException("A poszt státusz nem létezik!")
+        );
+
+        User selectedUser = jobApplication.getApplicant();
+        post.setSelectedUser(selectedUser);
+
+        post.setPostStatus(postStatus);
+
+        postRepository.save(post);
+
+        return modelMapper.map(post, OwnedPostResponseDTO.class);
+    }
+
+    @Transactional
+    public void rejectApply(Integer postId){
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        if(post.getSelectedUser() == null){
+            throw new InvalidPermissionException("Még nincs kiválasztva jelentkező a munkára!");
+        }
+
+        User user = userRepository.findByEmail(post.getSelectedUser().getEmail()).orElseThrow(
+                () -> new EntityNotFoundException("A felhasználó nem található!")
+        );
+
+        JobApplication jobApplication = jobApplicationRepository.findByApplicantAndJobPost(user, post).orElseThrow(
+                () -> new EntityNotFoundException("A jelentkezés nem létezik!")
+        );
+
+        String postStatusName = "";
+
+        if(postOwned(postId)){
+            postStatusName = "rejected_by_employer";
+        }
+        else{
+            postStatusName = "withdrawn_by_employee";
+        }
+
+        PostStatus postStatus = postStatusRepository.findByStatusName(postStatusName).orElseThrow(
+                () -> new EntityNotFoundException("A poszt státusz nem létezik!")
+        );
+
+        post.getJobApplications().remove(jobApplication);
+        post.setPostStatus(postStatus);
+        post.setSelectedUser(null);
+
+        postRepository.save(post);
     }
 }
