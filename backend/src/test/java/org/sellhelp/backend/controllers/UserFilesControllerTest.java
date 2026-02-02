@@ -59,10 +59,22 @@ class UserFilesControllerTest {
     @Test
     @WithMockUser(username = "test@test.com")
     void getUserFile_success() throws Exception {
-        when(userFileService.getUserFile("test@test.com", 5))
+        when(userFileService.getUserFileByFileId(5))
                 .thenReturn(new FileDTO(5, "http://download"));
 
-        mockMvc.perform(get("/user/files/download/{id}", 5))
+        mockMvc.perform(get("/user/files/download/{fileId}", 5))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.fileId").value(5))
+                .andExpect(jsonPath("$.url").value("http://download"));
+    }
+
+    @Test
+    @WithMockUser(username = "test@test.com")
+    void getUserFileById_success() throws Exception {
+        when(userFileService.getUserFileByFileId(5))
+                .thenReturn(new FileDTO(5, "http://download"));
+
+        mockMvc.perform(get("/user/files/download/{fileId}", 5))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(5))
                 .andExpect(jsonPath("$.url").value("http://download"));

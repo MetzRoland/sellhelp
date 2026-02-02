@@ -99,7 +99,7 @@ class UserFileServiceTest {
     }
 
     @Test
-    void getUserFile_invalidPermission() {
+    void deleteUserFile_invalidPermission() {
         User otherUser = User.builder().id(99).build();
         userFile.setUser(otherUser);
 
@@ -109,7 +109,7 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(userFile));
 
         assertThrows(InvalidPermissionException.class,
-                () -> userFileService.getUserFile(user.getEmail(), userFile.getId()));
+                () -> userFileService.deleteUserFile(user.getEmail(), userFile.getId()));
     }
 
     @Test
