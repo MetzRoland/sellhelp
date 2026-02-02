@@ -3,6 +3,7 @@ package org.sellhelp.backend.services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.requests.ChangePostStatusRequest;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.requests.PostCommentDTO;
 import org.sellhelp.backend.dtos.requests.UpdatePostDTO;
@@ -319,4 +320,60 @@ public class PostService {
 
         postRepository.save(post);
     }
+
+    public ChangePostStatusRequest changePostStatus(Integer postId, String targetStatusName) {
+
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
+
+        String currentStatus = post.getPostStatus().getStatusName();
+        boolean isEmployer = postOwned(postId);
+        boolean isEmployee = !isEmployer;
+
+        switch (currentStatus) {
+
+            case "accepted" -> {
+                if (!isEmployee || !"started".equals(targetStatusName)) {
+                    throw new IllegalStateException("Az alkalmazott csak 'started' státuszra válthat.");
+                }
+            }
+
+            case "started" -> {
+                if (!isEmployee || !"completed_by_employee".equals(targetStatusName)) {
+                    throw new IllegalStateException("Az alkalmazott csak 'completed_by_employee' státuszra válthat.");
+                }
+            }
+
+            case "completed_by_employee" -> {
+                if (!isEmployer ||
+                        (!"work_rejected".equals(targetStatusName) && !"closed".equals(targetStatusName))) {
+                    throw new IllegalStateException("A munkáltató csak 'work_rejected' vagy 'closed' státuszt választhat.");
+                }
+            }
+
+            case "work_rejected" -> {
+                if (!isEmployer ||
+                        (!"started".equals(targetStatusName) && !"unsuccessful_result_closed".equals(targetStatusName))) {
+                    throw new IllegalStateException("A munkáltató csak 'started' vagy 'unsuccessful_result_closed' státuszt választhat.");
+                }
+            }
+
+            case "withdrawn_by_employee", "rejected_by_employer" -> {
+                if (!isEmployer || !"new".equals(targetStatusName)) {
+                    throw new IllegalStateException("A munkáltató csak 'new' státuszra válthat.");
+                }
+            }
+
+            default -> throw new IllegalStateException("A státusz nem módosítható ebből az állapotból.");
+        }
+
+        PostStatus newStatus = postStatusRepository.findByStatusName(targetStatusName)
+                .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
+
+        post.setPostStatus(newStatus);
+        postRepository.save(post);
+
+        return new ChangePostStatusRequest(targetStatusName);
+    }
+
 }

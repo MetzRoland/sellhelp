@@ -1,5 +1,6 @@
 package org.sellhelp.backend.controllers;
 
+import org.sellhelp.backend.dtos.requests.ChangePostStatusRequest;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.requests.PostCommentDTO;
 import org.sellhelp.backend.dtos.requests.UpdatePostDTO;
@@ -8,7 +9,6 @@ import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
 import org.sellhelp.backend.dtos.responses.PostResponseInterface;
 import org.sellhelp.backend.dtos.responses.PostResponseDTO;
 import org.sellhelp.backend.dtos.validationGroups.ValidationOrder;
-import org.sellhelp.backend.entities.JobApplication;
 import org.sellhelp.backend.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -94,5 +94,10 @@ public class PostController {
         postService.rejectApply(postId);
 
         return ResponseEntity.ok("A munka sikeresen visszavonva! / A kiválasztott jelentkező sikeresen törölve!");
+    }
+
+    @PatchMapping("/{postId}/changeStatus")
+    public ResponseEntity<ChangePostStatusRequest> changePostStatus(@PathVariable Integer postId, @RequestBody ChangePostStatusRequest changePostStatusRequest) {
+        return ResponseEntity.ok(postService.changePostStatus(postId, changePostStatusRequest.getTargetStatusName()));
     }
 }
