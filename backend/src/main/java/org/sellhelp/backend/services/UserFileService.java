@@ -124,6 +124,11 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
+        if (userFileRepository.countByUser(user) >= 10)
+        {
+            throw new RuntimeException("Maximum 10 fájlt lehet feltölteni.");
+        }
+
         UserFile newFile = UserFile.builder()
                 .user(user)
                 .filePath(s3Service.fileKey(user.getId(), file.getOriginalFilename()))
