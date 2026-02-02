@@ -58,6 +58,30 @@ public class UserFileService {
         return fileDtos;
     }
 
+    public List<FileDTO> getAllUserFilesByUserId(Integer userId) {
+        List<UserFile> files = userFileRepository.findByUserId(userId);
+
+        List<FileDTO> fileDtos = new ArrayList<>();
+        try {
+
+            for (UserFile file : files)
+            {
+                String url = s3Service.getDownloadURL(file.getFilePath());
+                fileDtos.add(new FileDTO(file.getId(), url));
+            }
+
+        }
+        catch (NoSuchKeyException e) {
+            throw new RuntimeException("Nincs ilyen fájl!");
+        }
+        catch (Exception e) {
+            System.out.println(e.toString());
+            throw new RuntimeException("A művelet sikertelen!");
+        }
+
+        return fileDtos;
+    }
+
     public FileDTO getUserFile(String email, Integer fileId) {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
@@ -67,10 +91,22 @@ public class UserFileService {
                 () -> new RuntimeException("A fájl nem található!")
         );
 
-        // check ownership
-        if (file.getUser().getId() != user.getId()) {
-            throw new InvalidPermissionException("Nincs hozzáférés");
+
+        try {
+            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
         }
+        catch (NoSuchKeyException e) {
+            throw new RuntimeException("Nincs ilyen fájl!");
+        }
+        catch (Exception e) {
+            throw new RuntimeException("A fájlt nem sikerült feltölteni!");
+        }
+    }
+
+    public FileDTO getUserFileByFileId(Integer fileId) {
+        UserFile file = userFileRepository.findById(fileId).orElseThrow(
+                () -> new RuntimeException("A fájl nem található!")
+        );
 
         try {
             return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
