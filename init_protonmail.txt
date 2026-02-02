@@ -1,0 +1,3 @@
+docker run --rm -it -v ./protonmail:/root shenxn/protonmail-bridge init
+OR
+docker compose run protonmail-bridge init

@@ -1,0 +1,21 @@
+.profile-banned-container{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-banned-content-container{
+    width: 50%;
+    height: 40vh;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    text-align: center;
+}
+
+.profile-banned-message{
+    font-size: 2rem;
+    font-weight: bold;
+}

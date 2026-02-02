@@ -1,8 +1,6 @@
 package org.sellhelp.backend.controllers;
 
-import org.sellhelp.backend.dtos.responses.SuperUserDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
-import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.services.SuperUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -20,15 +18,16 @@ public class SuperUserController {
         this.superUserService = superUserService;
     }
 
-    @GetMapping("/info")
-    public SuperUserDTO getSuperUserDetails(){
-        return superUserService.getSuperUserDetails();
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @GetMapping("/users")
+    public List<UserDTO> showAllUserAccounts(){
+        return superUserService.getAllUserAccounts();
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
-    @GetMapping("/users")
-    public List<User> showAllUserAccounts(){
-        return superUserService.getAllUserAccounts();
+    @GetMapping("/users/{userId}")
+    public UserDTO showUserAccount(@PathVariable Integer userId){
+        return superUserService.getUserAccount(userId);
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")

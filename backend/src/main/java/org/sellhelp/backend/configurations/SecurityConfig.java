@@ -68,8 +68,14 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login", "/auth/register"
-                , "/auth/enable2fa", "/auth/disable2fa", "/auth/verify-totp")
+                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login",
+                        "/auth/login/superuser",
+                        "/auth/register",
+                        "/auth/enable2fa",
+                        "/auth/disable2fa",
+                        "/auth/setup2fa",
+                        "/auth/verify-totp",
+                        "/auth/login/refresh")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -77,16 +83,16 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/register", "/auth/verify-totp").permitAll()
-                        .requestMatchers("/auth/enable2fa", "/auth/disable2fa")
+                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
+                        .requestMatchers("/auth/enable2fa", "/auth/disable2fa", "/auth/setup2fa")
                         .authenticated()
-                        .requestMatchers("/user/info").hasRole("USER")
                         .requestMatchers(
                                 "/user/logout",
-                                "user/update/details",
-                                "user/update/email",
-                                "user/update/password/send",
-                                "user/update/password"
+                                "/user/info",
+                                "/user/update/details",
+                                "/user/update/email",
+                                "/user/update/password/send",
+                                "/user/update/password"
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
@@ -106,7 +112,8 @@ public class SecurityConfig {
     @Order(2)
     public SecurityFilterChain oauth2FilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/auth/login/google", "/auth/loginSuccess", "/oauth2/**", "/login/oauth2/**")
+                .securityMatcher("/auth/login/google", "/auth/loginSuccess", "/oauth2/**", "/login/oauth2/**",
+                        "/auth/google/register")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -134,6 +141,7 @@ public class SecurityConfig {
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
+        config.setExposedHeaders(List.of("Authorization", "Set-Cookie"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

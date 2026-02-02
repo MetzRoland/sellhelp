@@ -1,8 +1,10 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.requests.GoogleRegisterDTO;
 import org.sellhelp.backend.dtos.requests.LoginDTO;
 import org.sellhelp.backend.dtos.requests.RefreshDTO;
 import org.sellhelp.backend.dtos.requests.RegisterDTO;
@@ -17,6 +19,7 @@ import org.sellhelp.backend.exceptions.*;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -46,13 +49,16 @@ public class AuthService {
     private final JWTUtil jwtUtil;
     private final TempTokenService tempTokenService;
     private final EmailService emailService;
+    private final CurrentUser currentUser;
+    private S3Service s3Service;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
-                       EmailService emailService, TempTokenService tempTokenService){
+                       EmailService emailService, TempTokenService tempTokenService, CurrentUser currentUser,
+                       S3Service s3Service){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -63,6 +69,8 @@ public class AuthService {
         this.jwtUtil = jwtUtil;
         this.tempTokenService = tempTokenService;
         this.emailService = emailService;
+        this.currentUser = currentUser;
+        this.s3Service = s3Service;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
@@ -102,7 +110,7 @@ public class AuthService {
             authenticationManager.authenticate(authInputToken);
         }
         catch (DisabledException e) {
-            throw new UserBannedException("A felhasználó levan tiltva van!");
+            throw new UserBannedException("A felhasználó le van tiltva!");
         }
         catch(AuthenticationException authExc){
             throw new LoginCredentialsException("Helytelen email vagy jelszó!");
@@ -148,9 +156,8 @@ public class AuthService {
         return loginHandler(loginDTO, true);
     }
 
-    public TokenDTO refresh(RefreshDTO refreshDTO)
+    public TokenDTO refresh(String refreshToken)
     {
-        String refreshToken = refreshDTO.getRefreshToken();
         String email = jwtUtil.extractEmail(refreshToken);
 
         if(email == null){
@@ -159,9 +166,9 @@ public class AuthService {
 
         UserDetails userDetails = userDetailsService.loadUserByUsername(email);
 
-        if (jwtUtil.validateRefreshToken(refreshDTO.getRefreshToken(), userDetails)) {
+        if (jwtUtil.validateRefreshToken(refreshToken, userDetails)) {
             String accessToken = jwtUtil.generateAccessToken(userDetails.getUsername());
-            return new TokenDTO(accessToken, refreshDTO.getRefreshToken(), null);
+            return new TokenDTO(accessToken, refreshToken, null);
         }
         else {
             throw new InvalidTokenException("Helytelen refresh token!");
@@ -172,14 +179,10 @@ public class AuthService {
         OAuth2User oAuth2User = oAuth2AuthenticationToken.getPrincipal();
 
         String email = oAuth2User.getAttribute("email");
-        String firstName = oAuth2User.getAttribute("given_name");
-        String lastName  = oAuth2User.getAttribute("family_name");
-        String picturePath  = oAuth2User.getAttribute("picture");
+
+        TokenDTO tokenDTO = new TokenDTO();
 
         log.info("Email: {}", email);
-        log.info("First name: {}", firstName);
-        log.info("Last name: {}", lastName);
-        log.info("Picture url: {}", picturePath);
 
         User user = userRepository.findByEmail(email).orElseGet(() -> {
             Role role = roleRepository.findByRoleName("ROLE_USER")
@@ -187,6 +190,14 @@ public class AuthService {
 
             City city = cityRepository.findByCityName("Pécs")
                     .orElseThrow(() -> new EntityNotFoundException("A város nem található!"));
+
+            String firstName = oAuth2User.getAttribute("given_name");
+            String lastName  = oAuth2User.getAttribute("family_name");
+            String picturePath  = oAuth2User.getAttribute("picture");
+
+            log.info("First name: {}", firstName);
+            log.info("Last name: {}", lastName);
+            log.info("Picture url: {}", picturePath);
 
             User newUser = new User();
             newUser.setFirstName(firstName);
@@ -196,21 +207,83 @@ public class AuthService {
             newUser.setBirthDate(LocalDate.of(2000, 12, 23));
             newUser.setRole(role);
             newUser.setCity(city);
-            newUser.setProfilePicturePath(picturePath);
+
+            newUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
+
+            tokenDTO.setTempToken(tempTokenService.create(email));
 
             emailService.registerUser(email, firstName, lastName);
 
             return userRepository.save(newUser);
         });
 
-        user.setProfilePicturePath(picturePath);
+        /*
+        if(!user.getFirstName().equals(firstName)){
+            user.setFirstName(firstName);
+        }
+
+        if(!user.getLastName().equals(lastName)){
+            user.setLastName(lastName);
+        }
+
+        user.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, user.getId()));
+
         userRepository.save(user);
+        */
+
+
+        if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
+
+        if(tokenDTO.getTempToken() == null){
+            UserDetails userDetails =
+                    org.springframework.security.core.userdetails.User.builder()
+                            .username(user.getEmail())
+                            .password("")
+                            .authorities(user.getRole().getRoleName())
+                            .build();
+
+            UsernamePasswordAuthenticationToken auth =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(auth);
+
+            String accessToken = jwtUtil.generateAccessToken(email);
+            String refreshToken = jwtUtil.generateRefreshToken(email);
+
+            log.info("accessToken: {}", accessToken);
+            log.info("refreshToken: {}", refreshToken);
+
+            tokenDTO.setAccessToken(accessToken);
+            tokenDTO.setRefreshToken(refreshToken);
+
+            emailService.loginUser(email);
+        }
+
+        return tokenDTO;
+    }
+
+    public TokenDTO finishGoogleRegistration(GoogleRegisterDTO googleRegisterDTO, String tempToken) {
+        String cityName = googleRegisterDTO.getCityName();
+        LocalDate birthDate = googleRegisterDTO.getBirthDate();
+
+        City city = cityRepository.findByCityName(cityName)
+                .orElseThrow(() -> new EntityNotFoundException("A város nem található!"));
+
+        String email = tempTokenService.getEmailByTempToken(tempToken);
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        user.setCity(city);
+        user.setBirthDate(birthDate);
+
+        User newUser = userRepository.save(user);
 
         UserDetails userDetails =
                 org.springframework.security.core.userdetails.User.builder()
-                        .username(user.getEmail())
+                        .username(newUser.getEmail())
                         .password("")
-                        .authorities(user.getRole().getRoleName())
+                        .authorities(newUser.getRole().getRoleName())
                         .build();
 
         UsernamePasswordAuthenticationToken auth =
@@ -220,12 +293,8 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(email);
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
-        log.info("accessToken: {}", accessToken);
-        log.info("refreshToken: {}", refreshToken);
-
         emailService.loginUser(email);
 
         return new TokenDTO(accessToken, refreshToken, null);
-
     }
 }

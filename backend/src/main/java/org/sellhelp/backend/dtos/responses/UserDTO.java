@@ -16,17 +16,16 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
+    private Integer id;
     private String firstName;
     private String lastName;
     private String email;
     private LocalDate birthDate;
     private String cityName;
     private boolean isMfa;
-    private String totpSecret;
     private boolean banned;
     private String role;
+    private String authProvider;
     private Instant createdAt;
-    private List<Review> reviews;
-    private List<Review> sentReviews;
-    private List<UserFile> userFiles;
+    private String accessToken;
 }

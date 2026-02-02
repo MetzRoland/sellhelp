@@ -6,7 +6,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.sellhelp.backend.dtos.requests.FirstTotpValidationDTO;
 import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.entities.User;
@@ -22,8 +24,7 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class MfaServiceTest {
@@ -52,45 +53,122 @@ class MfaServiceTest {
     void init() {
         user = new User();
         user.setEmail("test@test.com");
-        user.setUserSecret(new UserSecret());
+
+        UserSecret userSecret = new UserSecret();
+        userSecret.setMfa(false);
+        user.setUserSecret(userSecret);
     }
 
     @Test
-    void enableMfa_success() throws Exception {
+    void generateMfa_success() {
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(totpService.generateSecret()).thenReturn("SECRET");
         when(qrCodeService.generateQrBase64(anyString())).thenReturn("QR_CODE");
+        when(tempTokenService.create("test@test.com")).thenReturn("TEMP_TOKEN");
 
-        TotpSecretDTO dto = mfaService.enableMfa();
+        GenerateTotpDTO result = mfaService.generateMfa();
 
-        assertTrue(dto.isMfa());
-        assertEquals("SECRET", dto.getTotpSecret());
-        assertEquals("QR_CODE", dto.getQrCode());
-
-        verify(userRepository).save(user);
-        verify(emailService).mfaEnabled("test@test.com");
+        assertEquals("SECRET", result.getTotpSecret());
+        assertEquals("QR_CODE", result.getQrCode());
+        assertEquals("TEMP_TOKEN", result.getTempToken());
     }
 
     @Test
-    void enableMfa_alreadyEnabled_throws() {
+    void generateMfa_alreadyEnabled_throws() {
         user.getUserSecret().setMfa(true);
+
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
 
-        assertThrows(MfaException.class, () -> mfaService.enableMfa());
+        assertThrows(MfaException.class, () -> mfaService.generateMfa());
+    }
+
+    @Test
+    void enableMfa_success() {
+        FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
+        dto.setTempToken("TEMP_TOKEN");
+        dto.setTotpSecret("SECRET");
+        dto.setTotpCode("123456");
+
+        when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(true);
+        when(totpService.verify("SECRET", "123456")).thenReturn(true);
+
+        mfaService.enableMfa(dto);
+
+        assertTrue(user.getUserSecret().isMfa());
+        assertEquals("SECRET", user.getUserSecret().getTotpSecret());
+
+        verify(tempTokenService).removeToken("TEMP_TOKEN");
+        verify(emailService).mfaEnabled("test@test.com");
+        verify(userRepository).save(user);
+    }
+
+    @Test
+    void enableMfa_invalidToken_throws() {
+        FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
+        dto.setTempToken("TEMP_TOKEN");
+
+        when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(false);
+
+        assertThrows(InvalidTokenException.class, () -> mfaService.enableMfa(dto));
+    }
+
+    @Test
+    void enableMfa_invalidTotp_throws() {
+        FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
+        dto.setTempToken("TEMP_TOKEN");
+        dto.setTotpSecret("SECRET");
+        dto.setTotpCode("123456");
+
+        when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(true);
+        when(totpService.verify("SECRET", "123456")).thenReturn(false);
+
+        assertThrows(InvalidTotpException.class, () -> mfaService.enableMfa(dto));
+    }
+
+    @Test
+    void disableMfa_success() {
+        user.getUserSecret().setMfa(true);
+        user.getUserSecret().setTotpSecret("SECRET");
+
+        when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        TotpSecretDTO result = mfaService.disableMfa();
+
+        assertFalse(result.isMfa());
+        assertNull(result.getTotpSecret());
+        assertNull(result.getQrCode());
+
+        verify(userRepository).save(user);
+        verify(emailService).mfaDisabled("test@test.com");
+    }
+
+    @Test
+    void disableMfa_notEnabled_throws() {
+        when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        assertThrows(MfaException.class, () -> mfaService.disableMfa());
     }
 
     @Test
     void validateTotpCode_success() {
         TotpCodeDTO totpCodeDTO = new TotpCodeDTO();
-        totpCodeDTO.setTempToken("temp123");
+        totpCodeDTO.setTempToken("TEMP_TOKEN");
         totpCodeDTO.setTotpCode("123456");
 
         user.getUserSecret().setTotpSecret("SECRET");
 
-        when(tempTokenService.validate("temp123")).thenReturn(true);
-        when(tempTokenService.getEmailByTempToken("temp123")).thenReturn("test@test.com");
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(true);
+        when(tempTokenService.getEmailByTempToken("TEMP_TOKEN")).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(totpService.verify("SECRET", "123456")).thenReturn(true);
         when(jwtUtil.generateAccessToken("test@test.com")).thenReturn("ACCESS");
@@ -100,35 +178,35 @@ class MfaServiceTest {
 
         assertEquals("ACCESS", tokenDTO.getAccessToken());
         assertEquals("REFRESH", tokenDTO.getRefreshToken());
+        assertNull(tokenDTO.getTempToken());
 
-        verify(tempTokenService).removeToken("temp123");
+        verify(tempTokenService).removeToken("TEMP_TOKEN");
         verify(emailService).loginUser("test@test.com");
     }
 
     @Test
     void validateTotpCode_invalidToken_throws() {
-        TotpCodeDTO totpCodeDTO = new TotpCodeDTO();
-        totpCodeDTO.setTempToken("temp123");
+        TotpCodeDTO dto = new TotpCodeDTO();
+        dto.setTempToken("TEMP_TOKEN");
 
-        when(tempTokenService.validate("temp123")).thenReturn(false);
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(false);
 
-        assertThrows(InvalidTokenException.class, () -> mfaService.validateTotpCode(totpCodeDTO));
+        assertThrows(InvalidTokenException.class, () -> mfaService.validateTotpCode(dto));
     }
 
     @Test
     void validateTotpCode_invalidTotp_throws() {
-        TotpCodeDTO totpCodeDTO = new TotpCodeDTO();
-        totpCodeDTO.setTempToken("temp123");
-        totpCodeDTO.setTotpCode("123456");
+        TotpCodeDTO dto = new TotpCodeDTO();
+        dto.setTempToken("TEMP_TOKEN");
+        dto.setTotpCode("123456");
 
         user.getUserSecret().setTotpSecret("SECRET");
 
-        when(tempTokenService.validate("temp123")).thenReturn(true);
-        when(tempTokenService.getEmailByTempToken("temp123")).thenReturn("test@test.com");
+        when(tempTokenService.validate("TEMP_TOKEN")).thenReturn(true);
+        when(tempTokenService.getEmailByTempToken("TEMP_TOKEN")).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
         when(totpService.verify("SECRET", "123456")).thenReturn(false);
 
-        assertThrows(InvalidTotpException.class, () -> mfaService.validateTotpCode(totpCodeDTO));
+        assertThrows(InvalidTotpException.class, () -> mfaService.validateTotpCode(dto));
     }
 }
-

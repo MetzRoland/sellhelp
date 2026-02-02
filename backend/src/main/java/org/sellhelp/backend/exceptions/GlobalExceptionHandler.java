@@ -1,6 +1,5 @@
 package org.sellhelp.backend.exceptions;
 
-import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityNotFoundException;
 import org.sellhelp.backend.dtos.responses.GeneralErrorDTO;
 import org.sellhelp.backend.dtos.responses.NotFoundErrorDTO;

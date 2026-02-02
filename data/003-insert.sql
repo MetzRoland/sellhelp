@@ -21,13 +21,13 @@ VALUES
 (5, 'spam'),
 (6, 'bot/not_a_real_person');
 
-INSERT INTO "counties" ("county_name")
-VALUES 
-('Baranya');
+-- INSERT INTO "counties" ("county_name")
+-- VALUES
+-- ('Baranya');
 
-INSERT INTO "cities" ("county_id", "city_name")
-VALUES 
-(1, 'Pécs');
+-- INSERT INTO "cities" ("county_id", "city_name")
+-- VALUES
+-- (1, 'Pécs');
 
 INSERT INTO "users" (
   "first_name", "last_name", "birth_date",

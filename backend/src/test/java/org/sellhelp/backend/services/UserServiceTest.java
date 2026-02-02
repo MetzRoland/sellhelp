@@ -111,7 +111,8 @@ class UserServiceTest {
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@example.com");
         when(jwtUtil.validatePasswordUpdateToken("validToken", userDetails)).thenReturn(true);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
-        when(passwordEncoder.matches("newPassword", "oldEncodedPassword")).thenReturn(false);
+        when(passwordEncoder.matches("newPassword", user.getUserSecret().getPassword())).thenReturn(false);
+        when(passwordEncoder.matches("newPassword", user.getUserSecret().getLastUsedPassword())).thenReturn(false);
         when(passwordEncoder.encode("newPassword")).thenReturn("newEncodedPassword");
         when(jwtUtil.generateAccessToken("test@example.com")).thenReturn("accessToken");
         when(jwtUtil.generateRefreshToken("test@example.com")).thenReturn("refreshToken");
@@ -164,7 +165,7 @@ class UserServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(modelMapper.map(user, UserDTO.class)).thenReturn(userDTO);
 
-        UserDTO result = userService.getUserDetails();
+        UserDTO result = userService.getUserDetails("accessToken");
 
         assertNotNull(result);
         verify(modelMapper).map(user, UserDTO.class);

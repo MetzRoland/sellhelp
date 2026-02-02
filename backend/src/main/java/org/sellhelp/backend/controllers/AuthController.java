@@ -2,12 +2,11 @@ package org.sellhelp.backend.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
-import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.requests.*;
+import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
+import org.sellhelp.backend.dtos.validationGroups.ValidationOrder;
 import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
@@ -16,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -36,7 +36,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<RegisterDTO> registerLocalUser(@Valid @RequestBody RegisterDTO registerDTO,
+    public ResponseEntity<RegisterDTO> registerLocalUser(@Validated(ValidationOrder.class) @RequestBody RegisterDTO registerDTO,
                                                          @RequestParam(defaultValue = "ROLE_USER") UserRole userRole){
         authService.registerLocalUser(registerDTO, userRole);
 
@@ -44,7 +44,8 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> loginUserHandler(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> loginUserHandler(@Validated(ValidationOrder.class) @RequestBody LoginDTO loginDTO,
+                                                     HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.userLogin(loginDTO);
 
@@ -54,7 +55,8 @@ public class AuthController {
     }
 
     @PostMapping("/login/superuser")
-    public ResponseEntity<TokenDTO> loginSuperUserHandler(@Valid @RequestBody LoginDTO loginDTO, HttpServletResponse response)
+    public ResponseEntity<TokenDTO> loginSuperUserHandler(@Validated(ValidationOrder.class) @RequestBody LoginDTO loginDTO,
+                                                          HttpServletResponse response)
     {
         TokenDTO tokenDTO = authService.superUserLogin(loginDTO);
 
@@ -63,21 +65,28 @@ public class AuthController {
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @PostMapping("/login/refresh")
-    public ResponseEntity<TokenDTO> refreshHandler(@Valid @RequestBody RefreshDTO refreshDTO, HttpServletResponse response)
+    @GetMapping("/login/refresh")
+    public ResponseEntity<TokenDTO> refreshHandler(@CookieValue(name = "refreshToken") String refreshToken, HttpServletResponse response)
     {
-        TokenDTO tokenDTO = authService.refresh(refreshDTO);
+        TokenDTO tokenDTO = authService.refresh(refreshToken);
 
         cookieGenerator.refreshAccessTokenCookie(response, tokenDTO.getAccessToken());
 
         return ResponseEntity.ok(tokenDTO);
     }
 
-    @GetMapping("/enable2fa")
-    public ResponseEntity<TotpSecretDTO> enableMfa(){
-        TotpSecretDTO totpSecretDTO = mfaService.enableMfa();
+    @GetMapping("/setup2fa")
+    public ResponseEntity<GenerateTotpDTO> setupMfa(){
+        GenerateTotpDTO generateTotpDTO = mfaService.generateMfa();
 
-        return ResponseEntity.ok(totpSecretDTO);
+        return ResponseEntity.ok(generateTotpDTO);
+    }
+
+    @PostMapping("/enable2fa")
+    public ResponseEntity<String> enableMfa(@Validated(ValidationOrder.class) @RequestBody FirstTotpValidationDTO firstTotpValidationDTO){
+        mfaService.enableMfa(firstTotpValidationDTO);
+
+        return ResponseEntity.ok("Kétfaktoros hitelesítés bekapcsolva!");
     }
 
     @GetMapping("/disable2fa")
@@ -88,7 +97,7 @@ public class AuthController {
     }
 
     @PostMapping("/verify-totp")
-    public ResponseEntity<TokenDTO> verifyTotp(@Valid @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
+    public ResponseEntity<TokenDTO> verifyTotp(@Validated(ValidationOrder.class) @RequestBody TotpCodeDTO totpCodeDTO, HttpServletResponse response){
         TokenDTO tokenDTO = mfaService.validateTotpCode(totpCodeDTO);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
@@ -105,12 +114,37 @@ public class AuthController {
 
     @GetMapping("/loginSuccess")
     public ResponseEntity<Void> handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
-        TokenDTO tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
+        TokenDTO tokenDTO = new TokenDTO();
+
+        String redirectUrl = "";
+
+        try{
+            tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
+        } catch (Exception e) {
+            response.sendRedirect("http://localhost:5173/profileInactive");
+        }
+
+        if(tokenDTO.getTempToken() == null){
+            cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
+            redirectUrl = "http://localhost:5173/home";
+        }
+        else{
+            redirectUrl = "http://localhost:5173/finishGoogleRegistration?tempToken=" + tokenDTO.getTempToken();
+        }
+
+        return ResponseEntity.status(HttpStatus.FOUND)
+                .header("Location", redirectUrl)
+                .build();
+    }
+
+    @PostMapping("/google/register")
+    public ResponseEntity<Void> finishGoogleRegistration(@Validated(ValidationOrder.class) @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
+        TokenDTO tokenDTO = authService.finishGoogleRegistration(googleRegisterDTO, tempToken);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 
         return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:3000/home")
+                .header("Location", "http://localhost:5173/home")
                 .build();
     }
 }

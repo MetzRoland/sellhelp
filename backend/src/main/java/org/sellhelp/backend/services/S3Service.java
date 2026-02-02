@@ -4,16 +4,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import software.amazon.awssdk.core.ResponseBytes;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
-import software.amazon.awssdk.services.s3.paginators.ListObjectsV2Iterable;
 import software.amazon.awssdk.services.s3.presigner.S3Presigner;
 import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest;
-import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.nio.file.Paths;
 import java.time.Duration;
 
@@ -69,8 +69,9 @@ public class S3Service {
     }
 
     public void uploadFileWithKey(String key, MultipartFile file) throws IOException {
-        if (file.isEmpty())
-        {throw new IllegalArgumentException("File is empty");}
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
 
         s3Client.putObject(PutObjectRequest.builder()
                         .bucket(bucketName)
@@ -79,6 +80,48 @@ public class S3Service {
                 RequestBody.fromBytes(file.getBytes())
         );
     }
+
+    public String uploadFileFromUrl(String imageUrl, Integer userId) {
+        try {
+            URL url = new URL(imageUrl);
+            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+            connection.setRequestMethod("GET");
+            connection.setConnectTimeout(5000);
+            connection.setReadTimeout(5000);
+
+            int status = connection.getResponseCode();
+            if (status != HttpURLConnection.HTTP_OK) {
+                throw new RuntimeException("Failed to download image, HTTP status: " + status);
+            }
+
+            String contentType = connection.getContentType();
+            if (contentType == null || !contentType.startsWith("image/")) {
+                throw new RuntimeException("URL does not point to an image");
+            }
+
+            try (InputStream inputStream = connection.getInputStream()) {
+
+                String objectKey = ppKey(userId);
+
+                PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+                        .bucket(bucketName)
+                        .key(objectKey)
+                        .contentType(contentType)
+                        .build();
+
+                s3Client.putObject(
+                        putObjectRequest,
+                        RequestBody.fromInputStream(inputStream, connection.getContentLengthLong())
+                );
+
+                return objectKey;
+            }
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to upload profile picture from URL", e);
+        }
+    }
+
 
     public byte[] downloadFile(String fileName) {
         try {
@@ -119,11 +162,6 @@ public class S3Service {
         }
     }
 
-
-
-
-
-
     public String getDownloadURL(String objectKey) {
         try {
             String fileName = Paths.get(objectKey).getFileName().toString();
@@ -142,10 +180,18 @@ public class S3Service {
             return s3Presigner.presignGetObject(presignRequest).url().toString();
 
         } catch (NoSuchKeyException e) {
-            throw new RuntimeException("Key not found: " + objectKey, e);
+            return null;
         } catch (S3Exception e) {
             throw new RuntimeException("Error downloading file: " + objectKey, e);
         }
+    }
+
+    public String fileKey(Integer id, String fileName) {
+        return "users/" + id + "/" + fileName;
+    }
+
+    public String ppKey(Integer id) {
+        return "users/" + id + "/profilePicture";
     }
 
 //    not used

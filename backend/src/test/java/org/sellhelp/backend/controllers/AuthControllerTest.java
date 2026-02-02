@@ -1,12 +1,11 @@
 package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
-import org.sellhelp.backend.dtos.requests.TotpCodeDTO;
+import org.sellhelp.backend.dtos.requests.*;
+import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.dtos.responses.TotpSecretDTO;
 import org.sellhelp.backend.security.CookieGenerator;
@@ -24,15 +23,16 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
 
-import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(AuthController.class)
 @AutoConfigureMockMvc(addFilters = false)
-public class AuthControllerTest {
+class AuthControllerTest {
+
     @MockitoBean
     private AuthService authService;
 
@@ -59,13 +59,14 @@ public class AuthControllerTest {
 
     private RegisterDTO registerDTO;
     private LoginDTO loginDTO;
-    private RefreshDTO refreshDTO;
     private TotpCodeDTO totpCodeDTO;
+    private FirstTotpValidationDTO firstTotpValidationDTO;
     private TokenDTO tokenDTO;
     private TotpSecretDTO totpSecretDTO;
+    private GenerateTotpDTO generateTotpDTO;
 
     @BeforeEach
-    public void init(){
+    void init() {
         registerDTO = new RegisterDTO();
         registerDTO.setEmail("test@test.com");
         registerDTO.setPassword("Password1234.");
@@ -78,29 +79,32 @@ public class AuthControllerTest {
         loginDTO.setEmail("test@test.com");
         loginDTO.setPassword("pass");
 
-        refreshDTO = new RefreshDTO();
-        refreshDTO.setRefreshToken("refreshToken");
-
         totpCodeDTO = new TotpCodeDTO();
         totpCodeDTO.setTotpCode("123456");
+        totpCodeDTO.setTempToken("tempToken");
+
+        firstTotpValidationDTO = new FirstTotpValidationDTO();
+        firstTotpValidationDTO.setTempToken("tempToken");
+        firstTotpValidationDTO.setTotpCode("123456");
+        firstTotpValidationDTO.setTotpSecret("SECRET");
 
         tokenDTO = new TokenDTO();
         tokenDTO.setAccessToken("accessToken");
         tokenDTO.setRefreshToken("refreshToken");
 
-        totpSecretDTO = new TotpSecretDTO();
-        totpSecretDTO.setTotpSecret("secretKey");
+        totpSecretDTO = new TotpSecretDTO(false, null, null);
+
+        generateTotpDTO = new GenerateTotpDTO("SECRET", "QR_CODE", "tempToken");
     }
 
     @Test
-    public void authControllerRegisterUser() throws Exception {
+    void authControllerRegisterUser() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .param("userRole", "ROLE_USER")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(registerDTO))
-                )
+                        .content(objectMapper.writeValueAsString(registerDTO)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.firstName", is(registerDTO.getFirstName())));
+                .andExpect(jsonPath("$.email").value(registerDTO.getEmail()));
     }
 
     @Test
@@ -125,19 +129,29 @@ public class AuthControllerTest {
 
     @Test
     void testRefreshHandler() throws Exception {
-        when(authService.refresh(any(RefreshDTO.class))).thenReturn(tokenDTO);
+        when(authService.refresh(anyString())).thenReturn(tokenDTO);
 
-        mockMvc.perform(post("/auth/login/refresh")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(refreshDTO)))
+        mockMvc.perform(get("/auth/login/refresh")
+                        .cookie(new Cookie("refreshToken", "refreshToken")))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void testEnableMfa() throws Exception {
-        when(mfaService.enableMfa()).thenReturn(totpSecretDTO);
+    void testSetupMfa() throws Exception {
+        when(mfaService.generateMfa()).thenReturn(generateTotpDTO);
 
-        mockMvc.perform(get("/auth/enable2fa"))
+        mockMvc.perform(get("/auth/setup2fa"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.totpSecret").value("SECRET"))
+                .andExpect(jsonPath("$.qrCode").value("QR_CODE"))
+                .andExpect(jsonPath("$.tempToken").value("tempToken"));
+    }
+
+    @Test
+    void testEnableMfa() throws Exception {
+        mockMvc.perform(post("/auth/enable2fa")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(firstTotpValidationDTO)))
                 .andExpect(status().isOk());
     }
 
@@ -164,15 +178,4 @@ public class AuthControllerTest {
         mockMvc.perform(get("/auth/login/google"))
                 .andExpect(status().is3xxRedirection());
     }
-
-//    @Test
-//    void testHandleGoogleSuccess() throws Exception {
-//        when(authService.loginRegisterByGoogleOauth2(any(OAuth2AuthenticationToken.class)))
-//                .thenReturn(tokenDTO);
-//
-//        mockMvc.perform(get("/auth/loginSuccess")
-//                .with(SecurityMockMvcRequestPostProcessors.oauth2Login()))
-//                .andExpect(status().is3xxRedirection())
-//                .andExpect(header().string("Location", "http://localhost:3000/home"));
-//    }
 }
