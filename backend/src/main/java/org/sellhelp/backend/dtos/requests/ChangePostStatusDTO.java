@@ -7,6 +7,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class ChangePostStatusRequest {
+public class ChangePostStatusDTO {
     private String targetStatusName;
 }

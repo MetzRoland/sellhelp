@@ -1,6 +1,6 @@
 package org.sellhelp.backend.controllers;
 
-import org.sellhelp.backend.dtos.requests.ChangePostStatusRequest;
+import org.sellhelp.backend.dtos.requests.ChangePostStatusDTO;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.requests.PostCommentDTO;
 import org.sellhelp.backend.dtos.requests.UpdatePostDTO;
@@ -97,7 +97,7 @@ public class PostController {
     }
 
     @PatchMapping("/{postId}/changeStatus")
-    public ResponseEntity<ChangePostStatusRequest> changePostStatus(@PathVariable Integer postId, @RequestBody ChangePostStatusRequest changePostStatusRequest) {
-        return ResponseEntity.ok(postService.changePostStatus(postId, changePostStatusRequest.getTargetStatusName()));
+    public ResponseEntity<ChangePostStatusDTO> changePostStatus(@PathVariable Integer postId, @RequestBody ChangePostStatusDTO changePostStatusDTO) {
+        return ResponseEntity.ok(postService.changePostStatus(postId, changePostStatusDTO.getTargetStatusName()));
     }
 }

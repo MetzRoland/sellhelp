@@ -3,7 +3,7 @@ package org.sellhelp.backend.services;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.requests.ChangePostStatusRequest;
+import org.sellhelp.backend.dtos.requests.ChangePostStatusDTO;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
 import org.sellhelp.backend.dtos.requests.PostCommentDTO;
 import org.sellhelp.backend.dtos.requests.UpdatePostDTO;
@@ -321,7 +321,7 @@ public class PostService {
         postRepository.save(post);
     }
 
-    public ChangePostStatusRequest changePostStatus(Integer postId, String targetStatusName) {
+    public ChangePostStatusDTO changePostStatus(Integer postId, String targetStatusName) {
 
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
@@ -373,7 +373,7 @@ public class PostService {
         post.setPostStatus(newStatus);
         postRepository.save(post);
 
-        return new ChangePostStatusRequest(targetStatusName);
+        return new ChangePostStatusDTO(targetStatusName);
     }
 
 }
