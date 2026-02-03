@@ -29,12 +29,14 @@ public class PostService {
     private final JobApplicationRepository jobApplicationRepository;
     private final ModelMapper modelMapper;
     private final CurrentUser currentUser;
+    private final EmailService emailService;
 
     @Autowired
     public PostService(PostRepository postRepository, UserRepository userRepository,
                        ModelMapper modelMapper, CityRepository cityRepository,
                        CurrentUser currentUser, PostStatusRepository postStatusRepository,
-                       CommentRepository commentRepository, JobApplicationRepository jobApplicationRepository){
+                       CommentRepository commentRepository, JobApplicationRepository jobApplicationRepository,
+                       EmailService emailService){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.cityRepository = cityRepository;
@@ -43,6 +45,7 @@ public class PostService {
         this.jobApplicationRepository = jobApplicationRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
+        this.emailService = emailService;
     }
 
     public PostResponseDTO createPost(CreatePostDTO createPostDTO){
@@ -230,6 +233,8 @@ public class PostService {
         jobApplicationRepository.save(jobApplication);
         postRepository.save(post);
 
+        emailService.appliedToPost(publisherEmail);
+
         return modelMapper.map(jobApplication, JobApplicationResponseDTO.class);
     }
 
@@ -253,6 +258,8 @@ public class PostService {
         );
 
         jobApplicationRepository.delete(jobApplication);
+
+        emailService.cancelAppliedToPost(publisherEmail);
     }
 
     @Transactional
@@ -279,6 +286,8 @@ public class PostService {
         post.setPostStatus(postStatus);
 
         postRepository.save(post);
+
+        emailService.gotSelectedToPost(selectedUser.getEmail());
 
         return modelMapper.map(post, OwnedPostResponseDTO.class);
     }
@@ -319,6 +328,13 @@ public class PostService {
         post.setSelectedUser(null);
 
         postRepository.save(post);
+
+        if(postOwned(postId)){
+            emailService.gotRejectedToPost(user.getEmail());
+        }
+        else{
+            emailService.cancelSelectedToPost(post.getPostPublisher().getEmail());
+        }
     }
 
     public ChangePostStatusDTO changePostStatus(Integer postId, String targetStatusName) {
