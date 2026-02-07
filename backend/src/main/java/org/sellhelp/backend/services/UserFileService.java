@@ -105,7 +105,7 @@ public class UserFileService {
 
     public FileDTO getUserFileByFileId(Integer fileId) {
         UserFile file = userFileRepository.findById(fileId).orElseThrow(
-                () -> new RuntimeException("A fájl nem található!")
+                () -> new UserNotFoundException("A fájl nem található!")
         );
 
         try {

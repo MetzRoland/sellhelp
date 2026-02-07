@@ -100,4 +100,12 @@ public class PostController {
     public ResponseEntity<ChangePostStatusDTO> changePostStatus(@PathVariable Integer postId, @RequestBody ChangePostStatusDTO changePostStatusDTO) {
         return ResponseEntity.ok(postService.changePostStatus(postId, changePostStatusDTO.getTargetStatusName()));
     }
+
+    @PostMapping("/{postId}/close")
+    public ResponseEntity<String> closePost(@PathVariable Integer postId)
+    {
+        postService.closePost(postId);
+
+        return ResponseEntity.ok("A poszt sikeresen lezárva.");
+    }
 }
