@@ -80,6 +80,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         if(updatePostDTO.getTitle() != null){
             post.setTitle(updatePostDTO.getTitle());
@@ -174,6 +176,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         Comment comment = modelMapper.map(postCommentDTO, Comment.class);
 
@@ -213,6 +217,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         if(post.getSelectedUser() != null){
             throw new RuntimeException("Már nem lehet jelentkezni a posztra!");
@@ -252,6 +258,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         JobApplication jobApplication = jobApplicationRepository.findByApplicantAndJobPost(user, post).orElseThrow(
                 () -> new EntityNotFoundException("Még nem adtál be jelentkezést az alábbi poszthoz!")
@@ -271,6 +279,8 @@ public class PostService {
         Post post = postRepository.findById(jobApplication.getJobPost().getId()).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         if(!postOwned(post.getId())){
             throw new InvalidPermissionException("Nincs hozzáférésed a poszthoz!");
@@ -297,6 +307,8 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         if(post.getSelectedUser() == null){
             throw new InvalidPermissionException("Még nincs kiválasztva jelentkező a munkára!");
@@ -312,6 +324,7 @@ public class PostService {
 
         String postStatusName = "";
 
+        // TODO: needs refactoring
         if(postOwned(postId)){
             postStatusName = "rejected_by_employer";
         }
@@ -338,9 +351,11 @@ public class PostService {
     }
 
     public ChangePostStatusDTO changePostStatus(Integer postId, String targetStatusName) {
-
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
+
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
 
         String currentStatus = post.getPostStatus().getStatusName();
         boolean isEmployer = postOwned(postId);
@@ -374,12 +389,6 @@ public class PostService {
                 }
             }
 
-            case "withdrawn_by_employee", "rejected_by_employer" -> {
-                if (!isEmployer || !"new".equals(targetStatusName)) {
-                    throw new IllegalStateException("A munkáltató csak 'new' státuszra válthat.");
-                }
-            }
-
             default -> throw new IllegalStateException("A státusz nem módosítható ebből az állapotból.");
         }
 
@@ -392,7 +401,7 @@ public class PostService {
         return new ChangePostStatusDTO(targetStatusName);
     }
 
-    public void closePost(Integer postId) {
+    public void closePost(Integer postId, boolean isUnsuccessful) {
         if(!postOwned(postId)){
             throw new InvalidPermissionException("Csak a munkáltató zárhatja le a posztot!");
         }
@@ -401,15 +410,33 @@ public class PostService {
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
 
+        if (isClosed(post))
+        {throw new IllegalStateException("A poszt már le van zárva");}
+
         if (post.getPostStatus().getStatusName().equals("closed"))
         {
             throw new InvalidPermissionException("A poszt már le van zárva.");
         }
 
-        PostStatus closedStatus = postStatusRepository.findByStatusName("closed")
-                .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
+        PostStatus closedStatus;
+        if (isUnsuccessful) {
+            closedStatus = postStatusRepository.findByStatusName("unsuccessful_result_closed")
+                    .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
+        } else {
+            closedStatus = postStatusRepository.findByStatusName("closed")
+                    .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
+        }
 
         post.setPostStatus(closedStatus);
+        postRepository.save(post);
     }
 
+    public boolean isClosed(Post post)
+    {
+        if (post.getPostStatus().getStatusName().equals("closed") ||
+            post.getPostStatus().getStatusName().equals("unsuccessful_result_closed"))
+        {return false;}
+
+        return true;
+    }
 }

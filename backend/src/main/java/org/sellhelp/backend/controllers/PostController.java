@@ -104,7 +104,15 @@ public class PostController {
     @PostMapping("/{postId}/close")
     public ResponseEntity<String> closePost(@PathVariable Integer postId)
     {
-        postService.closePost(postId);
+        postService.closePost(postId, false);
+
+        return ResponseEntity.ok("A poszt sikeresen lezárva.");
+    }
+
+    @PostMapping("/{postId}/unsuccessfulClose")
+    public ResponseEntity<String> closeUnsuccessfulPost(@PathVariable Integer postId)
+    {
+        postService.closePost(postId, true);
 
         return ResponseEntity.ok("A poszt sikeresen lezárva.");
     }
