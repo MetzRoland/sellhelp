@@ -392,19 +392,24 @@ public class PostService {
         return new ChangePostStatusDTO(targetStatusName);
     }
 
-    public void closePost(int postId) {
+    public void closePost(Integer postId) {
         if(!postOwned(postId)){
             throw new InvalidPermissionException("Csak a munkáltató zárhatja le a posztot!");
         }
 
-        Post post = postRepository.findById(postId).get();
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
 
         if (post.getPostStatus().getStatusName().equals("closed"))
         {
             throw new InvalidPermissionException("A poszt már le van zárva.");
         }
 
-        post.getPostStatus().setStatusName("closed");
+        PostStatus closedStatus = postStatusRepository.findByStatusName("closed")
+                .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
+
+        post.setPostStatus(closedStatus);
     }
 
 }

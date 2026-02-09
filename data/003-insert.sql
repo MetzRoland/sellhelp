@@ -10,11 +10,9 @@ VALUES
 (2, 'accepted'),
 (3, 'started'),
 (4, 'completed_by_employee'),
-(5, 'rejected_by_employer'),
-(6, 'unsuccessful_result_closed'),
-(7, 'withdrawn_by_employee'),
-(8, 'work_rejected'),
-(9, 'closed');
+(5, 'unsuccessful_result_closed'),
+(6, 'work_rejected'),
+(7, 'closed');
 
 INSERT INTO "report_types" ("id", "name")
 VALUES 

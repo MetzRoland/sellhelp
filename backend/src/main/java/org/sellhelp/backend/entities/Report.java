@@ -36,6 +36,9 @@ public class Report {
     @JoinColumn(name = "report_type_id")
     private ReportType reportType;
 
+    @Column(name = "comment")
+    private String comment;
+
     @Column(name = "created_at")
     @CurrentTimestamp
     private Instant createdAt;

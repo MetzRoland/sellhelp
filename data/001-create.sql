@@ -236,6 +236,7 @@ CREATE TABLE "reports" (
   "reported_user_id" INT,
   "sender_user_id" INT,
   "report_type_id" SMALLINT,
+  "comment" VARCHAR(2000),
   "created_at" TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY ("id"),
   CONSTRAINT "FK_reports_reported_user_id"
