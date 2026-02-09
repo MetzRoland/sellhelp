@@ -12,5 +12,6 @@ Településenként a felhasználók ki tudnák rakni a problémájukat / kérés
 - [[Funkcionális terv]]
 - [[Projekt funkciók]]
 - [[Email szolgáltatás]]
-- [[Controller-ek]]
+- [[Endpoint-ok]]
 - [[Poszt státusz változtatási szabályok]]
+- [[Fájlkezelés]]

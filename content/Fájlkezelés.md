@@ -1,5 +1,5 @@
 ---
-title: Fájlok
+title: Fájlkezelés
 ---
 
 A szolgáltatásunkban a felhasználók feltölthetnek fájlokat az alábbi helyekre:
