@@ -118,7 +118,7 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(multipartFile.getOriginalFilename())
                 .thenReturn("test.png");
-        when(s3Service.fileKey(eq(user.getId()), any()))
+        when(s3Service.userFileKey(eq(user.getId()), any()))
                 .thenReturn("files/1/test.png");
 
         userFileService.addUserFile(user.getEmail(), multipartFile);
@@ -135,7 +135,7 @@ class UserFileServiceTest {
                 .thenReturn(9);
         when(multipartFile.getOriginalFilename())
                 .thenReturn("test.png");
-        when(s3Service.fileKey(eq(user.getId()), any()))
+        when(s3Service.userFileKey(eq(user.getId()), any()))
                 .thenReturn("files/1/test.png");
 
         userFileService.addUserFile(user.getEmail(), multipartFile);
@@ -150,7 +150,7 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(multipartFile.getOriginalFilename())
                 .thenReturn("test.png");
-        when(s3Service.fileKey(anyInt(), any()))
+        when(s3Service.userFileKey(anyInt(), any()))
                 .thenReturn("files/1/test.png");
         doThrow(IOException.class)
                 .when(s3Service).uploadFileWithKey(anyString(), any());

@@ -131,7 +131,7 @@ public class UserFileService {
 
         UserFile newFile = UserFile.builder()
                 .user(user)
-                .filePath(s3Service.fileKey(user.getId(), file.getOriginalFilename()))
+                .filePath(s3Service.userFileKey(user.getId(), file.getOriginalFilename()))
                 .build();
 
         userFileRepository.save(newFile);

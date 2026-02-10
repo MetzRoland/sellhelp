@@ -29,7 +29,7 @@ public class UserFilesController {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.OK).body(userFileService.getAllUserFiles(email));
+        return ResponseEntity.ok(userFileService.getAllUserFiles(email));
     }
 
     @GetMapping("/download/{fileId}")

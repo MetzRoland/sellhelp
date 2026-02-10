@@ -186,7 +186,7 @@ public class S3Service {
         }
     }
 
-    public String fileKey(Integer userId, String fileName) {
+    public String userFileKey(Integer userId, String fileName) {
         return "users/" + userId + "/" + fileName;
     }
 
@@ -194,11 +194,11 @@ public class S3Service {
         return "users/" + userId + "/pp";
     }
 
-    public String postKey(Integer postId, String fileName) {
+    public String postFileKey(Integer postId, String fileName) {
         return "posts/" + postId + "/" + fileName;
     }
 
-    public String reviewKey(Integer reviewId, String fileName) {
+    public String reviewFileKey(Integer reviewId, String fileName) {
         return "reviews/" + reviewId + "/" + fileName;
     }
 
