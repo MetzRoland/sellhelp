@@ -134,10 +134,9 @@ public class UserFileService {
                 .filePath(s3Service.userFileKey(user.getId(), file.getOriginalFilename()))
                 .build();
 
-        userFileRepository.save(newFile);
-
         try {
             s3Service.uploadFileWithKey(newFile.getFilePath(), file);
+            userFileRepository.save(newFile);
         }
         catch (IOException e) {
             throw new RuntimeException("A fájlt nem sikerült feltölteni!");
