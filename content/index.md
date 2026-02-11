@@ -15,3 +15,5 @@ Településenként a felhasználók ki tudnák rakni a problémájukat / kérés
 - [[Endpoint-ok]]
 - [[Poszt státusz változtatási szabályok]]
 - [[Fájlkezelés]]
+- [[Google integráció]]
+- [[TOTP]]
