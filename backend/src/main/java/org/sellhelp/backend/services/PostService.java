@@ -80,8 +80,10 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         if(updatePostDTO.getTitle() != null){
             post.setTitle(updatePostDTO.getTitle());
@@ -176,8 +178,10 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         Comment comment = modelMapper.map(postCommentDTO, Comment.class);
 
@@ -217,8 +221,10 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         if(post.getSelectedUser() != null){
             throw new RuntimeException("Már nem lehet jelentkezni a posztra!");
@@ -258,8 +264,10 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         JobApplication jobApplication = jobApplicationRepository.findByApplicantAndJobPost(user, post).orElseThrow(
                 () -> new EntityNotFoundException("Még nem adtál be jelentkezést az alábbi poszthoz!")
@@ -279,8 +287,10 @@ public class PostService {
         Post post = postRepository.findById(jobApplication.getJobPost().getId()).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         if(!postOwned(post.getId())){
             throw new InvalidPermissionException("Nincs hozzáférésed a poszthoz!");
@@ -307,8 +317,10 @@ public class PostService {
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         if(post.getSelectedUser() == null){
             throw new InvalidPermissionException("Még nincs kiválasztva jelentkező a munkára!");
@@ -322,17 +334,7 @@ public class PostService {
                 () -> new EntityNotFoundException("A jelentkezés nem létezik!")
         );
 
-        String postStatusName = "";
-
-        // TODO: needs refactoring
-        if(postOwned(postId)){
-            postStatusName = "rejected_by_employer";
-        }
-        else{
-            postStatusName = "withdrawn_by_employee";
-        }
-
-        PostStatus postStatus = postStatusRepository.findByStatusName(postStatusName).orElseThrow(
+        PostStatus postStatus = postStatusRepository.findByStatusName("new").orElseThrow(
                 () -> new EntityNotFoundException("A poszt státusz nem létezik!")
         );
 
@@ -433,10 +435,7 @@ public class PostService {
 
     public boolean isClosed(Post post)
     {
-        if (post.getPostStatus().getStatusName().equals("closed") ||
-            post.getPostStatus().getStatusName().equals("unsuccessful_result_closed"))
-        {return false;}
-
-        return true;
+        return post.getPostStatus().getStatusName().equals("closed") ||
+                post.getPostStatus().getStatusName().equals("unsuccessful_result_closed");
     }
 }
