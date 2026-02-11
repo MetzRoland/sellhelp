@@ -1,9 +1,7 @@
 ---
 title: "Poszt státusz változtatási szabályok"
 ---
-
 [[Poszt státuszok|Lehetséges poszt státuszok]]
-
 
 ```java
 switch (currentStatus) {
@@ -43,4 +41,3 @@ switch (currentStatus) {
   default -> throw new IllegalStateException("A státusz nem módosítható ebből az állapotból.");
 }
 ```
-

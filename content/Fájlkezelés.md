@@ -9,6 +9,6 @@ A szolgáltatásunkban a felhasználók feltölthetnek fájlokat az alábbi hely
 - Poszt
 - Review
 
-Minden fájl mérete maximum 10MB lehet.
+Minden fájl mérete **maximum 10MB** lehet.
 
 A fájlok [[S3|külön szerverre]] kerülnek mentésre és a böngésző ugyan innen éri el.
