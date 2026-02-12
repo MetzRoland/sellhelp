@@ -24,7 +24,7 @@ public class PostFileController {
         return ResponseEntity.ok(postFileService.getAllFilesForPost(postId));
     }
 
-    @GetMapping("/{fileId}")
+    @GetMapping("/{fileId}/download")
     public ResponseEntity<FileDTO> getPostFile(@PathVariable int fileId)
     {
         return ResponseEntity.ok(postFileService.getPostFileById(fileId));
