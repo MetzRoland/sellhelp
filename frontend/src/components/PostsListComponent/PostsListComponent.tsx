@@ -55,6 +55,7 @@ function PostsListComponent({ title, postFetchingEndpoint }: PostListProps) {
               <PostView
                 key={post.id}
                 post={post}
+                
                 handleOnClick={() => {
                     navigate(`/posts/${post.id}`);
                 }}

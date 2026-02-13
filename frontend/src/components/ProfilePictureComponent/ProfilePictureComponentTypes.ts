@@ -5,4 +5,5 @@ export interface ProfilePicture{
 export interface ProfilePictureComponentProps{
     userId: number;
     handleOnClick?: (e: React.MouseEvent<HTMLImageElement>) => void;
+    additionalSytleClass?: string;
 }

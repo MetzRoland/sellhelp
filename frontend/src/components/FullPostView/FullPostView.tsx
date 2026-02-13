@@ -224,11 +224,13 @@ function FullPostView() {
     }
   };
 
-  const handleCommentInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+  const handleCommentInputChange = (
+    e: React.ChangeEvent<HTMLTextAreaElement>,
+  ) => {
     const { value } = e.target;
 
     setComment(value);
-  }
+  };
 
   const addNewComment = async () => {
     setIsLoading(true);
@@ -237,22 +239,23 @@ function FullPostView() {
     try {
       const response = await privateAxios.post(
         `/post/posts/${post?.id}/comment`,
-        {message: comment},
+        { message: comment },
       );
 
       console.log(response.data);
 
-      const fetchPostResponse = await privateAxios.get<Post>(`/post/posts/${id}`);
+      const fetchPostResponse = await privateAxios.get<Post>(
+        `/post/posts/${id}`,
+      );
 
       console.log(response.data);
       setPost(fetchPostResponse.data);
     } catch {
       console.log("");
-    }
-    finally{
-        setIsLoading(false);
-        setLoadingMessage("");
-        setComment("");
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
+      setComment("");
     }
   };
 
@@ -306,7 +309,7 @@ function FullPostView() {
               <textarea
                 className="input-element textarea-element"
                 placeholder="Kommentelj valamit..."
-                
+                value={comment ?? ""}
                 onChange={handleCommentInputChange}
               ></textarea>
 
@@ -319,17 +322,32 @@ function FullPostView() {
               </button>
             </div>
 
-            {post.comments.length === 0 && <p>Nincsenek kommentek!</p>}
+            <div className="comments-container">
+              {post.comments.length === 0 && <p>Nincsenek kommentek!</p>}
 
-            {post.comments.map((comment) => {
-              return (
-                <div key={comment.id}>
-                  <p>{comment.message}</p>
-                  <p>{formatDate(comment.createdAt.toString())}</p>
-                  <ProfilePictureComponent userId={user.id} />
+              {post.comments.map((comment) => (
+                <div key={comment.id} className="comment-item" onClick={() => {
+                    navigate(`/users/${comment.publisher.id}`);
+                }}>
+                  <div className="comment-avatar">
+                    <ProfilePictureComponent additionalSytleClass="profile-picture-skeleton-small" userId={comment.publisher.id} />
+                  </div>
+
+                  <div className="comment-content">
+                    <div className="comment-header">
+                      <span className="comment-author">
+                        {comment.publisher.email}
+                      </span>
+                      <span className="comment-date">
+                        {formatDate(comment.createdAt.toString())}
+                      </span>
+                    </div>
+
+                    <p className="comment-message">{comment.message}</p>
+                  </div>
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
 
           {newPostError && (

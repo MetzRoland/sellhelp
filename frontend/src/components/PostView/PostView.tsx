@@ -17,7 +17,11 @@ function PostView({ post, handleOnClick }: PostViewProps){
                 <h1>{post.title}</h1>
 
                 <div className="post-details">
-                    <p className="post-description">{post.description}</p>
+                    {post.description.length > 100 ? (
+                        <p className="post-description">{post.description.slice(0, 100) + "..."}</p>
+                    ) : (
+                        <p className="post-description">{post.description}</p>
+                    )}
 
                     {post.reward ? (
                         <p className="post-reward">{post.reward} Ft</p>
@@ -31,6 +35,7 @@ function PostView({ post, handleOnClick }: PostViewProps){
                         <div className="post-publisher-details">
                             <ProfilePictureComponent
                                 userId={post.publisher.id}
+                                additionalSytleClass="profile-picture-skeleton-small"
                                 handleOnClick={(e: React.MouseEvent<HTMLImageElement>) => {
                                     e.stopPropagation();
                                     handleProfileClick(post.publisher.id);

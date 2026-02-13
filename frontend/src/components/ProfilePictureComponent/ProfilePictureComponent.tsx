@@ -3,7 +3,7 @@ import { privateAxios } from "../../config/axiosConfig";
 import type { ProfilePicture } from "./ProfilePictureComponentTypes";
 import type { ProfilePictureComponentProps } from "./ProfilePictureComponentTypes";
 
-function ProfilePictureComponent({ userId, handleOnClick }: ProfilePictureComponentProps) {
+function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }: ProfilePictureComponentProps) {
   const [profilePicture, setProfilePicture] = useState<ProfilePicture>({
     profilePictureUrl: null,
   });
@@ -31,7 +31,7 @@ function ProfilePictureComponent({ userId, handleOnClick }: ProfilePictureCompon
   return (
     <>
       {ppLoading ? (
-        <div className="profile-picture-skeleton" />
+        <div className={"profile-picture-skeleton " + additionalSytleClass} />
       ) : (
         <img
           className="profile-picture-img"
