@@ -1,0 +1,9 @@
+.post-view-container{
+    transition: all .4s;
+}
+
+.post-view-container:hover{
+    transform: scale(1.05);
+    box-shadow: 1px 1px 10px #fff;
+    cursor: pointer;
+}

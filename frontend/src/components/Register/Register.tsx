@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import Header from "./../Header/Header";
+import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import InputForm from "../Reusables/InputForm/InputForm";
 import type {
@@ -50,7 +50,11 @@ function Register() {
                 setIsLoading(true);
                 const response = await publicAxios.get("/api/public/cities");
                 setCities(response.data);
-            } finally {
+            }
+            catch{
+                setCities([]);
+            }
+            finally {
                 setIsLoading(false);
             }
         };

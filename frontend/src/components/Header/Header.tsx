@@ -2,72 +2,17 @@ import { Link } from "react-router";
 import { useEffect, useState, useRef } from "react";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
-import { privateAxios } from "../../config/axiosConfig";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
+
 import "./Header.css";
 
-type CachedProfilePicture = {
-  url: string;
-  expiresAt: number;
-};
-
 function Header() {
-  const { isAuthenticated, logout } = useAuth();
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [ppLoading, setPpLoading] = useState<boolean>(true);
+  const { isAuthenticated, logout , user } = useAuth();
   const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
 
   const { setIsLoading, setLoadingMessage } = useLoading();
 
   const profileRef = useRef<HTMLDivElement | null>(null);
-
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    if (profilePicture) return;
-
-    const cachedPp = localStorage.getItem("profilePicture");
-
-    if (cachedPp) {
-      const parsed: CachedProfilePicture = JSON.parse(cachedPp);
-
-      if (Date.now() < parsed.expiresAt) {
-        setProfilePicture(parsed.url);
-
-        setTimeout(() => {
-          setPpLoading(false);
-        }, 1000);
-
-        return;
-      } 
-      else {
-        localStorage.removeItem("profilePicture");
-      }
-    }
-
-    const fetchProfilePicture = async () => {
-      try {
-        const response = await privateAxios.get("/user/files/pp");
-        setProfilePicture(response.data.profilePictureUrl);
-
-        if (response.data.profilePictureUrl) {
-          const expiresInMs = 15 * 60 * 1000;
-
-          localStorage.setItem(
-            "profilePicture",
-            JSON.stringify({
-              url: response.data.profilePictureUrl,
-              expiresAt: Date.now() + expiresInMs,
-            }),
-          );
-        }
-      } catch {
-        setProfilePicture(null);
-      } finally {
-        setPpLoading(false);
-      }
-    };
-
-    fetchProfilePicture();
-  }, [isAuthenticated, profilePicture]);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -89,6 +34,10 @@ function Header() {
   const handleProfileDropDown = () => {
     setIsProfileOpen((prev) => !prev);
   };
+
+  if(user === null){
+    return;
+  }
 
   return (
     <header className="header">
@@ -133,16 +82,10 @@ function Header() {
               className="right-options right-options-profile"
               ref={profileRef}
             >
-              {ppLoading ? (
-                <div className="profile-picture-skeleton" />
-              ) : (
-                <img
-                  className="profile-picture-img"
-                  src={profilePicture || "images/profile.svg"}
-                  alt="Profile picture"
-                  onClick={handleProfileDropDown}
-                />
-              )}
+              <ProfilePictureComponent
+                userId={user.id} 
+                handleOnClick={handleProfileDropDown}
+              />
               <div
                 className={`profile-options-container ${
                   isProfileOpen ? "open" : "closed"

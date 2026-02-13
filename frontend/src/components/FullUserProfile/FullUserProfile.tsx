@@ -95,6 +95,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
     const fetchUserById = async () => {
       setIsLoading(true);
+
       try {
         setLoadingMessage("A fiók adatainak betöltése...");
 
@@ -127,7 +128,18 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchCities();
   }, [setIsLoading, settings]);
 
-  const setUserData = () => {
+  // const setUserData = () => {
+  //   setFormData({
+  //     lastName: user?.lastName,
+  //     firstName: user?.firstName,
+  //     birthDate: user?.birthDate?.toString(),
+  //     cityName: user?.cityName,
+  //     email: user?.email,
+  //     role: getUserRoleLabel(user?.role),
+  //   });
+  // };
+
+  useEffect(() => {
     setFormData({
       lastName: user?.lastName,
       firstName: user?.firstName,
@@ -136,10 +148,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       email: user?.email,
       role: getUserRoleLabel(user?.role),
     });
-  };
-
-  useEffect(() => {
-    setUserData();
   }, [user]);
 
   if (isLoading && !user) {

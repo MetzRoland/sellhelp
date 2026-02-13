@@ -20,6 +20,7 @@ public class CreatePostDTO {
     @Size(max = 2000, message = "A poszt leírása nem lehet 2000 karakternél hosszabb!", groups = SizeGroup.class)
     private String description;
 
+    @NotNull(message = "A munkadíj nem lehet üres!", groups = NotBlankGroup.class)
     @Min(value = 0, message = "A fizetés nem lehet 0 forint alatt!", groups = MinMaxGroup.class)
     @Max(value = 10000000, message = "A fizetés nem lehet 10 000 000 forint felett!", groups = MinMaxGroup.class)
     private Integer reward;

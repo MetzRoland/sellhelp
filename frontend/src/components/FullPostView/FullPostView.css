@@ -1,0 +1,12 @@
+.full-post-view-container{
+    min-width: 40vw;
+}
+
+.post-details{
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
