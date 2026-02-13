@@ -2,6 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.services.PostFileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -13,6 +14,7 @@ import java.util.List;
 public class PostFileController {
     private final PostFileService postFileService;
 
+    @Autowired
     public PostFileController(PostFileService postFileService)
     {
         this.postFileService = postFileService;
