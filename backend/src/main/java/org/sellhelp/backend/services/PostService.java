@@ -438,4 +438,20 @@ public class PostService {
         return post.getPostStatus().getStatusName().equals("closed") ||
                 post.getPostStatus().getStatusName().equals("unsuccessful_result_closed");
     }
+
+    public Boolean getAppliedStatus(Integer postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        User user = currentUser.getCurrentlyLoggedUserEntity();
+
+        for(JobApplication jobApplication: post.getJobApplications()){
+            if(Objects.equals(jobApplication.getApplicant().getId(), user.getId())){
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

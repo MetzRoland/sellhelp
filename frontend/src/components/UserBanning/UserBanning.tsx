@@ -116,7 +116,7 @@ function UserBanning() {
   }, [formData, allUserAccounts]);
 
   const handleInputUpdate = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
 

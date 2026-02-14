@@ -21,7 +21,7 @@ function NewPostComponent() {
 
   const newPostInputs = [
     { name: "title", type: "text", placeholder: "A poszt címe" },
-    { name: "description", type: "text", placeholder: "Leírás" },
+    { name: "description", type: "textarea", placeholder: "Leírás" },
     { name: "cityName", type: "select", placeholder: "Válasszon települést" },
     { name: "reward", type: "number", placeholder: "Munkadíj" },
   ] as const;
@@ -61,7 +61,7 @@ function NewPostComponent() {
   }));
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
 

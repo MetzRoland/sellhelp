@@ -14,16 +14,17 @@ import InputForm from "../Reusables/InputForm/InputForm";
 import type { City } from "../Register/RegisterTypes";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { AxiosError } from "axios";
-import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
+import UserListItem from "../UserListItem/UserListItem";
+import PostActionButton from "../PostActionButton/PostActionButton";
 
 import "./FullPostView.css";
-import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 
 function FullPostView() {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [cities, setCities] = useState<City[]>([]);
   const [comment, setComment] = useState<string | null>(null);
+  const [applied, setApplied] = useState<boolean>(false);
   const { user } = useAuth();
 
   const { setIsLoading, setLoadingMessage } = useLoading();
@@ -32,7 +33,7 @@ function FullPostView() {
 
   const newPostInputs = [
     { name: "title", type: "text", placeholder: "A poszt címe" },
-    { name: "description", type: "text", placeholder: "Leírás" },
+    { name: "description", type: "textarea", placeholder: "Leírás" },
     { name: "cityName", type: "select", placeholder: "Válasszon települést" },
     { name: "reward", type: "number", placeholder: "Munkadíj" },
   ] as const;
@@ -120,7 +121,7 @@ function FullPostView() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
   ) => {
     const { name, value } = e.target;
 
@@ -232,13 +233,13 @@ function FullPostView() {
     setComment(value);
   };
 
-  const addNewComment = async () => {
+  const addNewComment = async (postId: number) => {
     setIsLoading(true);
     setLoadingMessage("Komment mentése...");
 
     try {
       const response = await privateAxios.post(
-        `/post/posts/${post?.id}/comment`,
+        `/post/posts/${postId}/comment`,
         { message: comment },
       );
 
@@ -251,11 +252,145 @@ function FullPostView() {
       console.log(response.data);
       setPost(fetchPostResponse.data);
     } catch {
-      console.log("");
+      setPost(null);
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
       setComment("");
+    }
+  };
+
+  const selectUserToPost = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    applicationId: number,
+  ) => {
+    e.stopPropagation();
+
+    setIsLoading(true);
+    setLoadingMessage("Felhasználó kiválasztása...");
+
+    try {
+      const response = await privateAxios.post(
+        `post/chooseApplicant/${applicationId}`,
+      );
+
+      setPost(response.data);
+    } catch {
+      setPost(null);
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const rejectUserApply = async (
+    e: React.MouseEvent<HTMLButtonElement>,
+    postId: number,
+  ) => {
+    e.stopPropagation();
+
+    setIsLoading(true);
+    setLoadingMessage("Felhasználó visszavonása...");
+
+    try {
+      const response = await privateAxios.get(
+        `/post/posts/${postId}/rejectApply`,
+      );
+
+      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
+      setPost(postResponse.data);
+
+      console.log(response.data);
+    } catch {
+      setPost(null);
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
+    }
+  };
+
+  useEffect(() => {
+    async function fetchApplied() {
+      const response = await privateAxios.get(
+        `/post/posts/${id}/applied-status`,
+      );
+
+      setApplied(response.data);
+    }
+
+    fetchApplied();
+  }, [applied, id]);
+
+  const applyToPost = async (postId: number) => {
+    setIsLoading(true);
+    setLoadingMessage("Jelentkezés...");
+
+    try {
+      const response = await privateAxios.post(`/post/posts/${postId}/apply`);
+      console.log(response.data);
+
+      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
+      setPost(postResponse.data);
+
+      const appliedStatusRespone = await privateAxios.get(
+        `/post/posts/${post?.id}/applied-status`,
+      );
+
+      setApplied(appliedStatusRespone.data);
+    } catch {
+      setPost(null);
+    } finally {
+      setIsLoading(false);
+      setLoadingMessage("");
+    }
+  };
+
+  const startWorkingOnPost = async (postId: number) => {
+    try {
+      const response = await privateAxios.patch(
+        `/post/${postId}/changeStatus`,
+        {
+          targetStatusName: "started",
+        },
+      );
+      console.log(response.data);
+
+      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
+      setPost(postResponse.data);
+    } catch {
+      setPost(null);
+    }
+  };
+
+  const rejectApply = async (postId: number) => {
+    try {
+      const response = await privateAxios.get(
+        `/post/posts/${postId}/rejectApply`,
+      );
+      console.log(response.data);
+
+      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
+      setPost(postResponse.data);
+
+      setApplied(false);
+    } catch {
+      setPost(null);
+    }
+  };
+
+  const cancelApplication = async (postId: number) => {
+    try {
+      const response = await privateAxios.post(
+        `/post/posts/${postId}/cancelApply`,
+      );
+      console.log(response.data);
+
+      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
+      setPost(postResponse.data);
+
+      setApplied(false);
+    } catch {
+      setPost(null);
     }
   };
 
@@ -316,39 +451,86 @@ function FullPostView() {
               <button
                 type="button"
                 className="setting-btn"
-                onClick={addNewComment}
+                onClick={() => addNewComment(post.id)}
               >
                 Küldés
               </button>
             </div>
 
-            <div className="comments-container">
+            <div className="user-list-container">
               {post.comments.length === 0 && <p>Nincsenek kommentek!</p>}
 
               {post.comments.map((comment) => (
-                <div key={comment.id} className="comment-item" onClick={() => {
-                    navigate(`/users/${comment.publisher.id}`);
-                }}>
-                  <div className="comment-avatar">
-                    <ProfilePictureComponent additionalSytleClass="profile-picture-skeleton-small" userId={comment.publisher.id} />
-                  </div>
-
-                  <div className="comment-content">
-                    <div className="comment-header">
-                      <span className="comment-author">
-                        {comment.publisher.email}
-                      </span>
-                      <span className="comment-date">
-                        {formatDate(comment.createdAt.toString())}
-                      </span>
-                    </div>
-
-                    <p className="comment-message">{comment.message}</p>
-                  </div>
-                </div>
+                <UserListItem
+                  key={comment.id}
+                  userId={comment.publisher.id}
+                  email={comment.publisher.email}
+                  date={comment.createdAt.toString()}
+                  message={comment.message}
+                  highlightLabel={
+                    comment.publisher.id === post.publisher.id
+                      ? "<<Létrehozó>>"
+                      : undefined
+                  }
+                />
               ))}
             </div>
+
+            {post.publisher.id !== user.id && (
+              <PostActionButton
+                post={post}
+                applied={applied}
+                applyToPost={applyToPost}
+                cancelApplication={cancelApplication}
+                startWorkingOnPost={startWorkingOnPost}
+                rejectApply={rejectApply}
+              />
+            )}
+
+            {post.publisher.id === user.id && (
+              <>
+                <h2>Jelentkezések:</h2>
+
+                <div className="user-list-container">
+                  {post.jobApplications.length === 0 && (
+                    <p>Nincsenek Jelentkezők!</p>
+                  )}
+
+                  {post.jobApplications.map((jobApplication) => (
+                    <UserListItem
+                      key={jobApplication.id}
+                      userId={jobApplication.applicant.id}
+                      email={jobApplication.applicant.email}
+                      date={jobApplication.appliedAt.toString()}
+                      actionText="Kiválaszt"
+                      btnDisabled={post.selectedUser ? true : false}
+                      onActionClick={(e) =>
+                        selectUserToPost(e, jobApplication.id)
+                      }
+                    />
+                  ))}
+                </div>
+
+                <h2>Munkavállaló:</h2>
+
+                {post.selectedUser === null ? (
+                  <p>Nincs még senki kiválasztva!</p>
+                ) : (
+                  <UserListItem
+                    userId={post.selectedUser.id}
+                    email={post.selectedUser.email}
+                    date={post.jobApplications
+                      .find((a) => a.applicant.id === post.selectedUser?.id)
+                      ?.appliedAt.toString()}
+                    actionText="Visszavonás"
+                    onActionClick={(e) => rejectUserApply(e, post.id)}
+                  />
+                )}
+              </>
+            )}
           </div>
+
+          <p>{post.statusName}</p>
 
           {newPostError && (
             <p className="message error error-process-status">{newPostError}</p>
