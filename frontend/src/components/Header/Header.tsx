@@ -35,10 +35,6 @@ function Header() {
     setIsProfileOpen((prev) => !prev);
   };
 
-  if(user === null){
-    return;
-  }
-
   return (
     <header className="header">
       <nav className="header-nav">
@@ -82,10 +78,12 @@ function Header() {
               className="right-options right-options-profile"
               ref={profileRef}
             >
-              <ProfilePictureComponent
-                userId={user.id} 
-                handleOnClick={handleProfileDropDown}
-              />
+              {user && (
+                <ProfilePictureComponent
+                  userId={user.id}
+                  handleOnClick={handleProfileDropDown}
+                />
+              )}
               <div
                 className={`profile-options-container ${
                   isProfileOpen ? "open" : "closed"
