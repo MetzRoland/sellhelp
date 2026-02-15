@@ -3,6 +3,7 @@ import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes
 export interface PostListProps{
     title: string;
     postFetchingEndpoint: string;
+    navigateToPostEndpoint?: string;
 }
 
 export interface JobApplication{

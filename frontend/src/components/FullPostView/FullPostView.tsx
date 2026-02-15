@@ -16,10 +16,12 @@ import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { AxiosError } from "axios";
 import UserListItem from "../UserListItem/UserListItem";
 import PostActionButton from "../PostActionButton/PostActionButton";
+import type { FullPostViewProps } from "./FullPostViewTypes";
+import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
 
 import "./FullPostView.css";
 
-function FullPostView() {
+function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [cities, setCities] = useState<City[]>([]);
@@ -121,7 +123,9 @@ function FullPostView() {
   };
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -140,7 +144,7 @@ function FullPostView() {
       setLoadingMessage("Poszt betöltése...");
 
       try {
-        const response = await privateAxios.get<Post>(`/post/posts/${id}`);
+        const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
 
         console.log(response.data);
         setPost(response.data);
@@ -153,7 +157,7 @@ function FullPostView() {
     };
 
     fetchPostById();
-  }, [id, setIsLoading, setLoadingMessage]);
+  }, [id, setIsLoading, setLoadingMessage, fetchEndpoint]);
 
   const toggleDisabled = async (inputName: keyof NewPostForm) => {
     const isCurrentlyDisabled = disabledInputsMap[inputName];
@@ -203,15 +207,15 @@ function FullPostView() {
     }
   };
 
-  const deletePostById = async () => {
+  const deletePostById = async (postId: number, baseEndpoint: string) => {
     setIsLoading(true);
     setLoadingMessage("Poszt törlése...");
 
     try {
-      const response = await privateAxios.delete(`/post/delete/${post?.id}`);
+      const response = await privateAxios.delete(baseEndpoint + `${postId}`);
       console.log(response.data);
 
-      navigate("/myposts");
+      navigate(!baseEndpoint.includes("superuser") ? "/myposts" : "/postManagement");
     } catch (err) {
       const error = err as AxiosError<{
         message?: string;
@@ -311,15 +315,17 @@ function FullPostView() {
 
   useEffect(() => {
     async function fetchApplied() {
-      const response = await privateAxios.get(
-        `/post/posts/${id}/applied-status`,
-      );
+      if(user?.role === "ROLE_USER"){
+        const response = await privateAxios.get(
+          `/post/posts/${id}/applied-status`,
+        );
 
-      setApplied(response.data);
+        setApplied(response.data);
+      }
     }
 
     fetchApplied();
-  }, [applied, id]);
+  }, [applied, id, user?.role]);
 
   const applyToPost = async (postId: number) => {
     setIsLoading(true);
@@ -411,6 +417,8 @@ function FullPostView() {
 
         <div className="content-container full-post-view-container">
           <div className="post-details">
+            <p className="post-date">Megosztva: {formatDate(post.createdAt.toString())}</p>
+
             {post.publisher.id === user.id ? (
               <>
                 <InputForm<NewPostForm>
@@ -424,7 +432,7 @@ function FullPostView() {
                   disabledToggle={toggleDisabled}
                 />
 
-                <button type="button" className="btn" onClick={deletePostById}>
+                <button type="button" className="btn" onClick={() => deletePostById(post.id, "/post/delete/")}>
                   Poszt törlése
                 </button>
               </>
@@ -438,24 +446,39 @@ function FullPostView() {
               />
             )}
 
+            {post.publisher.id !== user.id && (
+              <>
+                <h2>Poszt létrehozó:</h2>
+                
+                <UserListItem
+                  key={post.publisher.id}
+                  userId={post.publisher.id}
+                  email={post.publisher.email}
+                  date={post.publisher.createdAt.toString()} 
+                />
+              </>
+            )}
+
             <h2>Kommentek:</h2>
 
-            <div className="new-comment-div">
-              <textarea
-                className="input-element textarea-element"
-                placeholder="Kommentelj valamit..."
-                value={comment ?? ""}
-                onChange={handleCommentInputChange}
-              ></textarea>
+            {user.role === "ROLE_USER" && (
+              <div className="new-comment-div">
+                <textarea
+                  className="input-element textarea-element"
+                  placeholder="Kommentelj valamit..."
+                  value={comment ?? ""}
+                  onChange={handleCommentInputChange}
+                ></textarea>
 
-              <button
-                type="button"
-                className="setting-btn"
-                onClick={() => addNewComment(post.id)}
-              >
-                Küldés
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className="setting-btn"
+                  onClick={() => addNewComment(post.id)}
+                >
+                  Küldés
+                </button>
+              </div>
+            )}
 
             <div className="user-list-container">
               {post.comments.length === 0 && <p>Nincsenek kommentek!</p>}
@@ -476,7 +499,17 @@ function FullPostView() {
               ))}
             </div>
 
-            {post.publisher.id !== user.id && (
+            {(user.role === "ROLE_MODERATOR" || user.role === "ROLE_ADMIN") && (
+              <button
+                  type="button"
+                  className="btn"
+                  onClick={() => deletePostById(post.id, `/superuser/posts/delete/`)}
+                >
+                  Admin törlés
+              </button>
+            )}
+
+            {post.publisher.id !== user.id && user.role === "ROLE_USER" && (
               <PostActionButton
                 post={post}
                 applied={applied}
@@ -487,7 +520,7 @@ function FullPostView() {
               />
             )}
 
-            {post.publisher.id === user.id && (
+            {(post.publisher.id === user.id || user.role !== "ROLE_USER") && (
               <>
                 <h2>Jelentkezések:</h2>
 

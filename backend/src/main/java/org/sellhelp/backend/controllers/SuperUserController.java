@@ -1,5 +1,6 @@
 package org.sellhelp.backend.controllers;
 
+import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.services.SuperUserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,18 @@ public class SuperUserController {
     @PutMapping("/users/unban/{userId}")
     public UserDTO unbanUser(@PathVariable Integer userId){
         return superUserService.unbanUser(userId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @GetMapping("/posts")
+    public ResponseEntity<List<OwnedPostResponseDTO>> getAllPosts(){
+        return ResponseEntity.ok(superUserService.getAllPosts());
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @GetMapping("/posts/{postId}")
+    public ResponseEntity<OwnedPostResponseDTO> getPostById(@PathVariable Integer postId){
+        return ResponseEntity.ok(superUserService.getPostById(postId));
     }
 
     @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")

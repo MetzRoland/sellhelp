@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
@@ -112,11 +113,22 @@ public class SuperUserService {
                 );
     }
 
+    public List<OwnedPostResponseDTO> getAllPosts(){
+        return postRepository.findAll().stream()
+                .map(post -> modelMapper.map(post, OwnedPostResponseDTO.class)).toList();
+    }
+
     public void deletePost(Integer postId){
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem található!")
         );
 
         postRepository.delete(post);
+    }
+
+    public OwnedPostResponseDTO getPostById(Integer postId) {
+        return modelMapper.map(postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem található!")
+        ), OwnedPostResponseDTO.class);
     }
 }

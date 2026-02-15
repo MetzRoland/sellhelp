@@ -9,7 +9,7 @@ import { useLoading } from "../../contextProviders/ProccessLoadProvider/Proccess
 
 import "./PostsListComponent.css";
 
-function PostsListComponent({ title, postFetchingEndpoint }: PostListProps) {
+function PostsListComponent({ title, postFetchingEndpoint, navigateToPostEndpoint = "/posts/" }: PostListProps) {
   const navigate = useNavigate();
 
   const { setIsLoading, setLoadingMessage, isLoading, loadingMessage } =
@@ -57,7 +57,7 @@ function PostsListComponent({ title, postFetchingEndpoint }: PostListProps) {
                 post={post}
                 
                 handleOnClick={() => {
-                    navigate(`/posts/${post.id}`);
+                    navigate(navigateToPostEndpoint + `${post.id}`);
                 }}
               />
             );

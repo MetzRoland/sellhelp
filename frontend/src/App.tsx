@@ -55,6 +55,8 @@ function App() {
 
           <Route element={<SuperUserRouterLayout />}>
             <Route path="/banningPage" element={<UserBanning />} />
+            <Route path="/postManagement" element={<PostsListComponent postFetchingEndpoint="/superuser/posts" navigateToPostEndpoint="/postManagement/posts/" title="Posztok kezelése" />} />
+            <Route path="/postManagement/posts/:id" element={<FullPostView fetchEndpoint="/superuser/posts/"/>} />
           </Route>
 
           <Route path="*" element={<PageNotFound />} />
