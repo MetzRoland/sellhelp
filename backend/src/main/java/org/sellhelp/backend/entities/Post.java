@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,8 +31,8 @@ public class Post {
     @Column(name = "reward", nullable = false)
     private Integer reward;
 
-    @Column(name = "created_at", nullable = false)
-    @CurrentTimestamp
+    @Column(name = "created_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private Instant createdAt;
 
     @ManyToOne

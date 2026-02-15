@@ -3,7 +3,7 @@ package org.sellhelp.backend.entities;
 import java.time.Instant;
 import java.util.List;
 
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -38,7 +38,7 @@ public class ChatMessage {
     private String message;
 
     @Column(name = "sent_at")
-    @CurrentTimestamp
+    @CreationTimestamp
     private Instant sentAt;
 
     @OneToMany(mappedBy = "chatMessage", cascade = {CascadeType.PERSIST, CascadeType.REMOVE, CascadeType.MERGE}, orphanRemoval = true)
