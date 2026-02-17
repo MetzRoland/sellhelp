@@ -48,36 +48,40 @@ class UserFilesControllerTest {
     @WithMockUser(username = "test@test.com")
     void getAllFiles_success() throws Exception {
         when(userFileService.getAllUserFiles("test@test.com"))
-                .thenReturn(List.of(new FileDTO(1, "http://url")));
+                .thenReturn(List.of(new FileDTO(1, "http://url", "testFileName1")));
 
         mockMvc.perform(get("/user/files"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].fileId").value(1))
-                .andExpect(jsonPath("$[0].url").value("http://url"));
+                .andExpect(jsonPath("$[0].url").value("http://url"))
+                .andExpect(jsonPath("$[0].fileName").value("testFileName1"));
     }
 
     @Test
     @WithMockUser(username = "test@test.com")
     void getUserFile_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
-                .thenReturn(new FileDTO(5, "http://download"));
+                .thenReturn(new FileDTO(5, "http://download", "MytestFileName22"));
 
         mockMvc.perform(get("/user/files/download/{fileId}", 5))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(5))
-                .andExpect(jsonPath("$.url").value("http://download"));
+                .andExpect(jsonPath("$.url").value("http://download"))
+                .andExpect(jsonPath("$.fileName").value("MytestFileName22"));
+
     }
 
     @Test
     @WithMockUser(username = "test@test.com")
     void getUserFileById_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
-                .thenReturn(new FileDTO(5, "http://download"));
+                .thenReturn(new FileDTO(5, "http://download", "new-testFileName333"));
 
         mockMvc.perform(get("/user/files/download/{fileId}", 5))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(5))
-                .andExpect(jsonPath("$.url").value("http://download"));
+                .andExpect(jsonPath("$.url").value("http://download"))
+                .andExpect(jsonPath("$.fileName").value("new-testFileName333"));
     }
 
     @Test
