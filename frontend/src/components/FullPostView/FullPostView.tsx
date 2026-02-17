@@ -21,7 +21,7 @@ import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
 
 import "./FullPostView.css";
 
-function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
+function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
   const { id } = useParams();
   const [post, setPost] = useState<Post | null>(null);
   const [cities, setCities] = useState<City[]>([]);
@@ -215,7 +215,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
       const response = await privateAxios.delete(baseEndpoint + `${postId}`);
       console.log(response.data);
 
-      navigate(!baseEndpoint.includes("superuser") ? "/myposts" : "/postManagement");
+      navigate(
+        !baseEndpoint.includes("superuser") ? "/myposts" : "/postManagement",
+      );
     } catch (err) {
       const error = err as AxiosError<{
         message?: string;
@@ -315,7 +317,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
 
   useEffect(() => {
     async function fetchApplied() {
-      if(user?.role === "ROLE_USER"){
+      if (user?.role === "ROLE_USER") {
         const response = await privateAxios.get(
           `/post/posts/${id}/applied-status`,
         );
@@ -417,7 +419,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
 
         <div className="content-container full-post-view-container">
           <div className="post-details">
-            <p className="post-date">Megosztva: {formatDate(post.createdAt.toString())}</p>
+            <p className="post-date">
+              Megosztva: {formatDate(post.createdAt.toString())}
+            </p>
 
             {post.publisher.id === user.id ? (
               <>
@@ -432,7 +436,11 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
                   disabledToggle={toggleDisabled}
                 />
 
-                <button type="button" className="btn" onClick={() => deletePostById(post.id, "/post/delete/")}>
+                <button
+                  type="button"
+                  className="btn"
+                  onClick={() => deletePostById(post.id, "/post/delete/")}
+                >
                   Poszt törlése
                 </button>
               </>
@@ -449,12 +457,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
             {post.publisher.id !== user.id && (
               <>
                 <h2>Poszt létrehozó:</h2>
-                
+
                 <UserListItem
                   key={post.publisher.id}
                   userId={post.publisher.id}
                   email={post.publisher.email}
-                  date={post.publisher.createdAt.toString()} 
+                  date={post.publisher.createdAt.toString()}
                 />
               </>
             )}
@@ -483,29 +491,37 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
             <div className="user-list-container">
               {post.comments.length === 0 && <p>Nincsenek kommentek!</p>}
 
-              {post.comments.map((comment) => (
-                <UserListItem
-                  key={comment.id}
-                  userId={comment.publisher.id}
-                  email={comment.publisher.email}
-                  date={comment.createdAt.toString()}
-                  message={comment.message}
-                  highlightLabel={
-                    comment.publisher.id === post.publisher.id
-                      ? "<<Létrehozó>>"
-                      : undefined
-                  }
-                />
-              ))}
+              {[...post.comments]
+                .sort(
+                  (a, b) =>
+                    new Date(b.createdAt).getTime() -
+                    new Date(a.createdAt).getTime(),
+                )
+                .map((comment) => (
+                  <UserListItem
+                    key={comment.id}
+                    userId={comment.publisher.id}
+                    email={comment.publisher.email}
+                    date={new Date(comment.createdAt).toString()}
+                    message={comment.message}
+                    highlightLabel={
+                      comment.publisher.id === post.publisher.id
+                        ? "<<Létrehozó>>"
+                        : undefined
+                    }
+                  />
+                ))}
             </div>
 
             {(user.role === "ROLE_MODERATOR" || user.role === "ROLE_ADMIN") && (
               <button
-                  type="button"
-                  className="btn"
-                  onClick={() => deletePostById(post.id, `/superuser/posts/delete/`)}
-                >
-                  Admin törlés
+                type="button"
+                className="btn"
+                onClick={() =>
+                  deletePostById(post.id, `/superuser/posts/delete/`)
+                }
+              >
+                Admin törlés
               </button>
             )}
 
@@ -529,19 +545,27 @@ function FullPostView({ fetchEndpoint = "/post/posts/" } : FullPostViewProps) {
                     <p>Nincsenek Jelentkezők!</p>
                   )}
 
-                  {post.jobApplications.map((jobApplication) => (
-                    <UserListItem
-                      key={jobApplication.id}
-                      userId={jobApplication.applicant.id}
-                      email={jobApplication.applicant.email}
-                      date={jobApplication.appliedAt.toString()}
-                      actionText="Kiválaszt"
-                      btnDisabled={post.selectedUser ? true : false}
-                      onActionClick={(e) =>
-                        selectUserToPost(e, jobApplication.id)
-                      }
-                    />
-                  ))}
+                  {[...post.jobApplications]
+                    .sort(
+                      (a, b) =>
+                        new Date(b.appliedAt).getTime() -
+                        new Date(a.appliedAt).getTime(),
+                    )
+                    .map((jobApplication) => (
+                      <UserListItem
+                        key={jobApplication.id}
+                        userId={jobApplication.applicant.id}
+                        email={jobApplication.applicant.email}
+                        date={new Date(
+                          jobApplication.appliedAt,
+                        ).toLocaleString()}
+                        actionText="Kiválaszt"
+                        btnDisabled={!!post.selectedUser}
+                        onActionClick={(e) =>
+                          selectUserToPost(e, jobApplication.id)
+                        }
+                      />
+                    ))}
                 </div>
 
                 <h2>Munkavállaló:</h2>
