@@ -10,4 +10,5 @@ import lombok.NoArgsConstructor;
 public class FileDTO {
     private Integer fileId;
     private String url;
+    private String fileName;
 }

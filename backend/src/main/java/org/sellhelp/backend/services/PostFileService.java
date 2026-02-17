@@ -40,7 +40,7 @@ public class PostFileService {
         List<FileDTO> files = new ArrayList<>();
         for (PostFile f: postFiles)
         {
-            FileDTO dto = new FileDTO(f.getId(), s3Service.getDownloadURL(f.getPostFilePath()));
+            FileDTO dto = new FileDTO(f.getId(), s3Service.getDownloadURL(f.getPostFilePath()), s3Service.getFileNameFromKey(f.getPostFilePath()));
             files.add(dto);
         }
 
@@ -52,7 +52,7 @@ public class PostFileService {
         PostFile postFile = postFileRepository.findById(postFileId)
                 .orElseThrow(() -> new EntityNotFoundException("A fájl nem létezik!"));
 
-        return new FileDTO(postFile.getId(), s3Service.getDownloadURL(postFile.getPostFilePath()));
+        return new FileDTO(postFile.getId(), s3Service.getDownloadURL(postFile.getPostFilePath()), s3Service.getFileNameFromKey(postFile.getPostFilePath()));
     }
 
     public void addFileToPost(int postId, MultipartFile file)

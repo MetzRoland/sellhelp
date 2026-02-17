@@ -43,7 +43,7 @@ public class UserFileService {
             for (UserFile file : files)
             {
                 String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url));
+                fileDtos.add(new FileDTO(file.getId(), url, s3Service.getFileNameFromKey(file.getFilePath())));
             }
 
         }
@@ -67,7 +67,7 @@ public class UserFileService {
             for (UserFile file : files)
             {
                 String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url));
+                fileDtos.add(new FileDTO(file.getId(), url, s3Service.getFileNameFromKey(file.getFilePath())));
             }
 
         }
@@ -93,7 +93,7 @@ public class UserFileService {
 
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
+            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()), s3Service.getFileNameFromKey(file.getFilePath()));
         }
         catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
@@ -109,7 +109,7 @@ public class UserFileService {
         );
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
+            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()), s3Service.getFileNameFromKey(file.getFilePath()));
         }
         catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");

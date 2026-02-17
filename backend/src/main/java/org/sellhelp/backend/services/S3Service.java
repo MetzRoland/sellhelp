@@ -202,6 +202,8 @@ public class S3Service {
         return "reviews/" + reviewId + "/" + fileName;
     }
 
+    public String getFileNameFromKey(String key){return key.split("/")[2];}
+
 //    not used
 //    public String generateUploadUrl(String objectKey) {
 //        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
