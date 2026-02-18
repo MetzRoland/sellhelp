@@ -13,7 +13,7 @@ function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }
   useEffect(() => {
     const fetchProfilePicture = async () => {
       try {
-        const response = await privateAxios.get(`/user/files/${userId}/pp`);
+        const response = await privateAxios.get(`/user/files/public/${userId}/pp`);
 
         setProfilePicture(response.data);
       } catch {
