@@ -353,12 +353,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     }
   };
 
-  const startWorkingOnPost = async (postId: number) => {
+  const changePostStatus = async (targetStatusName: string, postId: number) => {
     try {
       const response = await privateAxios.patch(
         `/post/${postId}/changeStatus`,
         {
-          targetStatusName: "started",
+          targetStatusName: targetStatusName,
         },
       );
       console.log(response.data);
@@ -368,6 +368,26 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     } catch {
       setPost(null);
     }
+  };
+
+  const startWorkingOnPost = async (postId: number) => {
+    await changePostStatus("started", postId);
+  };
+
+  const postCompletedByEmployee = async (postId: number) => {
+    await changePostStatus("completed_by_employee", postId);
+  };
+
+  const postClosedUnsucessFully = async (postId: number) => {
+    await changePostStatus("unsuccessful_result_closed", postId);
+  };
+
+  const workRejectedByEmployer = async (postId: number) => {
+    await changePostStatus("work_rejected", postId);
+  };
+
+  const postClosed = async (postId: number) => {
+    await changePostStatus("closed", postId);
   };
 
   const rejectApply = async (postId: number) => {
@@ -525,17 +545,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               </button>
             )}
 
-            {post.publisher.id !== user.id && user.role === "ROLE_USER" && (
-              <PostActionButton
-                post={post}
-                applied={applied}
-                applyToPost={applyToPost}
-                cancelApplication={cancelApplication}
-                startWorkingOnPost={startWorkingOnPost}
-                rejectApply={rejectApply}
-              />
-            )}
-
             {(post.publisher.id === user.id || user.role !== "ROLE_USER") && (
               <>
                 <h2>Jelentkezések:</h2>
@@ -584,6 +593,21 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                   />
                 )}
               </>
+            )}
+
+            {user.role === "ROLE_USER" && (
+              <PostActionButton
+                post={post}
+                applied={applied}
+                applyToPost={applyToPost}
+                cancelApplication={cancelApplication}
+                startWorkingOnPost={startWorkingOnPost}
+                rejectApply={rejectApply}
+                postCompletedByEmployee={postCompletedByEmployee}
+                postClosedUnsucessFully={postClosedUnsucessFully}
+                workRejectedByEmployer={workRejectedByEmployer}
+                postClosed={postClosed}
+              />
             )}
           </div>
 
