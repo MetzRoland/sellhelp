@@ -54,6 +54,7 @@ public class SecurityConfig {
                         "/api-docs/**",
                         "/webjars/**",
                         "/s3/**"
+                        , "/post/posts", "/user/files/download/*", "/user/files/public/*", "/user/files/public/*/pp", "/post/files/all/*", "/post/files/*/download"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -94,6 +95,7 @@ public class SecurityConfig {
                                 "/user/update/password/send",
                                 "/user/update/password"
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
+                        .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/post/**").hasRole("USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()

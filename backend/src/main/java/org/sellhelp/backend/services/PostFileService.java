@@ -60,6 +60,9 @@ public class PostFileService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
 
+        if (post.getPostPublisher().getId() != currentUser.getCurrentlyLoggedUserEntity().getId())
+        {throw new InvalidPermissionException("Nincs jogosultság!");}
+
         if (postFileRepository.countByPost(post) >= 10)
         {
             throw new RuntimeException("Maximum 10 fájlt lehet feltölteni.");
