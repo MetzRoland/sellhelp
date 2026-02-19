@@ -148,11 +148,8 @@ public class UserService {
     public List<UserDTO> getAllUserAccounts(){
         return userRepository.findAll()
                 .stream()
-                .map(user -> {
-                    UserDTO userDTO = modelMapper.map(user, UserDTO.class);
-
-                    return userDTO;
-                })
+                .map(user -> modelMapper.map(user, UserDTO.class))
+                .filter(userDTO -> Objects.equals(userDTO.getRole(), "ROLE_USER"))
                 .toList();
     }
 
