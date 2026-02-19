@@ -5,9 +5,12 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
+
+import java.security.Principal;
 
 @Component
 @Slf4j
@@ -28,7 +31,7 @@ public class CurrentUser {
     }
 
     public String getCurrentlyLoggedUserEmail() {
-        var authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null ||
                 !authentication.isAuthenticated() ||
