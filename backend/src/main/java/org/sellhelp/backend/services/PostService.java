@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.ChangePostStatusDTO;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
@@ -127,6 +129,8 @@ public class PostService {
 
         String publisherEmail = currentUser.getCurrentlyLoggedUserEmail();
 
+        log.info(publisherEmail);
+
         User user = userRepository.findByEmail(publisherEmail).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
@@ -160,10 +164,30 @@ public class PostService {
                 () -> new EntityNotFoundException("A poszt nem található!")
         );
 
+        if(currentUser.getCurrentlyLoggedUserEntity() == null){
+            return modelMapper.map(post, PostResponseDTO.class);
+        }
+
+//        try{
+//            if (postOwned(postId)) {
+//                log.info("tulajdonos");
+//                return modelMapper.map(post, OwnedPostResponseDTO.class);
+//            }
+//            else {
+//                log.info("nem tulajdonos");
+//                return modelMapper.map(post, PostResponseDTO.class);
+//            }
+//        }
+//        catch(Exception ex){
+//            return modelMapper.map(post, PostResponseDTO.class);
+//        }
+
         if (postOwned(postId)) {
+            log.info("tulajdonos");
             return modelMapper.map(post, OwnedPostResponseDTO.class);
         }
         else {
+            log.info("nem tulajdonos");
             return modelMapper.map(post, PostResponseDTO.class);
         }
     }

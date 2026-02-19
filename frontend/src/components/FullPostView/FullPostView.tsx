@@ -27,7 +27,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
   const [cities, setCities] = useState<City[]>([]);
   const [comment, setComment] = useState<string | null>(null);
   const [applied, setApplied] = useState<boolean>(false);
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   const { setIsLoading, setLoadingMessage } = useLoading();
 
@@ -72,6 +72,11 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const [validationErrors, setValidationErrors] =
     useState<NewPostValidationErrors>({});
+
+  const isOwner = user && post && post.publisher.id === user.id;
+  const isPrivileged =
+    user && (user.role === "ROLE_MODERATOR" || user.role === "ROLE_ADMIN");
+  const isNormalUser = user && user.role === "ROLE_USER";
 
   useEffect(() => {
     if (!post) return;
@@ -144,7 +149,15 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
       setLoadingMessage("Poszt betöltése...");
 
       try {
-        const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
+        let response;
+
+        if(isAuthenticated){
+          response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
+        }
+        else{
+          response = await publicAxios.get<Post>(fetchEndpoint + `${id}`);
+        }
+        //const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
 
         console.log(response.data);
         setPost(response.data);
@@ -157,7 +170,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     };
 
     fetchPostById();
-  }, [id, setIsLoading, setLoadingMessage, fetchEndpoint]);
+  }, [id, setIsLoading, setLoadingMessage, fetchEndpoint, isAuthenticated]);
 
   const toggleDisabled = async (inputName: keyof NewPostForm) => {
     const isCurrentlyDisabled = disabledInputsMap[inputName];
@@ -422,10 +435,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     }
   };
 
-  if (user === null) {
-    return;
-  }
-
   if (post === null) {
     return <PageNotFound message="A poszt nem található!" />;
   }
@@ -443,7 +452,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               Megosztva: {formatDate(post.createdAt.toString())}
             </p>
 
-            {post.publisher.id === user.id ? (
+            {isOwner ? (
               <>
                 <InputForm<NewPostForm>
                   inputs={newPostInputs}
@@ -474,7 +483,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               />
             )}
 
-            {post.publisher.id !== user.id && (
+            {(isNormalUser || !isAuthenticated) && (
               <>
                 <h2>Poszt létrehozó:</h2>
 
@@ -489,7 +498,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
             <h2>Kommentek:</h2>
 
-            {user.role === "ROLE_USER" && (
+            {isNormalUser && (
               <div className="new-comment-div">
                 <textarea
                   className="input-element textarea-element"
@@ -533,7 +542,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                 ))}
             </div>
 
-            {(user.role === "ROLE_MODERATOR" || user.role === "ROLE_ADMIN") && (
+            {isPrivileged && (
               <button
                 type="button"
                 className="btn"
@@ -545,7 +554,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               </button>
             )}
 
-            {(post.publisher.id === user.id || user.role !== "ROLE_USER") && (
+            {(isOwner || isPrivileged) && (
               <>
                 <h2>Jelentkezések:</h2>
 
@@ -595,7 +604,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               </>
             )}
 
-            {user.role === "ROLE_USER" && (
+            {isNormalUser && (
               <PostActionButton
                 post={post}
                 applied={applied}

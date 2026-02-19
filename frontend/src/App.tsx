@@ -43,14 +43,11 @@ function App() {
             <Route path="/home" element={<FullUserProfile />} />
             <Route path="/home/settings" element={<FullUserProfile settings={true} />} />
             <Route path="/profile" element={<FullUserProfile />} />
-            <Route path="/users/:id" element={<FullUserProfile />} />
             <Route path="/setupmfa" element={<SetupMfa />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
-            <Route path="/posts" element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
             <Route path="/myposts" element={<PostsListComponent postFetchingEndpoint="/post/myposts" title="Saját posztok" />} />
             <Route path="/posts/involved" element={<PostsListComponent postFetchingEndpoint="/post/posts/involved" title="Elvállalt posztok" />} />
             <Route path="/posts/new" element={<NewPostComponent />} />
-            <Route path="/posts/:id" element={<FullPostView />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
@@ -58,6 +55,10 @@ function App() {
             <Route path="/postManagement" element={<PostsListComponent postFetchingEndpoint="/superuser/posts" navigateToPostEndpoint="/postManagement/posts/" title="Posztok kezelése" />} />
             <Route path="/postManagement/posts/:id" element={<FullPostView fetchEndpoint="/superuser/posts/"/>} />
           </Route>
+
+          <Route path="/posts" element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
+          <Route path="/posts/:id" element={<FullPostView />} />
+          <Route path="/users/:id" element={<FullUserProfile />} />
 
           <Route path="*" element={<PageNotFound />} />
         </Route>

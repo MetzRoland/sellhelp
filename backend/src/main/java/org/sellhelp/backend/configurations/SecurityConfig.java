@@ -54,7 +54,7 @@ public class SecurityConfig {
                         "/api-docs/**",
                         "/webjars/**",
                         "/s3/**"
-                        , "/post/posts", "/user/files/download/*", "/user/files/public/*", "/user/files/public/*/pp", "/post/files/all/*", "/post/files/*/download"
+                        , "/user/files/download/*", "/user/files/public/*", "/user/files/public/*/pp", "/post/files/all/*", "/post/files/*/download"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -85,6 +85,8 @@ public class SecurityConfig {
                 )
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
+                        .requestMatchers("/user/users/*").permitAll()
+                        .requestMatchers("/post/posts/*", "/post/posts").permitAll()
                         .requestMatchers("/auth/enable2fa", "/auth/disable2fa", "/auth/setup2fa")
                         .authenticated()
                         .requestMatchers(
