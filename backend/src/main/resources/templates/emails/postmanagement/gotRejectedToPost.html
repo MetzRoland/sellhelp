@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Bejelentkezés a fiókba</title>
+    <title>Jelentkezés visszautasítva</title>
     <style>
         body {
             font-family: Arial, Helvetica, sans-serif;
@@ -55,7 +55,7 @@
 <body>
 <div class="container">
     <div class="header">
-        <h1>Sikeres bejelentkezés</h1>
+        <h1>Jelentkezés visszautasítva</h1>
     </div>
 
     <div class="content">
@@ -64,7 +64,8 @@
         </p>
 
         <p>
-            Értesítünk, hogy sikeres bejelentkezés történt a fiókodba az alábbi email címmel:
+            Sajnálattal értesítünk, hogy az általad megpályázott posztra történő jelentkezésedet
+            <strong>utólag visszautasították</strong>.
         </p>
 
         <div class="info-box">
@@ -73,19 +74,17 @@
         </div>
 
         <p>
-            Ha ezt a bejelentkezést te hajtottad végre, nincs további teendőd.
+            A döntés a poszt tulajdonosának hatáskörébe tartozik. Kérjük, ne csüggedj,
+            számos további lehetőség vár rád a platformon.
         </p>
 
         <p>
-            Amennyiben nem te jelentkeztél be, javasoljuk, hogy azonnal módosítsd a jelszavadat.
+            Értesítés időpontja:
+            <span th:text="${timestamp}">2025-12-27 10:30:00</span>
         </p>
 
         <p>
-            Email küldve: <span th:text="${timestamp}">2025-12-27 10:30:00</span>
-        </p>
-
-        <p>
-            Üdvözlettel:<br>
+            Köszönjük a megértésedet!<br>
             <strong>A SellHelp csapata</strong>
         </p>
     </div>

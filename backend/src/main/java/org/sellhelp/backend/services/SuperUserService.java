@@ -1,10 +1,13 @@
 package org.sellhelp.backend.services;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.responses.UserDTO;
+import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
+import org.sellhelp.backend.repositories.PostRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -21,15 +24,18 @@ public class SuperUserService {
     private final EmailService emailService;
     private final S3Service s3Service;
     private final UserService userService;
+    private final PostRepository postRepository;
 
     @Autowired
     public SuperUserService(UserRepository userRepository, ModelMapper modelMapper,
-                            EmailService emailService, S3Service s3Service, UserService userService){
+                            EmailService emailService, S3Service s3Service, UserService userService,
+                            PostRepository postRepository){
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
         this.s3Service = s3Service;
         this.userService = userService;
+        this.postRepository = postRepository;
     }
 
     private boolean hasRole(String role) {
@@ -104,5 +110,13 @@ public class SuperUserService {
                 .findFirst().orElseThrow(
                         () -> new UserNotFoundException("A felhasználó nem található!")
                 );
+    }
+
+    public void deletePost(Integer postId){
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem található!")
+        );
+
+        postRepository.delete(post);
     }
 }

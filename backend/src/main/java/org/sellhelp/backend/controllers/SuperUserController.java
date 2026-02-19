@@ -3,6 +3,7 @@ package org.sellhelp.backend.controllers;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.services.SuperUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,5 +41,13 @@ public class SuperUserController {
     @PutMapping("/users/unban/{userId}")
     public UserDTO unbanUser(@PathVariable Integer userId){
         return superUserService.unbanUser(userId);
+    }
+
+    @PreAuthorize("hasRole('ADMIN') or hasRole('MODERATOR')")
+    @DeleteMapping("/posts/delete/{postId}")
+    public ResponseEntity<String> deletePost(@PathVariable Integer postId){
+        superUserService.deletePost(postId);
+
+        return ResponseEntity.ok("Poszt törölve adminisztrátor által!");
     }
 }

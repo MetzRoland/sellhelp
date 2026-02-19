@@ -78,7 +78,7 @@ public class EmailService {
         variables.put("lastName", lastName);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Regisztráció", "emails/registration", variables);
+        sendHTMLTemplateEmail(toEmail, "Regisztráció", "emails/usermanagement/registration", variables);
     }
 
     public void loginUser(String toEmail)
@@ -88,7 +88,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Bejelentkezés", "emails/login", variables);
+        sendHTMLTemplateEmail(toEmail, "Bejelentkezés", "emails/usermanagement/login", variables);
     }
 
     public void logoutUser(String toEmail)
@@ -98,7 +98,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Kijelentkezés", "emails/logout", variables);
+        sendHTMLTemplateEmail(toEmail, "Kijelentkezés", "emails/usermanagement/logout", variables);
     }
 
     public void banUser(String toEmail)
@@ -108,7 +108,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Bannolva lett a fiókod", "emails/banned", variables);
+        sendHTMLTemplateEmail(toEmail, "Bannolva lett a fiókod", "emails/usermanagement/banned", variables);
     }
 
     public void unbanUser(String toEmail)
@@ -118,7 +118,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "A fiókod újra engedélyezve lett", "emails/unbanned", variables);
+        sendHTMLTemplateEmail(toEmail, "A fiókod újra engedélyezve lett", "emails/usermanagement/unbanned", variables);
     }
 
     public void updatePassword(String toEmail)
@@ -131,7 +131,7 @@ public class EmailService {
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/passwordUpdate", variables);
+        sendHTMLTemplateEmail("metzroland1111@gmail.com", "Jelszó módosítás", "emails/usermanagement/passwordUpdate", variables);
     }
 
     public void updatePasswordSuccess(String toEmail)
@@ -140,7 +140,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Jelszó módosítás sikeres", "emails/passwordUpdateSuccess", variables);
+        sendHTMLTemplateEmail(toEmail, "Jelszó módosítás sikeres", "emails/usermanagement/passwordUpdateSuccess", variables);
     }
 
     public void updateUserDetailsSuccess(String toEmail)
@@ -149,7 +149,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Módosítás történ a felhasználói adatokban", "emails/userDetailsUpdated", variables);
+        sendHTMLTemplateEmail(toEmail, "Módosítás történ a felhasználói adatokban", "emails/usermanagement/userDetailsUpdated", variables);
     }
 
     public void updateUserEmailSuccess(String toEmail)
@@ -158,7 +158,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Email cím módosítva", "emails/userEmailUpdated", variables);
+        sendHTMLTemplateEmail(toEmail, "Email cím módosítva", "emails/usermanagement/userEmailUpdated", variables);
     }
 
     public void mfaEnabled(String toEmail)
@@ -167,7 +167,7 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés bekapcsolva", "emails/mfaEnabled", variables);
+        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés bekapcsolva", "emails/usermanagement/mfaEnabled", variables);
     }
 
     public void mfaDisabled(String toEmail)
@@ -176,6 +176,46 @@ public class EmailService {
         variables.put("email", toEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés kikapcsolva", "emails/mfaDisabled", variables);
+        sendHTMLTemplateEmail(toEmail, "A kétfaktoros hitelesítés kikapcsolva", "emails/usermanagement/mfaDisabled", variables);
+    }
+
+    public void appliedToPost(String toEmail){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        sendHTMLTemplateEmail(toEmail, "Sikeres jelentkezés a posztra", "emails/postmanagement/appliedToPost", variables);
+    }
+
+    public void cancelAppliedToPost(String toEmail){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        sendHTMLTemplateEmail(toEmail, "Jelentkezés visszavonva a poszról", "emails/postmanagement/cancelAppliedToPost", variables);
+    }
+
+    public void gotSelectedToPost(String toEmail){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        sendHTMLTemplateEmail(toEmail, "Önt felvették a posztra", "emails/postmanagement/gotSelectedToPost", variables);
+    }
+
+    public void gotRejectedToPost(String toEmail){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        sendHTMLTemplateEmail(toEmail, "Önt visszautasították utólag a posztról", "emails/postmanagement/gotRejectedToPost", variables);
+    }
+
+    public void cancelSelectedToPost(String toEmail){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        sendHTMLTemplateEmail(toEmail, "A munkavállaló visszautasította a posztot", "emails/postmanagement/cancelSelectedToPost", variables);
     }
 }

@@ -22,20 +22,20 @@ public class UserFilesController {
         this.userFileService = userFileService;
     }
 
+    // endpoints for self
+
     @GetMapping()
-    public ResponseEntity<List<FileDTO>> getAllFiles() {
+    public ResponseEntity<List<FileDTO>> getAllOwnedFiles() {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         String email = userDetails.getUsername();
 
-        return ResponseEntity.status(HttpStatus.OK).body(userFileService.getAllUserFiles(email));
+        return ResponseEntity.ok(userFileService.getAllUserFiles(email));
     }
 
     @GetMapping("/download/{fileId}")
-    public FileDTO getUserFile(@PathVariable Integer fileId) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
+    public FileDTO getUserFileByFileId(@PathVariable Integer fileId) {
 
-        return userFileService.getUserFile(email, fileId);
+        return userFileService.getUserFileByFileId(fileId);
     }
 
     @PostMapping("/upload")
@@ -66,11 +66,6 @@ public class UserFilesController {
         return ResponseEntity.ok(profilePictureDTO);
     }
 
-    @GetMapping("{userId}/pp")
-    public ResponseEntity<ProfilePictureDTO> showUserProfilePicture(@PathVariable Integer userId){
-        return ResponseEntity.ok(userFileService.getUserProfilePicture(userId));
-    }
-
     @PostMapping("/pp")
     public ResponseEntity<String> setProfilePicture(@RequestParam("file") MultipartFile file) {
         UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
@@ -93,5 +88,19 @@ public class UserFilesController {
         userFileService.deleteProfilePicture(email);
 
         return ResponseEntity.ok("Profilkép törölve!");
+    }
+
+    // endpoints for someone else
+    // "/user/files"
+
+    @GetMapping("/{userId}")
+    public ResponseEntity<List<FileDTO>> getAllUserFilesById(@PathVariable Integer userId) {
+
+        return ResponseEntity.status(HttpStatus.OK).body(userFileService.getAllUserFilesByUserId(userId));
+    }
+
+    @GetMapping("{userId}/pp")
+    public ResponseEntity<ProfilePictureDTO> gerUserProfilePictureById(@PathVariable Integer userId){
+        return ResponseEntity.ok(userFileService.getUserProfilePicture(userId));
     }
 }

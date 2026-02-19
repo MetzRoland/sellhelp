@@ -99,7 +99,7 @@ class UserFileServiceTest {
     }
 
     @Test
-    void getUserFile_invalidPermission() {
+    void deleteUserFile_invalidPermission() {
         User otherUser = User.builder().id(99).build();
         userFile.setUser(otherUser);
 
@@ -109,7 +109,7 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(userFile));
 
         assertThrows(InvalidPermissionException.class,
-                () -> userFileService.getUserFile(user.getEmail(), userFile.getId()));
+                () -> userFileService.deleteUserFile(user.getEmail(), userFile.getId()));
     }
 
     @Test
@@ -118,7 +118,24 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(multipartFile.getOriginalFilename())
                 .thenReturn("test.png");
-        when(s3Service.fileKey(eq(user.getId()), any()))
+        when(s3Service.userFileKey(eq(user.getId()), any()))
+                .thenReturn("files/1/test.png");
+
+        userFileService.addUserFile(user.getEmail(), multipartFile);
+
+        verify(userFileRepository).save(any(UserFile.class));
+        verify(s3Service).uploadFileWithKey(anyString(), eq(multipartFile));
+    }
+
+    @Test
+    void addUserFile_successWithMultipleFiles() throws IOException {
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+        when(userFileRepository.countByUser(user))
+                .thenReturn(9);
+        when(multipartFile.getOriginalFilename())
+                .thenReturn("test.png");
+        when(s3Service.userFileKey(eq(user.getId()), any()))
                 .thenReturn("files/1/test.png");
 
         userFileService.addUserFile(user.getEmail(), multipartFile);
@@ -133,10 +150,21 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(multipartFile.getOriginalFilename())
                 .thenReturn("test.png");
-        when(s3Service.fileKey(anyInt(), any()))
+        when(s3Service.userFileKey(anyInt(), any()))
                 .thenReturn("files/1/test.png");
         doThrow(IOException.class)
                 .when(s3Service).uploadFileWithKey(anyString(), any());
+
+        assertThrows(RuntimeException.class,
+                () -> userFileService.addUserFile(user.getEmail(), multipartFile));
+    }
+
+    @Test
+    void addUserFile_failTooManyFiles() throws IOException {
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+        when(userFileRepository.countByUser(user))
+                .thenReturn(10);
 
         assertThrows(RuntimeException.class,
                 () -> userFileService.addUserFile(user.getEmail(), multipartFile));

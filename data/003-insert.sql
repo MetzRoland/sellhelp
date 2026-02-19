@@ -7,10 +7,12 @@ VALUES
 INSERT INTO "post_status" ("id", "status_name")
 VALUES 
 (1, 'new'),
-(2, 'closed'),
-(3, 'pending_closure'),
-(4, 'available'),
-(5, 'ended_with_conflict');
+(2, 'accepted'),
+(3, 'started'),
+(4, 'completed_by_employee'),
+(5, 'unsuccessful_result_closed'),
+(6, 'work_rejected'),
+(7, 'closed');
 
 INSERT INTO "report_types" ("id", "name")
 VALUES 

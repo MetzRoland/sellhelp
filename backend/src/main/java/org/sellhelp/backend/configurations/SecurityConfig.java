@@ -68,7 +68,7 @@ public class SecurityConfig {
     @Order(1)
     public SecurityFilterChain jwtFilterChain(HttpSecurity http) throws Exception {
         http
-                .securityMatcher("/user/**", "/superuser/**", "/api/**", "/auth/login",
+                .securityMatcher("/user/**", "/superuser/**", "/post/**", "/api/**", "/auth/login",
                         "/auth/login/superuser",
                         "/auth/register",
                         "/auth/enable2fa",
@@ -94,6 +94,7 @@ public class SecurityConfig {
                                 "/user/update/password/send",
                                 "/user/update/password"
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
+                        .requestMatchers("/post/**").hasRole("USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
                 )

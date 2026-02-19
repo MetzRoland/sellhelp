@@ -186,12 +186,20 @@ public class S3Service {
         }
     }
 
-    public String fileKey(Integer id, String fileName) {
-        return "users/" + id + "/" + fileName;
+    public String userFileKey(Integer userId, String fileName) {
+        return "users/" + userId + "/" + fileName;
     }
 
-    public String ppKey(Integer id) {
-        return "users/" + id + "/profilePicture";
+    public String ppKey(Integer userId) {
+        return "users/" + userId + "/pp";
+    }
+
+    public String postFileKey(Integer postId, String fileName) {
+        return "posts/" + postId + "/" + fileName;
+    }
+
+    public String reviewFileKey(Integer reviewId, String fileName) {
+        return "reviews/" + reviewId + "/" + fileName;
     }
 
 //    not used
