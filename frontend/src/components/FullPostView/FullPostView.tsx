@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useParams, useNavigate } from "react-router";
+import { useParams, useNavigate, Link } from "react-router";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import { privateAxios, publicAxios } from "../../config/axiosConfig";
@@ -439,6 +439,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     return <PageNotFound message="A poszt nem található!" />;
   }
 
+  
+
   return (
     <>
       <Header />
@@ -624,6 +626,10 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
           {newPostError && (
             <p className="message error error-process-status">{newPostError}</p>
+          )}
+
+          {!isAuthenticated && (
+            <Link className="btn btn-highlight" to="/login">Jelentkezéshez jelentkezz be</Link>
           )}
         </div>
       </div>

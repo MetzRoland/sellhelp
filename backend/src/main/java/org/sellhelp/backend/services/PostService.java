@@ -145,13 +145,29 @@ public class PostService {
                 .toList();
     }
 
-    public List<PostResponseDTO> getInvolvedPosts(){
+    public List<PostResponseDTO> getInvolvedPosts() {
+        Integer currentUserId = currentUser.getCurrentlyLoggedUserEntity().getId();
+
         return postRepository.findAll().stream()
-                .map(post -> modelMapper.map(post, PostResponseDTO.class))
-                .filter(postResponseDTO -> !Objects.equals(postResponseDTO.getStatusName(), "new"))
+                .map(post -> modelMapper.map(post, OwnedPostResponseDTO.class))
+                .filter(
+                        ownedPostResponseDTO ->
+                                (ownedPostResponseDTO.getSelectedUser() != null &&
+                                        Objects.equals(ownedPostResponseDTO.getSelectedUser().getId(), currentUserId))
+                                        ||
+                                        ownedPostResponseDTO.getJobApplications().stream()
+                                                .anyMatch(jobApplicationResponseDTO ->
+                                                        Objects.equals(
+                                                                jobApplicationResponseDTO.getApplicant().getId(),
+                                                                currentUserId
+                                                        )
+                                                )
+                )
+                .map(ownedPostResponseDTO -> modelMapper.map(ownedPostResponseDTO, PostResponseDTO.class))
                 .filter(postResponseDTO -> !postOwned(postResponseDTO.getId()))
                 .toList();
     }
+
 
     public List<OwnedPostResponseDTO> getOwnPosts(){
         return postRepository.findAll().stream()
@@ -380,8 +396,13 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
 
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+        if(!postOwned(postId) && !Objects.equals(post.getSelectedUser().getId(), currentUser.getCurrentlyLoggedUserEntity().getId())){
+            throw new InvalidPermissionException("Nem te vagy a munkavállaló, nincs jogusultságot!");
+        }
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         String currentStatus = post.getPostStatus().getStatusName();
         boolean isEmployer = postOwned(postId);
@@ -448,7 +469,8 @@ public class PostService {
         if (isUnsuccessful) {
             closedStatus = postStatusRepository.findByStatusName("unsuccessful_result_closed")
                     .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
-        } else {
+        }
+        else {
             closedStatus = postStatusRepository.findByStatusName("closed")
                     .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
         }
