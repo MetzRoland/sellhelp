@@ -168,7 +168,6 @@ public class PostService {
                 .toList();
     }
 
-
     public List<OwnedPostResponseDTO> getOwnPosts(){
         return postRepository.findAll().stream()
                 .map(post -> modelMapper.map(post, OwnedPostResponseDTO.class))
@@ -183,20 +182,6 @@ public class PostService {
         if(currentUser.getCurrentlyLoggedUserEntity() == null){
             return modelMapper.map(post, PostResponseDTO.class);
         }
-
-//        try{
-//            if (postOwned(postId)) {
-//                log.info("tulajdonos");
-//                return modelMapper.map(post, OwnedPostResponseDTO.class);
-//            }
-//            else {
-//                log.info("nem tulajdonos");
-//                return modelMapper.map(post, PostResponseDTO.class);
-//            }
-//        }
-//        catch(Exception ex){
-//            return modelMapper.map(post, PostResponseDTO.class);
-//        }
 
         if (postOwned(postId)) {
             log.info("tulajdonos");

@@ -3,6 +3,8 @@ import { privateAxios } from "../../config/axiosConfig";
 import type { ProfilePicture } from "./ProfilePictureComponentTypes";
 import type { ProfilePictureComponentProps } from "./ProfilePictureComponentTypes";
 
+const profilePictureCache = new Map<number, ProfilePicture>();
+
 function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }: ProfilePictureComponentProps) {
   const [profilePicture, setProfilePicture] = useState<ProfilePicture>({
     profilePictureUrl: null,
@@ -11,20 +13,36 @@ function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }
   const [ppLoading, setPpLoading] = useState<boolean>(true);
 
   useEffect(() => {
-    const fetchProfilePicture = async () => {
-      try {
-        const response = await privateAxios.get(`/user/files/public/${userId}/pp`);
+    if (!userId) return;
 
-        setProfilePicture(response.data);
+    const fetchProfilePicture = async () => {
+      if (profilePictureCache.has(userId)) {
+        setProfilePicture(profilePictureCache.get(userId)!);
+        setPpLoading(false);
+        return;
+      }
+
+      try {
+        const response = await privateAxios.get(
+          `/user/files/public/${userId}/pp`
+        );
+
+        const data = response.data;
+
+        profilePictureCache.set(userId, data);
+
+        setProfilePicture(data);
       } catch {
-        setProfilePicture({
-          profilePictureUrl: null,
-        });
+        const fallback = { profilePictureUrl: null };
+
+        profilePictureCache.set(userId, fallback);
+        setProfilePicture(fallback);
       } finally {
         setPpLoading(false);
       }
     };
 
+    setPpLoading(true);
     fetchProfilePicture();
   }, [userId]);
 

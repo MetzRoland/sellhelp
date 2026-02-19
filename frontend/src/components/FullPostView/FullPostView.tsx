@@ -439,7 +439,15 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     return <PageNotFound message="A poszt nem található!" />;
   }
 
-  
+  if (
+    isAuthenticated &&
+    user &&
+    post.selectedUser &&
+    post.publisher.id !== user.id &&
+    post.selectedUser.id !== user.id
+  ) {
+    return <PageNotFound message="A poszt már nem tekinthető meg!" />;
+  }
 
   return (
     <>
