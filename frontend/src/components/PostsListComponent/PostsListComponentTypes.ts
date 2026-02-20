@@ -34,3 +34,18 @@ export interface Post{
     comments: PostComment[];
     selectedUser: User;
 }
+
+export interface PostFilter {
+  postTitle?: string;
+  postDescription?: string;
+  postDate?: string;
+  reward?: string;
+  publisherEmail?: string;
+  city?: string;
+}
+
+export interface PostInputField {
+  name: keyof PostFilter;
+  type: "text" | "select";
+  placeholder: string;
+}

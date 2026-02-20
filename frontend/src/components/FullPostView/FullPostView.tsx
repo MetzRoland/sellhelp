@@ -33,17 +33,24 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const navigate = useNavigate();
 
-  const newPostInputs = [
+  const postUpdateInputs = [
     { name: "title", type: "text", placeholder: "A poszt címe" },
     { name: "description", type: "textarea", placeholder: "Leírás" },
     { name: "cityName", type: "select", placeholder: "Válasszon települést" },
     { name: "reward", type: "number", placeholder: "Munkadíj" },
   ] as const;
 
+  const [formData, setFormData] = useState<NewPostForm>({
+    title: "",
+    description: "",
+    cityName: "",
+    reward: "",
+  });
+
   const [disabledInputsMap, setDisabledInputsMap] = useState<
     Record<string, boolean>
   >(
-    newPostInputs.reduce(
+    postUpdateInputs.reduce(
       (acc, input) => {
         acc[input.name] = true;
         return acc;
@@ -52,7 +59,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     ),
   );
 
-  const settingInputsMap: Record<string, boolean> = newPostInputs.reduce(
+  const settingInputsMap: Record<string, boolean> = postUpdateInputs.reduce(
     (acc, input) => {
       acc[input.name] = true;
 
@@ -60,13 +67,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     },
     {} as Record<string, boolean>,
   );
-
-  const [formData, setFormData] = useState<NewPostForm>({
-    title: "",
-    description: "",
-    cityName: "",
-    reward: "",
-  });
 
   const [newPostError, setNewPostError] = useState("");
 
@@ -151,10 +151,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
       try {
         let response;
 
-        if(isAuthenticated){
+        if (isAuthenticated) {
           response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
-        }
-        else{
+        } else {
           response = await publicAxios.get<Post>(fetchEndpoint + `${id}`);
         }
         //const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
@@ -440,13 +439,13 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
   }
 
   if (
-    isAuthenticated &&
-    user &&
-    post.selectedUser &&
-    post.publisher.id !== user.id &&
-    post.selectedUser.id !== user.id
+    (isAuthenticated &&
+      user &&
+      post.publisher.id !== user.id &&
+      post.statusName !== "new" && !applied) ||
+    (!isAuthenticated && !user && post.statusName !== "new")
   ) {
-    return <PageNotFound message="A poszt már nem tekinthető meg!" />;
+    return <PageNotFound message="A poszt már nem elérhető!" />;
   }
 
   return (
@@ -465,7 +464,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
             {isOwner ? (
               <>
                 <InputForm<NewPostForm>
-                  inputs={newPostInputs}
+                  inputs={postUpdateInputs}
                   formData={formData}
                   handleFunction={handleInputChange}
                   errorMessage={validationErrors}
@@ -485,7 +484,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               </>
             ) : (
               <InputForm<NewPostForm>
-                inputs={newPostInputs}
+                inputs={postUpdateInputs}
                 formData={formData}
                 handleFunction={handleInputChange}
                 options={{ cityName: cityOptions }}
@@ -637,7 +636,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
           )}
 
           {!isAuthenticated && (
-            <Link className="btn btn-highlight" to="/login">Jelentkezéshez jelentkezz be</Link>
+            <Link className="btn btn-highlight" to="/login">
+              Jelentkezéshez jelentkezz be
+            </Link>
           )}
         </div>
       </div>

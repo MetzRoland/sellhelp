@@ -1,43 +1,36 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
-import { privateAxios } from "../../config/axiosConfig";
+import { privateAxios, publicAxios } from "../../config/axiosConfig";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import UserProfileView from "../UserProfileView/UserProfileView";
 import InputForm from "../Reusables/InputForm/InputForm";
+import type { UserAccountFilter } from "./UserListTypes";
+import type { UserInputField } from "./UserListTypes";
+import type { UserRole } from "./UserListTypes";
 import type { UserListProps } from "./UserListTypes";
+import type { City } from "../Register/RegisterTypes";
 
 import "./UserList.css";
 
-interface UserAccountFilter {
-  userName?: string;
-  email?: string;
-  banned?: string;
-  role?: string;
-}
-
-interface UserRole {
-  id: number;
-  roleName: string;
-}
-
 function UserList({ isAdmin = false }: UserListProps) {
-  type UserInputField = {
-    name: keyof UserAccountFilter;
-    type: "text" | "select";
-    placeholder: string;
-  };
-
   const userUpdateInputs: UserInputField[] = [
     { name: "userName", type: "text", placeholder: "Felhasználónév" },
     { name: "email", type: "text", placeholder: "Email" },
-    { name: "banned", type: "select", placeholder: "Válasszon fiók állapotot" },
+    { name: "city", type: "select", placeholder: "Válasszon települést..." },
   ];
 
-  if(isAdmin){
-    userUpdateInputs.push({ name: "role", type: "select", placeholder: "Válasszon szerepkört" });
+  if (isAdmin) {
+    userUpdateInputs.push(
+      { name: "role", type: "select", placeholder: "Válasszon szerepkört" },
+      {
+        name: "banned",
+        type: "select",
+        placeholder: "Válasszon fiók állapotot",
+      },
+    );
   }
 
   const [formData, setFormData] = useState<UserAccountFilter>({
@@ -53,6 +46,8 @@ function UserList({ isAdmin = false }: UserListProps) {
   const [userAccounts, setUserAccounts] = useState<User[]>([]);
 
   const [roles, setRoles] = useState<UserRole[]>([]);
+  const [cities, setCities] = useState<City[]>([]);
+
   const roleOptions = roles.map((role) => ({
     id: role.id,
     value: role.roleName,
@@ -71,6 +66,12 @@ function UserList({ isAdmin = false }: UserListProps) {
 
   const navigate = useNavigate();
 
+  const cityOptions = cities.map((city) => ({
+    id: city.id,
+    value: city.cityName,
+    label: city.cityName,
+  }));
+
   useEffect(() => {
     const fetchUserAccounts = async () => {
       setIsLoading(true);
@@ -78,12 +79,18 @@ function UserList({ isAdmin = false }: UserListProps) {
 
       try {
         if (isAdmin) {
-          const roleResponse = await privateAxios.get<UserRole[]>("/api/public/roles");
+          const roleResponse =
+            await privateAxios.get<UserRole[]>("/api/public/roles");
           setRoles(roleResponse.data);
         }
 
-        const response = await privateAxios.get(isAdmin ? "/superuser/users" : "/user/users");
+        const response = await privateAxios.get(
+          isAdmin ? "/superuser/users" : "/user/users",
+        );
         const users: User[] = response.data;
+
+        const citiesResponse = await publicAxios.get("/api/public/cities");
+        setCities(citiesResponse.data);
 
         setAllUserAccounts(users);
         setUserAccounts(users);
@@ -91,6 +98,7 @@ function UserList({ isAdmin = false }: UserListProps) {
         console.error(error);
         setAllUserAccounts([]);
         setUserAccounts([]);
+        setCities([]);
       } finally {
         setIsLoading(false);
         setLoadingMessage("");
@@ -118,14 +126,24 @@ function UserList({ isAdmin = false }: UserListProps) {
       const matchesRole =
         !isAdmin || !formData.role || user.role === formData.role;
 
-      return matchesUserName && matchesEmail && matchesBanned && matchesRole;
+      const matchesCity = !formData.city || user.cityName === formData.city;
+
+      return (
+        matchesUserName &&
+        matchesEmail &&
+        matchesCity &&
+        matchesBanned &&
+        matchesRole
+      );
     });
 
     setUserAccounts(filtered);
   }, [formData, allUserAccounts, isAdmin]);
 
   const handleInputUpdate = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -178,26 +196,24 @@ function UserList({ isAdmin = false }: UserListProps) {
       <Header />
 
       <div className="main-container">
-        <h1 className="container-title">Felhasználói fiókok kezelése</h1>
+        <h1 className="container-title">Felhasználói fiókok</h1>
 
-        <div
-          className="content-container user-account-filter-container"
-        >
-          <p className="message">
-            Szűrési feltételek
-          </p>
+        <div className="content-container filter-container">
+          <p className="message">Szűrési feltételek</p>
 
           <InputForm<UserAccountFilter>
             inputs={userUpdateInputs}
             formData={formData}
             handleFunction={handleInputUpdate}
-            options={{ role: roleOptions, banned: bannedOptions }}
+            options={{
+              role: roleOptions,
+              banned: bannedOptions,
+              city: cityOptions,
+            }}
           />
         </div>
 
-        {userAccounts.length === 0 && (
-          <h2>Nem találhatók fiókok!</h2>
-        )}
+        {userAccounts.length === 0 && <h2>Nem találhatók fiókok!</h2>}
 
         {userAccounts.map((userAccount) => (
           <UserProfileView

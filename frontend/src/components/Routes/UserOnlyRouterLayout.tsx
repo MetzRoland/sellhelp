@@ -5,12 +5,16 @@ import ProccessLoad from "../ProcessLoad/ProccessLoad";
 const UserOnlyRouterLayout = () => {
   const { isAuthenticated, authLoading, user } = useAuth();
 
-  if (authLoading || !user) {
+  if (authLoading) {
     return <ProccessLoad />;
   }
 
-  if (!isAuthenticated || user.role !== "ROLE_USER") {
+  if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+
+  if (user?.role !== "ROLE_USER") {
+    return <Navigate to="/home" replace />;
   }
 
   return <Outlet />;

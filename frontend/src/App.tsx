@@ -56,7 +56,7 @@ function App() {
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
-            <Route path="/banningPage" element={<UserList isAdmin={true} />} />
+            <Route path="/userManagement" element={<UserList isAdmin={true} />} />
             <Route path="/postManagement" element={<PostsListComponent postFetchingEndpoint="/superuser/posts" navigateToPostEndpoint="/postManagement/posts/" title="Posztok kezelése" />} />
             <Route path="/postManagement/posts/:id" element={<FullPostView fetchEndpoint="/superuser/posts/"/>} />
           </Route>
