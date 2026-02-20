@@ -33,10 +33,7 @@ function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }
 
         setProfilePicture(data);
       } catch {
-        const fallback = { profilePictureUrl: null };
-
-        profilePictureCache.set(userId, fallback);
-        setProfilePicture(fallback);
+        setProfilePicture({ profilePictureUrl: null });
       } finally {
         setPpLoading(false);
       }

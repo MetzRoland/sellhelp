@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import UserBanning from "../../components/UserBanning/UserBanning";
+import UserBanning from "../../components/UserList/UserList";
 import { privateAxios } from "../../config/axiosConfig";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";

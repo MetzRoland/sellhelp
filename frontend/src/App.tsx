@@ -8,7 +8,8 @@ import PublicRouterLayout from "./components/Routes/PublicRouterLayout";
 import PageNotFound from "./components/PageNotFound/PageNotFound";
 import ScrollToTop from "./components/ScrollToTop/ScrollToTop";
 import SuperUserRouterLayout from "./components/Routes/SuperUserRouterLayout";
-import UserBanning from "./components/UserBanning/UserBanning";
+import UserOnlyRouterLayout from "./components/Routes/UserOnlyRouterLayout";
+import UserList from "./components/UserList/UserList";
 import ProfileBanned from "./components/ProfileBanned/ProfileBanned";
 import DelayedLayout from "./components/DelayedLayout";
 import SetupMfa from "./components/SetupMfa/SetupMfa";
@@ -45,13 +46,17 @@ function App() {
             <Route path="/profile" element={<FullUserProfile />} />
             <Route path="/setupmfa" element={<SetupMfa />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
+          </Route>
+
+          <Route element={<UserOnlyRouterLayout />}>
             <Route path="/myposts" element={<PostsListComponent postFetchingEndpoint="/post/myposts" title="Saját posztok" />} />
             <Route path="/posts/involved" element={<PostsListComponent postFetchingEndpoint="/post/posts/involved" title="Elvállalt posztok" />} />
             <Route path="/posts/new" element={<NewPostComponent />} />
+            <Route path="/users" element={<UserList />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>
-            <Route path="/banningPage" element={<UserBanning />} />
+            <Route path="/banningPage" element={<UserList isAdmin={true} />} />
             <Route path="/postManagement" element={<PostsListComponent postFetchingEndpoint="/superuser/posts" navigateToPostEndpoint="/postManagement/posts/" title="Posztok kezelése" />} />
             <Route path="/postManagement/posts/:id" element={<FullPostView fetchEndpoint="/superuser/posts/"/>} />
           </Route>

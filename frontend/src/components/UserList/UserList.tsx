@@ -7,8 +7,9 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import UserProfileView from "../UserProfileView/UserProfileView";
 import InputForm from "../Reusables/InputForm/InputForm";
+import type { UserListProps } from "./UserListTypes";
 
-import "./UserBanning.css";
+import "./UserList.css";
 
 interface UserAccountFilter {
   userName?: string;
@@ -22,13 +23,22 @@ interface UserRole {
   roleName: string;
 }
 
-function UserBanning() {
-  const userUpdateInputs = [
+function UserList({ isAdmin = false }: UserListProps) {
+  type UserInputField = {
+    name: keyof UserAccountFilter;
+    type: "text" | "select";
+    placeholder: string;
+  };
+
+  const userUpdateInputs: UserInputField[] = [
     { name: "userName", type: "text", placeholder: "Felhasználónév" },
     { name: "email", type: "text", placeholder: "Email" },
     { name: "banned", type: "select", placeholder: "Válasszon fiók állapotot" },
-    { name: "role", type: "select", placeholder: "Válasszon szerepkört" },
-  ] as const;
+  ];
+
+  if(isAdmin){
+    userUpdateInputs.push({ name: "role", type: "select", placeholder: "Válasszon szerepkört" });
+  }
 
   const [formData, setFormData] = useState<UserAccountFilter>({
     userName: "",
@@ -67,15 +77,13 @@ function UserBanning() {
       setLoadingMessage("Felhasználói fiókok betöltése...");
 
       try {
-        await fetchUserRoles();
-        const response = await privateAxios.get("/superuser/users");
-        const users: User[] = response.data;
+        if (isAdmin) {
+          const roleResponse = await privateAxios.get<UserRole[]>("/api/public/roles");
+          setRoles(roleResponse.data);
+        }
 
-        await Promise.all(
-          users.map(async (user) => {
-            user.profilePicture = await fetchProfilePicture(user.id);
-          }),
-        );
+        const response = await privateAxios.get(isAdmin ? "/superuser/users" : "/user/users");
+        const users: User[] = response.data;
 
         setAllUserAccounts(users);
         setUserAccounts(users);
@@ -90,7 +98,7 @@ function UserBanning() {
     };
 
     fetchUserAccounts();
-  }, [setIsLoading, setLoadingMessage]);
+  }, [setIsLoading, setLoadingMessage, isAdmin]);
 
   useEffect(() => {
     const filtered = allUserAccounts.filter((user) => {
@@ -107,13 +115,14 @@ function UserBanning() {
       const matchesBanned =
         !formData.banned || String(user.banned) === formData.banned;
 
-      const matchesRole = !formData.role || user.role === formData.role;
+      const matchesRole =
+        !isAdmin || !formData.role || user.role === formData.role;
 
       return matchesUserName && matchesEmail && matchesBanned && matchesRole;
     });
 
     setUserAccounts(filtered);
-  }, [formData, allUserAccounts]);
+  }, [formData, allUserAccounts, isAdmin]);
 
   const handleInputUpdate = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
@@ -124,16 +133,6 @@ function UserBanning() {
       ...prev,
       [name]: value,
     }));
-  };
-
-  const fetchProfilePicture = async (userId: number) => {
-    const response = await privateAxios.get(`/user/files/${userId}/pp`);
-    return response.data.profilePictureUrl;
-  };
-
-  const fetchUserRoles = async () => {
-    const response = await privateAxios.get<UserRole[]>("/api/public/roles");
-    setRoles(response.data);
   };
 
   const handleUserBanning = async (userId: number, isBanned: boolean) => {
@@ -203,9 +202,9 @@ function UserBanning() {
         {userAccounts.map((userAccount) => (
           <UserProfileView
             key={userAccount.id}
-            adminMode={true}
+            adminMode={isAdmin}
             userAccount={userAccount}
-            handleUserBanning={handleUserBanning}
+            handleUserBanning={isAdmin ? handleUserBanning : undefined}
             handleRedirectToProfile={() => navigate(`/users/${userAccount.id}`)}
           />
         ))}
@@ -216,4 +215,4 @@ function UserBanning() {
   );
 }
 
-export default UserBanning;
+export default UserList;
