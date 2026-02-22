@@ -8,6 +8,7 @@ import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserFileRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.FileTypeDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,13 +23,15 @@ public class UserFileService {
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final UserFileRepository userFileRepository;
+    private final FileTypeDetector fileTypeDetector;
 
     @Autowired
     public UserFileService(S3Service s3Service, UserRepository userRepository,
-                    UserFileRepository userFileRepository) {
+                           UserFileRepository userFileRepository, FileTypeDetector fileTypeDetector) {
         this.s3Service = s3Service;
         this.userRepository = userRepository;
         this.userFileRepository = userFileRepository;
+        this.fileTypeDetector = fileTypeDetector;
     }
 
     public List<FileDTO> getAllUserFiles(String email) {
@@ -197,6 +200,9 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
+        if (!fileTypeDetector.detectType(file).startsWith("image/"))
+        {throw new RuntimeException("A fájl kép kell legyen!");}
 
         String key = s3Service.ppKey(user.getId());
 

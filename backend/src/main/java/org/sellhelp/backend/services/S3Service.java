@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.sellhelp.backend.dtos.responses.FileDTO;
+import org.sellhelp.backend.security.FileTypeDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -24,13 +25,15 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final String bucketName;
+    private final FileTypeDetector fileTypeDetector;
 
     @Autowired
     public S3Service(S3Client s3Client, S3Presigner s3Presigner,
-            @Value("${s3.bucket}") String bucketName) {
+            @Value("${s3.bucket}") String bucketName, FileTypeDetector fileTypeDetector) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.bucketName = bucketName;
+        this.fileTypeDetector = fileTypeDetector;
 
         if (!bucketExists(bucketName))
         {
@@ -64,6 +67,7 @@ public class S3Service {
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(file.getOriginalFilename())
+                .contentType(fileTypeDetector.detectType(file))
                 .build(),
                 RequestBody.fromBytes(file.getBytes())
         );
@@ -77,6 +81,7 @@ public class S3Service {
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(key)
+                .contentType(fileTypeDetector.detectType(file))
                 .build(),
                 RequestBody.fromBytes(file.getBytes()));
     }

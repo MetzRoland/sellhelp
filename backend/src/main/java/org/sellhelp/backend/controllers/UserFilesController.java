@@ -59,7 +59,7 @@ public class UserFilesController {
         String email = userDetails.getUsername();
         userFileService.deleteUserFile(email, fileId);
 
-        return ResponseEntity.ok("Profilkép törölve!");
+        return ResponseEntity.ok("Fájl sikeresen törölve!");
     }
 
     @GetMapping("/pp")
