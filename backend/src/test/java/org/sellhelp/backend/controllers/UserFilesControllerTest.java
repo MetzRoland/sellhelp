@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTFilter;
 import org.sellhelp.backend.services.UserFileService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,18 +43,22 @@ class UserFilesControllerTest {
     private UserDetailsService userDetailsService;
 
     @MockitoBean
+    private CurrentUser currentUser;
+
+    @MockitoBean
     private JWTFilter jwtFilter;
 
     @Test
     @WithMockUser(username = "test@test.com")
     void getAllFiles_success() throws Exception {
         when(userFileService.getAllUserFiles("test@test.com"))
-                .thenReturn(List.of(new FileDTO(1, "http://url", "testFileName1")));
+                .thenReturn(List.of(new FileDTO(1, "http://url", "http://url2", "testFileName1")));
 
         mockMvc.perform(get("/user/files"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[0].fileId").value(1))
-                .andExpect(jsonPath("$[0].url").value("http://url"))
+                .andExpect(jsonPath("$[0].downloadUrl").value("http://url"))
+                .andExpect(jsonPath("$[0].openUrl").value("http://url2"))
                 .andExpect(jsonPath("$[0].fileName").value("testFileName1"));
     }
 
@@ -61,12 +66,13 @@ class UserFilesControllerTest {
     @WithMockUser(username = "test@test.com")
     void getUserFile_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
-                .thenReturn(new FileDTO(5, "http://download", "MytestFileName22"));
+                .thenReturn(new FileDTO(5, "http://download", "http://open", "MytestFileName22"));
 
         mockMvc.perform(get("/user/files/download/{fileId}", 5))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(5))
-                .andExpect(jsonPath("$.url").value("http://download"))
+                .andExpect(jsonPath("$.downloadUrl").value("http://download"))
+                .andExpect(jsonPath("$.openUrl").value("http://open"))
                 .andExpect(jsonPath("$.fileName").value("MytestFileName22"));
 
     }
@@ -75,24 +81,27 @@ class UserFilesControllerTest {
     @WithMockUser(username = "test@test.com")
     void getUserFileById_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
-                .thenReturn(new FileDTO(5, "http://download", "new-testFileName333"));
+                .thenReturn(new FileDTO(5, "http://download", "http://open", "new-testFileName333"));
 
         mockMvc.perform(get("/user/files/download/{fileId}", 5))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.fileId").value(5))
-                .andExpect(jsonPath("$.url").value("http://download"))
+                .andExpect(jsonPath("$.downloadUrl").value("http://download"))
+                .andExpect(jsonPath("$.openUrl").value("http://open"))
                 .andExpect(jsonPath("$.fileName").value("new-testFileName333"));
     }
 
     @Test
     @WithMockUser(username = "test@test.com")
     void uploadFile_success() throws Exception {
+        when(currentUser.getCurrentlyLoggedUserEmail())
+                .thenReturn("test@test.com");
+
         MockMultipartFile file = new MockMultipartFile(
                 "file",
                 "test.txt",
                 MediaType.TEXT_PLAIN_VALUE,
-                "hello".getBytes()
-        );
+                "hello".getBytes());
 
         mockMvc.perform(multipart("/user/files/upload").file(file))
                 .andExpect(status().isOk())
@@ -128,7 +137,7 @@ class UserFilesControllerTest {
         when(userFileService.getUserProfilePicture(7))
                 .thenReturn(new ProfilePictureDTO("http://pp"));
 
-        mockMvc.perform(get("/user/files/{id}/pp", 7))
+        mockMvc.perform(get("/user/files/public/{id}/pp", 7))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.profilePictureUrl").value("http://pp"));
     }
@@ -137,11 +146,9 @@ class UserFilesControllerTest {
     @WithMockUser(username = "test@test.com")
     void setProfilePicture_success() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
-                "file",
-                "img.png",
+                "file", "img.png",
                 MediaType.IMAGE_PNG_VALUE,
-                "image".getBytes()
-        );
+                "image".getBytes());
 
         mockMvc.perform(multipart("/user/files/pp").file(image))
                 .andExpect(status().isOk())
@@ -154,11 +161,9 @@ class UserFilesControllerTest {
     @WithMockUser(username = "test@test.com")
     void setProfilePicture_invalidFileType() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
-                "file",
-                "file.txt",
+                "file", "file.txt",
                 MediaType.TEXT_PLAIN_VALUE,
-                "nope".getBytes()
-        );
+                "nope".getBytes());
 
         mockMvc.perform(multipart("/user/files/pp").file(file))
                 .andExpect(status().isBadRequest())

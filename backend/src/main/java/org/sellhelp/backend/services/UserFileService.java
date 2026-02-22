@@ -40,10 +40,8 @@ public class UserFileService {
         List<FileDTO> fileDtos = new ArrayList<>();
         try {
 
-            for (UserFile file : files)
-            {
-                String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url, s3Service.getFileNameFromKey(file.getFilePath())));
+            for (UserFile file : files) {
+                fileDtos.add(s3Service.createFileDTO(file.getId(), file.getFilePath()));
             }
 
         }
@@ -64,10 +62,8 @@ public class UserFileService {
         List<FileDTO> fileDtos = new ArrayList<>();
         try {
 
-            for (UserFile file : files)
-            {
-                String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url, s3Service.getFileNameFromKey(file.getFilePath())));
+            for (UserFile file : files) {
+                fileDtos.add(s3Service.createFileDTO(file.getId(), file.getFilePath()));
             }
 
         }
@@ -93,9 +89,8 @@ public class UserFileService {
 
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()), s3Service.getFileNameFromKey(file.getFilePath()));
-        }
-        catch (NoSuchKeyException e) {
+            return s3Service.createFileDTO(file.getId(), file.getFilePath());
+        } catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
         }
         catch (Exception e) {
@@ -109,9 +104,8 @@ public class UserFileService {
         );
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()), s3Service.getFileNameFromKey(file.getFilePath()));
-        }
-        catch (NoSuchKeyException e) {
+            return s3Service.createFileDTO(file.getId(), file.getFilePath());
+        } catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
         }
         catch (Exception e) {
@@ -169,15 +163,17 @@ public class UserFileService {
         }
     }
 
-    public ProfilePictureDTO getProfilePictureByUser(User user){
+    public ProfilePictureDTO getProfilePictureByUser(User user) {
         if (user.getProfilePicturePath() == null) {
             return new ProfilePictureDTO(null);
         }
 
-//        if (user.getAuthProvider() == AuthProvider.GOOGLE
-//                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
-//            return new ProfilePictureDTO(user.getProfilePicturePath());
-//        }
+        // if (user.getAuthProvider() == AuthProvider.GOOGLE
+        // &&
+        // user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/"))
+        // {
+        // return new ProfilePictureDTO(user.getProfilePicturePath());
+        // }
 
         return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
     }

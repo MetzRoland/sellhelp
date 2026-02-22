@@ -14,6 +14,7 @@ import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserFileRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.CurrentUser;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -64,14 +65,15 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(userFileRepository.findByUser(user))
                 .thenReturn(List.of(userFile));
-        when(s3Service.getDownloadURL(userFile.getFilePath()))
-                .thenReturn("http://s3-url");
+        when(s3Service.createFileDTO(userFile.getId(), userFile.getFilePath()))
+                .thenReturn(new FileDTO(userFile.getId(), "http://s3-url", "http://s3-url-open", "fileName"));
 
         List<FileDTO> result = userFileService.getAllUserFiles(user.getEmail());
 
         assertEquals(1, result.size());
         assertEquals(userFile.getId(), result.get(0).getFileId());
-        assertEquals("http://s3-url", result.get(0).getUrl());
+        assertEquals("http://s3-url", result.get(0).getDownloadUrl());
+        assertEquals("http://s3-url-open", result.get(0).getOpenUrl());
     }
 
     @Test
@@ -89,13 +91,14 @@ class UserFileServiceTest {
                 .thenReturn(Optional.of(user));
         when(userFileRepository.findById(userFile.getId()))
                 .thenReturn(Optional.of(userFile));
-        when(s3Service.getDownloadURL(userFile.getFilePath()))
-                .thenReturn("http://s3-url");
+        when(s3Service.createFileDTO(userFile.getId(), userFile.getFilePath()))
+                .thenReturn(new FileDTO(userFile.getId(), "http://s3-url", "http://s3-url-open", "fileName"));
 
         FileDTO dto = userFileService.getUserFile(user.getEmail(), userFile.getId());
 
         assertEquals(userFile.getId(), dto.getFileId());
-        assertEquals("http://s3-url", dto.getUrl());
+        assertEquals("http://s3-url", dto.getDownloadUrl());
+        assertEquals("http://s3-url-open", dto.getOpenUrl());
     }
 
     @Test
