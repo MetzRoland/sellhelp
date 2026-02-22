@@ -1,0 +1,37 @@
+.file-display-container {
+  width: 100%;
+  height: fit-content;
+  margin-top: 1rem;
+  border-radius: 20px;
+  /* background-color: gray;
+  padding: 0.5rem;
+  box-shadow: inset 5px 5px 10px 5px rgba(0, 0, 0, 0.25); */
+}
+
+.file-display-list {
+  display: flex;
+  flex-wrap: wrap;
+  text-overflow: ellipsis;
+}
+
+.one-file {
+  border-radius: 20px;
+  background-color: #171717;
+  padding: 0.5rem;
+  margin: 0.3rem;
+  width: fit-content;
+  /* box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25); */
+}
+
+hr {
+  width: 100%;
+}
+
+a {
+  max-width: 100%;
+  overflow: hidden;
+  display: inline-block;
+  word-break: break-word;
+  text-overflow: ellipsis;
+  text-decoration: underline;
+}

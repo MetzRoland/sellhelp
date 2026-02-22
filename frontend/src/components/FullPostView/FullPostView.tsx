@@ -18,6 +18,7 @@ import UserListItem from "../UserListItem/UserListItem";
 import PostActionButton from "../PostActionButton/PostActionButton";
 import type { FullPostViewProps } from "./FullPostViewTypes";
 import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
+import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 
 import "./FullPostView.css";
 
@@ -491,6 +492,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                 disabledInputsMap={disabledInputsMap}
               />
             )}
+            
+            <FileDisplay endpoint={`/post/files/all/${id}`}/>
 
             {(isNormalUser || !isAuthenticated) && (
               <>

@@ -39,6 +39,10 @@ body {
   text-align: center;
 }
 
+.disappear {
+  display: none;
+}
+
 /* ===================== */
 /* CONTENT CARD          */
 /* ===================== */

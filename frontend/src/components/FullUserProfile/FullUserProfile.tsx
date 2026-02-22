@@ -16,6 +16,7 @@ import type {
 import { AxiosError } from "axios";
 import { type City } from "../Register/RegisterTypes";
 import type { UserUpdateFormFields } from "./FullUserProfileTypes";
+import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 
 interface FullUserProfileProps {
   settings?: boolean;
@@ -307,6 +308,11 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     setUser(userInfo.data);
   };
 
+  const editFiles = async () => {
+    navigator("/home/settings/files");
+    return;
+  };
+
   const title = settings
     ? "Adatok módosítása"
     : `${user.lastName} ${user.firstName}`;
@@ -350,8 +356,12 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
                   ? "Két faktoros hitelesítés kikapcsolása"
                   : "Két faktoros hitelesítés bekapcsolása"}
               </button>
+              <button className="btn" type="button" onClick={editFiles}>
+                Fájlok kezelése
+              </button>
             </>
           )}
+        <FileDisplay endpoint={`user/files/public/${user.id}`}/>
         </form>
       </div>
       <Footer />
