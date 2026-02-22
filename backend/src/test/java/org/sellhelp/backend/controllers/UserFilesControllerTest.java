@@ -115,7 +115,7 @@ class UserFilesControllerTest {
     void deleteUserFile_success() throws Exception {
         mockMvc.perform(delete("/user/files/delete/{id}", 3))
                 .andExpect(status().isOk())
-                .andExpect(content().string("Profilkép törölve!"));
+                .andExpect(content().string("Fájl sikeresen törölve!"));
 
         verify(userFileService).deleteUserFile("test@test.com", 3);
     }

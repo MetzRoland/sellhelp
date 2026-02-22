@@ -137,5 +137,12 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
     }
+
+    @ExceptionHandler(WrongFileTypeException.class)
+    public ResponseEntity<GeneralErrorDTO> handleWrongFileTypeException(WrongFileTypeException ex) {
+        GeneralErrorDTO errorDTO = createErrorDto(ex.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+
+        return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
+    }
 }
 

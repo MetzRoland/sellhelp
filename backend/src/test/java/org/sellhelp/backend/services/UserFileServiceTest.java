@@ -12,9 +12,11 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
+import org.sellhelp.backend.exceptions.WrongFileTypeException;
 import org.sellhelp.backend.repositories.UserFileRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
+import org.sellhelp.backend.security.FileTypeDetector;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -38,6 +40,9 @@ class UserFileServiceTest {
 
     @Mock
     private MultipartFile multipartFile;
+
+    @Mock
+    private FileTypeDetector fileTypeDetector;
 
     @InjectMocks
     private UserFileService userFileService;
@@ -212,6 +217,8 @@ class UserFileServiceTest {
     void setProfilePicture_success() throws IOException {
         when(userRepository.findByEmail(user.getEmail()))
                 .thenReturn(Optional.of(user));
+        when(fileTypeDetector.detectType(multipartFile))
+                .thenReturn("image/png");
         when(s3Service.ppKey(user.getId()))
                 .thenReturn("pp/1.png");
 
@@ -220,6 +227,17 @@ class UserFileServiceTest {
         verify(s3Service).uploadFileWithKey("pp/1.png", multipartFile);
         verify(userRepository).save(user);
         assertEquals("pp/1.png", user.getProfilePicturePath());
+    }
+
+    @Test
+    void setProfilePicture_fileTypeError() {
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+        when(fileTypeDetector.detectType(multipartFile))
+                .thenReturn("text/plain");
+
+        assertThrows(WrongFileTypeException.class,
+                () -> userFileService.setProfilePicture(user.getEmail(), multipartFile));
     }
 
     @Test

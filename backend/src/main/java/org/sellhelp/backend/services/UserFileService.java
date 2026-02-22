@@ -6,6 +6,7 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
+import org.sellhelp.backend.exceptions.WrongFileTypeException;
 import org.sellhelp.backend.repositories.UserFileRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.FileTypeDetector;
@@ -202,7 +203,7 @@ public class UserFileService {
         );
 
         if (!fileTypeDetector.detectType(file).startsWith("image/"))
-        {throw new RuntimeException("A fájl kép kell legyen!");}
+        {throw new WrongFileTypeException("A fájl kép kell legyen!");}
 
         String key = s3Service.ppKey(user.getId());
 
