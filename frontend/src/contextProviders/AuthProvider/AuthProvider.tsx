@@ -14,7 +14,7 @@ import type {
   GoogleRegister,
 } from "./AuthProviderTypes";
 import { AuthContext } from "./AuthContext";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -33,6 +33,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUser = async () => {
@@ -230,6 +231,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setValidationErrors({ email: "", password: "", totpCode: "" });
 
       localStorage.removeItem("profilePicture");
+      navigate("/login");
     }
   };
 
