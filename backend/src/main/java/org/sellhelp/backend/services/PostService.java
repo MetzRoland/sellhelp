@@ -430,6 +430,16 @@ public class PostService {
         post.setPostStatus(newStatus);
         postRepository.save(post);
 
+        String employerEmail = post.getPostPublisher().getEmail();
+        String employeeEmail = post.getSelectedUser().getEmail();
+
+        if(targetStatusName.equals("started") || targetStatusName.equals("completed_by_employee")){
+            emailService.changePostStatus(employerEmail, targetStatusName);
+        }
+        else {
+            emailService.changePostStatus(employeeEmail, targetStatusName);
+        }
+
         return new ChangePostStatusDTO(targetStatusName);
     }
 

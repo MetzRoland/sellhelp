@@ -218,4 +218,23 @@ public class EmailService {
 
         sendHTMLTemplateEmail(toEmail, "A munkavállaló visszautasította a posztot", "emails/postmanagement/cancelSelectedToPost", variables);
     }
+
+    public void changePostStatus(String toEmail, String postStatus){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        switch (postStatus) {
+            case "started" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkavállaló elkezdte a munkát", "emails/postmanagement/startedPost", variables);
+            case "completed_by_employee" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkavállaló leadta a munkáját ellenőrzésre", "emails/postmanagement/sentWorkToCheck", variables);
+            case "unsuccessful_result_closed" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató lezárta a posztot sikertelen eredmény miatt", "emails/postmanagement/closedUnsuccessfully", variables);
+            case "work_rejected" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató visszadobta a munkát javításra", "emails/postmanagement/workRejected", variables);
+            case "closed" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató lezárta a posztot sikeres eredménnyel", "emails/postmanagement/closedSuccessfully", variables);
+        }
+    }
 }
