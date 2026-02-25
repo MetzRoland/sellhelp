@@ -66,13 +66,23 @@ body {
 }
 
 .filter-container{
-    background-color: transparent;
-    box-shadow: none;
+  background-color: transparent;
+  box-shadow: none;
 }
 
 .content-title
 {
   font-size: 300%;
+}
+
+.profile-picture-container {
+  /* transform: translateY(-4rem); */
+  margin-top: -4rem; /* move upward */
+  margin-bottom: 1rem;
+}
+
+.content-container-has-pfp {
+  margin-top: 3rem;
 }
 
 /* ===================== */

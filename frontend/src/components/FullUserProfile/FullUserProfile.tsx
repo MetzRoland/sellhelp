@@ -17,6 +17,7 @@ import { AxiosError } from "axios";
 import { type City } from "../Register/RegisterTypes";
 import type { UserUpdateFormFields } from "./FullUserProfileTypes";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 
 interface FullUserProfileProps {
   settings?: boolean;
@@ -323,7 +324,10 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       <div className="main-container">
         <h1 className="content-title">{title}</h1>
 
-        <form className="content-container login-form">
+        <form className="content-container login-form content-container-has-pfp">
+          <div className="profile-picture-container">
+            <ProfilePictureComponent userId={user.id}/>
+          </div>
           {userUpdateError && (
             <p className="message error error-process-status">
               {userUpdateError}
