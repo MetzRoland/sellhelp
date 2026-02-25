@@ -1,0 +1,35 @@
+.profile-picture-img{
+    width: 5.8125rem;
+    height: 5.8125rem;
+
+    border-radius: 50%;
+    cursor: pointer;
+
+    transition: all .4s;
+
+    object-fit: cover
+}
+
+.profile-picture-img:hover{
+    box-shadow: 0px 0px 10px #fff;
+
+    transform: scale(1.05);
+}
+
+.profile-picture-skeleton {
+  width: 5.8125rem;
+  height: 5.8125rem;
+  border-radius: 50%;
+  background: linear-gradient(
+    90deg,
+    #eee 25%,
+    #ddd 37%,
+    #eee 63%
+  );
+  animation: shimmer 1.4s infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: -100px 0; }
+  100% { background-position: 100px 0; }
+}

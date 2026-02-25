@@ -3,6 +3,8 @@ import { privateAxios } from "../../config/axiosConfig";
 import type { ProfilePicture } from "./ProfilePictureComponentTypes";
 import type { ProfilePictureComponentProps } from "./ProfilePictureComponentTypes";
 
+import "./ProfilePictureComponent.css"
+
 const profilePictureCache = new Map<number, ProfilePicture>();
 
 function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }: ProfilePictureComponentProps) {
