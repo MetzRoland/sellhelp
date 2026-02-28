@@ -9,18 +9,19 @@
 }
 
 .file-display-list {
-  display: flex;
+  display: block;
   flex-wrap: wrap;
   text-overflow: ellipsis;
+  width: fit-content;
 }
 
 .one-file {
   border-radius: 20px;
   background-color: #171717;
-  padding: 0.5rem;
+  padding: 0.6rem;
   margin: 0.3rem;
-  width: fit-content;
-  /* box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25); */
+  width: 100%;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.25);
 }
 
 hr {
@@ -28,10 +29,27 @@ hr {
 }
 
 a {
+  display: flex;
+  justify-items: center;
   max-width: 100%;
   overflow: hidden;
   display: inline-block;
   word-break: break-word;
   text-overflow: ellipsis;
   text-decoration: underline;
+  font-size: 100%;
 }
+
+a img {
+  max-height: 1rem;
+  margin-left: 0.2rem;
+}
+
+/* .file-actions {
+  display: flex;
+  width: fit-content;
+}
+
+.file-actions img {
+  max-height: 1rem;
+} */

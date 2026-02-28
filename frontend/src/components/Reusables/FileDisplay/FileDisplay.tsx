@@ -1,7 +1,9 @@
 import { publicAxios } from "../../../config/axiosConfig"
 import { useLoading } from "../../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
-import type { File } from "../../../types/FileDisplayTypes";
+import type { File } from "../../../types/FileType";
 import { useEffect, useState } from "react"
+import openSVG from '../../../assets/open-in-new-white.svg';
+import downloadSVG from '../../../assets/download-white.svg';
 
 import "./FileDisplay.css"
 
@@ -46,7 +48,12 @@ function FileDisplay({ endpoint }: FileDisplayProps){
               <div className="one-file" key={f.id}>
                 <a href={f.openUrl} target="_blank" rel="noopener noreferrer">
                   {f.fileName}
+                  <img src={openSVG} alt="Megnyitás" />
                 </a>
+                {/* <div className="file-actions">
+                  <img src={openSVG} alt="Megnyitás" />
+                  <img src={downloadSVG} alt="Letöltés" />
+                </div> */}
               </div>
             ); 
           })
