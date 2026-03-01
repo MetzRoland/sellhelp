@@ -1,10 +1,11 @@
-import { privateAxios, publicAxios } from "../../../config/axiosConfig"
+import { privateAxios, publicAxios } from "../../../config/axiosConfig";
 import { useLoading } from "../../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { File } from "../../../types/FileType";
-import { useEffect, useState } from "react"
-import openSVG from '../../../assets/open-in-new-white.svg';
+import { useEffect, useState } from "react";
+import openSVG from "../../../assets/open-in-new-white.svg";
+import { useDropzone } from "react-dropzone";
 
-import "./FileDisplay.css"
+import "./FileDisplay.css";
 
 interface FileDisplayProps {
   type: string;
@@ -12,119 +13,170 @@ interface FileDisplayProps {
   canEdit: boolean | undefined;
 }
 
-function FileDisplay({ type, id, canEdit }: FileDisplayProps){
+function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
   const [files, setFiles] = useState<File[]>([]);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
   const [filesError, setFilesError] = useState(false);
   const [blur, setBlur] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
-  function getGetAllEndpoint()
-  {
-    switch (type)
-    {
+  function getGetAllEndpoint() {
+    switch (type) {
       case "post":
         return `post/files/all/${id}`;
       case "user":
         return `user/files/public/${id}`;
       default:
-        return `-`;
+        return "-";
     }
   }
 
-  function getUploadFileEndpoint()
-  {
-    switch (type)
-    {
+  function getUploadFileEndpoint() {
+    switch (type) {
       case "post":
         return `post/files/upload/${id}`;
       case "user":
         return `user/files/upload`;
       default:
-        return `-`;
+        return "-";
     }
   }
 
-  function getDeleteFileEndpoint(fileId: number)
-  {
-    switch (type)
-    {
+  function getDeleteFileEndpoint(fileId: number) {
+    switch (type) {
       case "post":
         return `post/files/${fileId}/delete`;
       case "user":
         return `user/files/delete/${fileId}`;
       default:
-        return `-`;
+        return "-";
     }
   }
 
   useEffect(() => {
-    const fetchFiles = async () => {
-      setIsLoading(true);
-      try {
-        setLoadingMessage("Fájlok lekérése...");
-
-        const response = await publicAxios.get<File[]>(getGetAllEndpoint())
-        if (response.data.length > 0)
-        {
-          setFiles(response.data);
-        }
-      } catch {
-        setFilesError(true);
-      }
-      finally {
-        setIsLoading(false);
-      }
-    }
     fetchFiles();
   }, []);
+
+  async function fetchFiles() {
+    setIsLoading(true);
+    try {
+      setLoadingMessage("Fájlok lekérése...");
+      const response = await publicAxios.get<File[]>(getGetAllEndpoint());
+      if (response.data.length > 0) {
+        setFiles(response.data);
+      }
+    } catch {
+      setFilesError(true);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   async function deleteFile(fileId: number) {
     try {
       setBlur(true);
       const response = await privateAxios.delete(getDeleteFileEndpoint(fileId));
       console.log(response);
-
-      // Remove the deleted file from the state
       setFiles((prevFiles) => prevFiles.filter((file) => file.fileId !== fileId));
     } catch (error) {
-      console.error('Error deleting file:', error);
-    }
-    finally {
+      console.error("Error deleting file:", error);
+    } finally {
       setBlur(false);
     }
   }
 
+  const onDrop = async (acceptedFiles: File[]) => {
+    if (acceptedFiles.length < 1) {
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      setLoadingMessage("Fájl feltöltése...");
+      const formData = new FormData();
+      acceptedFiles.forEach((file) => {
+        formData.append("file", file);
+      });
+    
+      await privateAxios.post(getUploadFileEndpoint(), formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+      });
+      fetchFiles();
+    }
+    catch (error) {
+      console.error("Error uploading files:", error);
+    }
+    finally {
+      setIsUploading(false);
+      setIsLoading(false);
+    }
+  };
+
+  // Use the useDropzone hook for drag-and-drop functionality
+  const { getRootProps, getInputProps } = useDropzone({
+    onDrop,
+    multiple: true, // Allow multiple file uploads
+  });
+
   return (
     <>
       <hr />
-      <div className={`file-display-container ${files.length < 1 && "disappear"}`}>
+      <div className={`file-display-container ${(files.length < 1 && !canEdit) && "disappear"}`}>
         <div className="file-display-title">
           <h1>Fájlok</h1>
-          {canEdit && <button type="button" className="setting-btn">Fájl feltöltése</button>}
+          {canEdit && (
+            <button
+              type="button"
+              className="setting-btn"
+              onClick={() => setIsUploading((prev) => !prev)}
+            >
+              {isUploading ? "Mégse" : "Fájl feltöltése"}
+            </button>
+          )}
         </div>
-        <div className={`file-display-list ${blur && "blurred"}`}>
-          {files.map((f) => {
-            console.log(files);
-            console.log(f);
-            console.log("mapping id :"+f.fileId);
-            return (
+
+        {isUploading ? (
+          <div
+            className="upload-area"
+            {...getRootProps()}
+          >
+            <input {...getInputProps()} />
+            <p>Húzd ide a fájlt, vagy kattints a fájl választásához!</p>
+          </div>
+        ) : (
+          <div className={`file-display-list ${blur && "blurred"}`}>
+            {files.map((f) => (
               <div className="one-file" key={f.fileId}>
-                <a href={f.openUrl} className="file-name" target="_blank" rel="noopener noreferrer">
-                  {f.fileName}
+                <a href={f.openUrl} className="" target="_blank" rel="noopener noreferrer">
+                  <span className="file-name">{f.fileName}</span>
                   <img src={openSVG} alt="Megnyitás" />
                 </a>
                 <div className="file-actions">
-                  <a href={f.downloadUrl} className="download-btn">Letöltés</a>
-                  {canEdit && <button type="button" className="delete-btn" onClick={() => {deleteFile(f.fileId)}}>Törlés</button>}
+                  <a href={f.downloadUrl} className="download-btn">
+                    Letöltés
+                  </a>
+                  {canEdit && (
+                    <button
+                      type="button"
+                      className="delete-btn"
+                      onClick={() => {
+                        deleteFile(f.fileId);
+                      }}
+                    >
+                      Törlés
+                    </button>
+                  )}
                 </div>
               </div>
-            ); 
-          })
-        } 
-        </div>
+            ))}
+            {files.length < 1 && "Nincsenek fájlok"}
+          </div>
+        )}
       </div>
     </>
-  )
+  );
 }
 
 export default FileDisplay;
