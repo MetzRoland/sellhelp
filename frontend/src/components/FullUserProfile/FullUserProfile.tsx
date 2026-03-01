@@ -309,11 +309,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     setUser(userInfo.data);
   };
 
-  const editFiles = async () => {
-    navigator("/home/settings/files");
-    return;
-  };
-
   const title = settings
     ? "Adatok módosítása"
     : `${user.lastName} ${user.firstName}`;
@@ -360,12 +355,9 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
                   ? "Két faktoros hitelesítés kikapcsolása"
                   : "Két faktoros hitelesítés bekapcsolása"}
               </button>
-              <button className="btn" type="button" onClick={editFiles}>
-                Fájlok kezelése
-              </button>
             </>
           )}
-        <FileDisplay endpoint={`user/files/public/${user.id}`}/>
+          <FileDisplay type="user" id={user.id} canEdit={user.id === authUser?.id && settings}/>
         </form>
       </div>
       <Footer />

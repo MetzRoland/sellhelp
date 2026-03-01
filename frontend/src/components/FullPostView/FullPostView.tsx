@@ -48,6 +48,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     reward: "",
   });
 
+  const isClosed = post?.statusName === "closed" || post?.statusName === "unsuccessful_result_closed";
+
   const [disabledInputsMap, setDisabledInputsMap] = useState<
     Record<string, boolean>
   >(
@@ -477,7 +479,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
                 <button
                   type="button"
-                  className="btn"
+                  className="btn btn-danger"
                   onClick={() => deletePostById(post.id, "/post/delete/")}
                 >
                   Poszt törlése
@@ -493,7 +495,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               />
             )}
             
-            <FileDisplay endpoint={`/post/files/all/${id}`}/>
+            <FileDisplay type="post" id={post.id} canEdit={isOwner || false }/>
 
             {(isNormalUser || !isAuthenticated) && (
               <>

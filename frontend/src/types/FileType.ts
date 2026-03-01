@@ -1,6 +1,6 @@
 export interface File
 {
-    id: number,
+    fileId: number,
     downloadUrl: string,
     openUrl: string,
     fileName: string

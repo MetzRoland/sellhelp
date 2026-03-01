@@ -249,6 +249,23 @@ body {
     inset 0px 6px 4px rgba(234, 234, 234, 0.5);
 }
 
+.btn-danger {
+  color: #eaeaea;
+  box-shadow:
+    inset -3px 0px 2px rgba(190, 44, 44, 0.5),
+    inset 3px 0px 2px rgba(190, 44, 44, 0.5),
+    inset 0px -3px 2px rgba(190, 44, 44, 0.5),
+    inset 0px 3px 2px rgba(190, 44, 44, 0.5);
+}
+
+.btn-danger:hover {
+  box-shadow:
+    inset -6px 0px 4px rgba(190, 44, 44, 0.5),
+    inset 6px 0px 4px rgba(190, 44, 44, 0.5),
+    inset 0px -6px 4px rgba(190, 44, 44, 0.5),
+    inset 0px 6px 4px rgba(190, 44, 44, 0.5);
+}
+
 /* ========================= */
 /* BUTTONS FOR SETTINGS      */
 /* ========================= */
