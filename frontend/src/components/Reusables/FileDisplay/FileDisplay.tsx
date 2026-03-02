@@ -16,7 +16,7 @@ interface FileDisplayProps {
 function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
   const [files, setFiles] = useState<File[]>([]);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
-  const [filesError, setFilesError] = useState(false);
+  const [filesError, setFilesError] = useState<string | null>(null);
   const [blur, setBlur] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -66,7 +66,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
         setFiles(response.data);
       }
     } catch {
-      setFilesError(true);
+      // error handling
     } finally {
       setIsLoading(false);
     }
@@ -91,8 +91,10 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
     }
 
     try {
+      setFilesError(null);
       setIsLoading(true);
       setLoadingMessage("Fájl feltöltése...");
+
       const formData = new FormData();
       acceptedFiles.forEach((file) => {
         formData.append("file", file);
@@ -106,7 +108,9 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       fetchFiles();
     }
     catch (error) {
-      console.error("Error uploading files:", error);
+      // console.error("Error uploading files:", error);
+      // console.log(error?.response?.data?.message);
+      setFilesError(error?.response?.data?.message || "Fájl feltöltés sikertelen.");
     }
     finally {
       setIsUploading(false);
@@ -125,7 +129,10 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       <hr />
       <div className={`file-display-container ${(files.length < 1 && !canEdit) && "disappear"}`}>
         <div className="file-display-title">
-          <h1>Fájlok</h1>
+          <div>
+            <h1>Fájlok</h1>
+            {canEdit && files.length+"/10"}
+          </div>
           {canEdit && (
             <button
               type="button"
@@ -144,9 +151,15 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
           >
             <input {...getInputProps()} />
             <p>Húzd ide a fájlt, vagy kattints a fájl választásához!</p>
+            <p>Max 10 MB</p>
           </div>
         ) : (
           <div className={`file-display-list ${blur && "blurred"}`}>
+            {filesError && (
+              <h3 className="file-message">
+                {filesError}
+              </h3>
+            )}
             {files.map((f) => (
               <div className="one-file" key={f.fileId}>
                 <a href={f.openUrl} className="" target="_blank" rel="noopener noreferrer">

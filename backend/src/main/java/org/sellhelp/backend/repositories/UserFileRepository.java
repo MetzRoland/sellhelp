@@ -12,5 +12,6 @@ import java.util.Optional;
 public interface UserFileRepository extends JpaRepository<UserFile, Integer> {
     List<UserFile> findByUser(User user);
     List<UserFile> findByUserId(Integer userId);
+    Optional<UserFile> findByFilePath(String filePath);
     Integer countByUser(User user);
 }

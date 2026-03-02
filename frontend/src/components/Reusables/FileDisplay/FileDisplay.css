@@ -103,6 +103,8 @@ hr {
 }
 
 .upload-area {
+  display: flex;
+  flex-direction: column;
   width: 100%;
   height: 150px;
   border: 2px dashed #6a6a6a;
@@ -150,5 +152,11 @@ hr {
 .upload-error {
   color: #f44336;
   font-size: 16px;
+  font-weight: bold;
+}
+
+.file-message {
+  text-align: center;
+  color: red;
   font-weight: bold;
 }

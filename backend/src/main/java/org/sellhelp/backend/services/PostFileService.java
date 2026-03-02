@@ -62,6 +62,10 @@ public class PostFileService {
         if (post.getPostPublisher().getId() != currentUser.getCurrentlyLoggedUserEntity().getId())
         {throw new InvalidPermissionException("Nincs jogosultság!");}
 
+        String key = s3Service.postFileKey(post.getId(), file.getOriginalFilename());
+        if (postFileRepository.findByPostFilePath(key).isPresent())
+        {throw new RuntimeException("Ez a fájl már létezik");}
+
         if (postFileRepository.countByPost(post) >= 10)
         {
             throw new RuntimeException("Maximum 10 fájlt lehet feltölteni.");
@@ -69,7 +73,7 @@ public class PostFileService {
 
         PostFile newPostFile = PostFile.builder()
                 .post(post)
-                .postFilePath(s3Service.postFileKey(post.getId(), file.getOriginalFilename()))
+                .postFilePath(key)
                 .build();
 
         try {

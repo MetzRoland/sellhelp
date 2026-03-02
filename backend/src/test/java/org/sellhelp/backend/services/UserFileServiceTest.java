@@ -179,6 +179,27 @@ class UserFileServiceTest {
     }
 
     @Test
+    void addUserFile_failFileAlreadyExists() throws IOException {
+        String key = "/users/55/filename.ext";
+        when(userRepository.findByEmail(user.getEmail()))
+                .thenReturn(Optional.of(user));
+        when(multipartFile.getOriginalFilename())
+                .thenReturn("filename.ext");
+        when(s3Service.userFileKey(user.getId(), "filename.ext"))
+                .thenReturn(key);
+        when(userFileRepository.findByFilePath(key))
+                .thenReturn(Optional.of(new UserFile()));
+
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> userFileService.addUserFile(user.getEmail(), multipartFile));
+        assertEquals("Ez a fájl már létezik", exception.getMessage());
+
+        // verify upload was never called
+        verify(s3Service, never()).uploadFileWithKey(anyString(), any());
+        verify(userFileRepository, never()).save(any());
+    }
+
+    @Test
     void deleteUserFile_success() {
         when(userRepository.findByEmail(user.getEmail()))
                 .thenReturn(Optional.of(user));
