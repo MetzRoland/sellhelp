@@ -73,12 +73,32 @@ body {
 .content-title
 {
   font-size: 300%;
+  margin-bottom: 1rem;
 }
 
+/* ===================== */
+/* PROFILE PICTURE BLOCK */
+/* ===================== */
+
 .profile-picture-container {
-  /* transform: translateY(-4rem); */
-  margin-top: -4rem; /* move upward */
-  margin-bottom: 1rem;
+  position: relative;
+  margin-top: -4rem; /* lift above card */
+  margin-bottom: 1.5rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Buttons row under image */
+.profile-picture-container .setting-btn {
+  width: 160px;
+}
+
+/* Button group wrapper */
+.profile-picture-container .setting-btn + .setting-btn {
+  margin-top: -0.5rem;
 }
 
 .content-container-has-pfp {
