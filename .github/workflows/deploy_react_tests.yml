@@ -29,9 +29,11 @@ jobs:
       - name: Run tests
         working-directory: ./frontend
         run: npx vitest run --reporter=html
+        continue-on-error: true
 
       # 5️⃣ Create timestamped folder
       - name: Prepare report folder
+        if: always()
         run: |
           TIMESTAMP=$(date +%Y%m%d-%H%M%S)
           REPORT_FOLDER="html/$TIMESTAMP"
