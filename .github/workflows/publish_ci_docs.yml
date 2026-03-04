@@ -31,7 +31,9 @@ jobs:
       # 3️⃣ Run tests and generate reports (even if tests fail)
       - name: Generate test reports
         working-directory: backend
-        run: mvn -B verify site
+        run: |
+          mvn -B clean verify || true
+          mvn -B site || true
         continue-on-error: true
 
       # 4️⃣ Copy reports to timestamped folder
