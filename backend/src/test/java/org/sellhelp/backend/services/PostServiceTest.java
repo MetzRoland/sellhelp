@@ -18,6 +18,7 @@ import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.*;
 import org.sellhelp.backend.security.CurrentUser;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -41,6 +42,7 @@ class PostServiceTest {
     private PostService postService;
 
     private User user;
+    private User anotherUser;
     private Post post;
     private City city;
     private PostStatus postStatus;
@@ -50,6 +52,10 @@ class PostServiceTest {
         user = new User();
         user.setId(1);
         user.setEmail("test@example.com");
+
+        anotherUser = new User();
+        anotherUser.setId(2);
+        anotherUser.setEmail("other@example.com");
 
         city = new City();
         city.setCityName("Budapest");
@@ -62,6 +68,7 @@ class PostServiceTest {
         post.setPostPublisher(user);
         post.setCity(city);
         post.setPostStatus(postStatus);
+        post.setJobApplications(new ArrayList<>());
     }
 
     @Test
@@ -150,9 +157,10 @@ class PostServiceTest {
 
     @Test
     void applyToPost_success() {
+        post.setPostPublisher(anotherUser);
+
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@example.com");
-        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(user));
         when(jobApplicationRepository.existsByApplicantAndJobPost(user, post)).thenReturn(false);
         when(modelMapper.map(any(JobApplication.class), eq(JobApplicationResponseDTO.class)))
@@ -162,7 +170,7 @@ class PostServiceTest {
 
         assertNotNull(response);
         verify(jobApplicationRepository).save(any(JobApplication.class));
-        verify(emailService).appliedToPost("test@example.com");
+        verify(emailService).appliedToPost("test2@example.com");
     }
 
     @Test
