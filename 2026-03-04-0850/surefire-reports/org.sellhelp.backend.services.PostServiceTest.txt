@@ -1,0 +1,12 @@
+-------------------------------------------------------------------------------
+Test set: org.sellhelp.backend.services.PostServiceTest
+-------------------------------------------------------------------------------
+Tests run: 10, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.373 s <<< FAILURE! -- in org.sellhelp.backend.services.PostServiceTest
+org.sellhelp.backend.services.PostServiceTest.applyToPost_success -- Time elapsed: 0.013 s <<< ERROR!
+org.sellhelp.backend.exceptions.InvalidPermissionException: Saját poszthoz nem lehet jelentkezni!
+	at org.sellhelp.backend.services.PostService.applyToPost(PostService.java:237)
+	at org.sellhelp.backend.services.PostServiceTest.applyToPost_success(PostServiceTest.java:161)
+	at java.base/java.lang.reflect.Method.invoke(Method.java:565)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+	at java.base/java.util.ArrayList.forEach(ArrayList.java:1604)
+
