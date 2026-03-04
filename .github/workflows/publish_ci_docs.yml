@@ -39,7 +39,7 @@ jobs:
         run: |
           TIMESTAMP=$(date +%Y-%m-%d-%H%M)
           mkdir -p public/$TIMESTAMP
-          cp -r backend/target/site/* public/$TIMESTAMP/
+          cp -r backend/target/* public/$TIMESTAMP/
 
       # 5️⃣ Generate index.html for navigation
       - name: Generate index
