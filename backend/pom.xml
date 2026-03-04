@@ -199,6 +199,7 @@
                 <version>3.2.5</version>
                 <configuration>
                     <testFailureIgnore>true</testFailureIgnore>
+                    <printSummary>true</printSummary>
                 </configuration>
             </plugin>
 		</plugins>
