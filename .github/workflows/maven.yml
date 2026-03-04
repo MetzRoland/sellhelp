@@ -78,6 +78,7 @@ jobs:
         working-directory: backend
 
       - name: Upload JAR artifact
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: backend-jar
