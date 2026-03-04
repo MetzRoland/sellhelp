@@ -1,0 +1,243 @@
+package org.sellhelp.backend.controllers;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.sellhelp.backend.dtos.requests.*;
+import org.sellhelp.backend.dtos.responses.*;
+import org.sellhelp.backend.security.JWTFilter;
+import org.sellhelp.backend.security.UserAuthDetailService;
+import org.sellhelp.backend.services.PostService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.List;
+
+import static org.mockito.Mockito.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+
+@WebMvcTest(PostController.class)
+@AutoConfigureMockMvc(addFilters = false)
+class PostControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private JWTFilter jwtFilter;
+
+    @MockitoBean
+    private UserDetailsService userDetailsService;
+
+    @MockitoBean
+    private PostService postService;
+
+    private CreatePostDTO createPostDTO;
+    private UpdatePostDTO updatePostDTO;
+    private PostCommentDTO postCommentDTO;
+    private ChangePostStatusDTO changePostStatusDTO;
+
+    private PostResponseDTO postResponseDTO;
+    private OwnedPostResponseDTO ownedPostResponseDTO;
+    private JobApplicationResponseDTO jobApplicationResponseDTO;
+
+    @BeforeEach
+    void init() {
+        createPostDTO = new CreatePostDTO();
+        updatePostDTO = new UpdatePostDTO();
+        postCommentDTO = new PostCommentDTO();
+        postCommentDTO.setMessage("Post comment");
+
+        changePostStatusDTO = new ChangePostStatusDTO();
+        changePostStatusDTO.setTargetStatusName("closed");
+
+        postResponseDTO = new PostResponseDTO();
+        ownedPostResponseDTO = new OwnedPostResponseDTO();
+        jobApplicationResponseDTO = new JobApplicationResponseDTO();
+    }
+
+    @Test
+    void createPost_success() throws Exception {
+        when(postService.createPost(any())).thenReturn(postResponseDTO);
+
+        mockMvc.perform(post("/post/new")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createPostDTO)))
+                .andExpect(status().isCreated());
+
+        verify(postService).createPost(any(CreatePostDTO.class));
+    }
+
+    @Test
+    void updatePost_success() throws Exception {
+        when(postService.updatePostData(any(), eq(1)))
+                .thenReturn(ownedPostResponseDTO);
+
+        mockMvc.perform(patch("/post/update/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(updatePostDTO)))
+                .andExpect(status().isOk());
+
+        verify(postService).updatePostData(any(UpdatePostDTO.class), eq(1));
+    }
+
+    @Test
+    void deletePost_success() throws Exception {
+        mockMvc.perform(delete("/post/delete/1"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("A poszt törölve!"));
+
+        verify(postService).deletePost(1);
+    }
+
+    @Test
+    void getAvailablePosts_success() throws Exception {
+        when(postService.getAvailablePosts())
+                .thenReturn(List.of(postResponseDTO));
+
+        mockMvc.perform(get("/post/posts"))
+                .andExpect(status().isOk());
+
+        verify(postService).getAvailablePosts();
+    }
+
+    @Test
+    void getInvolvedPosts_success() throws Exception {
+        when(postService.getInvolvedPosts())
+                .thenReturn(List.of(postResponseDTO));
+
+        mockMvc.perform(get("/post/posts/involved"))
+                .andExpect(status().isOk());
+
+        verify(postService).getInvolvedPosts();
+    }
+
+    @Test
+    void getOwnPosts_success() throws Exception {
+        when(postService.getOwnPosts())
+                .thenReturn(List.of(ownedPostResponseDTO));
+
+        mockMvc.perform(get("/post/myposts"))
+                .andExpect(status().isOk());
+
+        verify(postService).getOwnPosts();
+    }
+
+    @Test
+    void getPostById_success() throws Exception {
+        when(postService.getPostById(1))
+                .thenReturn(postResponseDTO);
+
+        mockMvc.perform(get("/post/posts/1"))
+                .andExpect(status().isOk());
+
+        verify(postService).getPostById(1);
+    }
+
+    @Test
+    void commentToPost_success() throws Exception {
+        when(postService.commentToPost(any(), eq(1)))
+                .thenReturn(postResponseDTO);
+
+        mockMvc.perform(post("/post/posts/1/comment")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(postCommentDTO)))
+                .andExpect(status().isOk());
+
+        verify(postService).commentToPost(any(PostCommentDTO.class), eq(1));
+    }
+
+    @Test
+    void applyToPost_success() throws Exception {
+        when(postService.applyToPost(1))
+                .thenReturn(jobApplicationResponseDTO);
+
+        mockMvc.perform(post("/post/posts/1/apply"))
+                .andExpect(status().isOk());
+
+        verify(postService).applyToPost(1);
+    }
+
+    @Test
+    void getAppliedStatus_success() throws Exception {
+        when(postService.getAppliedStatus(1))
+                .thenReturn(true);
+
+        mockMvc.perform(get("/post/posts/1/applied-status"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("true"));
+
+        verify(postService).getAppliedStatus(1);
+    }
+
+    @Test
+    void cancelApply_success() throws Exception {
+        mockMvc.perform(post("/post/posts/1/cancelApply"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Jelentkezés sikeresen visszavonva!"));
+
+        verify(postService).cancelApply(1);
+    }
+
+    @Test
+    void chooseApplicant_success() throws Exception {
+        when(postService.chooseApplicantForPost(1))
+                .thenReturn(ownedPostResponseDTO);
+
+        mockMvc.perform(post("/post/chooseApplicant/1"))
+                .andExpect(status().isOk());
+
+        verify(postService).chooseApplicantForPost(1);
+    }
+
+    @Test
+    void rejectApply_success() throws Exception {
+        mockMvc.perform(get("/post/posts/1/rejectApply"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(
+                        "A munka sikeresen visszavonva! / A kiválasztott jelentkező sikeresen törölve!"
+                ));
+
+        verify(postService).rejectApply(1);
+    }
+
+    @Test
+    void changePostStatus_success() throws Exception {
+        when(postService.changePostStatus(eq(1), eq("closed")))
+                .thenReturn(changePostStatusDTO);
+
+        mockMvc.perform(patch("/post/1/changeStatus")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(changePostStatusDTO)))
+                .andExpect(status().isOk());
+
+        verify(postService).changePostStatus(1, "closed");
+    }
+
+    @Test
+    void closePost_success() throws Exception {
+        mockMvc.perform(post("/post/1/close"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("A poszt sikeresen lezárva."));
+
+        verify(postService).closePost(1, false);
+    }
+
+    @Test
+    void closeUnsuccessfulPost_success() throws Exception {
+        mockMvc.perform(post("/post/1/unsuccessfulClose"))
+                .andExpect(status().isOk())
+                .andExpect(content().string("A poszt sikeresen lezárva."));
+
+        verify(postService).closePost(1, true);
+    }
+}

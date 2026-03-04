@@ -170,7 +170,7 @@ class PostServiceTest {
 
         assertNotNull(response);
         verify(jobApplicationRepository).save(any(JobApplication.class));
-        verify(emailService).appliedToPost("test2@example.com");
+        verify(emailService).appliedToPost("test@example.com");
     }
 
     @Test
