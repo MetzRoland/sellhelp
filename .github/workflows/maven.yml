@@ -20,7 +20,9 @@ jobs:
           cache: maven
 
       - name: Compile code
+        if: always()
         run: mvn -B clean compile
+        continue-on-error: true
         working-directory: backend
 
       - name: Upload compiled classes
@@ -50,6 +52,7 @@ jobs:
           path: backend/target/classes
 
       - name: Run unit tests
+        if: always()
         run: mvn -B test
         continue-on-error: true
         working-directory: backend
