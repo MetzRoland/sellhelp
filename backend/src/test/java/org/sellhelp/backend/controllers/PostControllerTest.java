@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.*;
 import org.sellhelp.backend.security.JWTFilter;
-import org.sellhelp.backend.security.UserAuthDetailService;
 import org.sellhelp.backend.services.PostService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -53,7 +52,13 @@ class PostControllerTest {
     @BeforeEach
     void init() {
         createPostDTO = new CreatePostDTO();
+        createPostDTO.setTitle("Post title");
+        createPostDTO.setDescription("Post description");
+        createPostDTO.setReward(5000);
+        createPostDTO.setCityName("Budapest");
+
         updatePostDTO = new UpdatePostDTO();
+
         postCommentDTO = new PostCommentDTO();
         postCommentDTO.setMessage("Post comment");
 
