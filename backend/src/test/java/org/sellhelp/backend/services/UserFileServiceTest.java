@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -56,6 +57,7 @@ class UserFileServiceTest {
     // ------------------ Get User Files ------------------
 
     @Test
+    @DisplayName("Get all user files successfully")
     void getAllUserFiles_success() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userFileRepository.findByUser(user)).thenReturn(List.of(userFile));
@@ -69,6 +71,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Get all user files throws UserNotFoundException when user not found")
     void getAllUserFiles_userNotFound() {
         when(userRepository.findByEmail(any())).thenReturn(Optional.empty());
         assertThrows(UserNotFoundException.class,
@@ -76,6 +79,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Get specific user file successfully")
     void getUserFile_success() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userFileRepository.findById(userFile.getId())).thenReturn(Optional.of(userFile));
@@ -90,6 +94,7 @@ class UserFileServiceTest {
     // ------------------ Add User Files ------------------
 
     @Test
+    @DisplayName("Add user file successfully")
     void addUserFile_success() throws IOException {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userFileRepository.countByUser(user)).thenReturn(0);
@@ -103,6 +108,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add user file fails when too many files exist")
     void addUserFile_failTooManyFiles() throws IOException {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userFileRepository.countByUser(user)).thenReturn(10);
@@ -112,6 +118,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add user file fails when file already exists")
     void addUserFile_failFileAlreadyExists() throws IOException {
         String key = "files/1/test.png";
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
@@ -126,6 +133,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add user file fails when upload throws IOException")
     void addUserFile_uploadFails() throws IOException {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(multipartFile.getOriginalFilename()).thenReturn("test.png");
@@ -139,6 +147,7 @@ class UserFileServiceTest {
     // ------------------ Delete User Files ------------------
 
     @Test
+    @DisplayName("Delete user file successfully")
     void deleteUserFile_success() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(userFileRepository.findById(userFile.getId())).thenReturn(Optional.of(userFile));
@@ -150,6 +159,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Delete user file fails due to invalid permission")
     void deleteUserFile_invalidPermission() {
         User otherUser = User.builder().id(99).build();
         userFile.setUser(otherUser);
@@ -164,6 +174,7 @@ class UserFileServiceTest {
     // ------------------ Profile Picture ------------------
 
     @Test
+    @DisplayName("Get profile picture returns null when none set")
     void getProfilePicture_null() {
         user.setProfilePicturePath(null);
         ProfilePictureDTO dto = userFileService.getProfilePictureByUser(user);
@@ -171,6 +182,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Get profile picture successfully")
     void getProfilePicture_success() {
         user.setProfilePicturePath("pp/1.png");
         when(s3Service.getDownloadURL("pp/1.png")).thenReturn("http://pp-url");
@@ -181,6 +193,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Set profile picture successfully")
     void setProfilePicture_success() throws IOException {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(fileTypeDetector.detectType(multipartFile)).thenReturn("image/png");
@@ -194,6 +207,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Set profile picture fails due to wrong file type")
     void setProfilePicture_fileTypeError() {
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
         when(fileTypeDetector.detectType(multipartFile)).thenReturn("text/plain");
@@ -203,6 +217,7 @@ class UserFileServiceTest {
     }
 
     @Test
+    @DisplayName("Delete profile picture successfully")
     void deleteProfilePicture_success() {
         user.setProfilePicturePath("pp/1.png");
         when(userRepository.findByEmail(user.getEmail())).thenReturn(Optional.of(user));
