@@ -89,7 +89,7 @@ class UserServiceTest {
         assertEquals(city, user.getCity());
 
         verify(userRepository).save(user);
-        verify(emailService).updateUserDetailsSuccess("test1@example.com");
+        verify(emailService).updateUserDetailsSuccess("test@example.com");
     }
 
     @Test
