@@ -17,6 +17,7 @@ import ResetPassword from "./components/ResetPassword/ResetPassword";
 import PostsListComponent from "./components/PostsListComponent/PostsListComponent";
 import NewPostComponent from "./components/NewPostComponent/NewPostComponent";
 import FullPostView from "./components/FullPostView/FullPostView";
+import NonSuperUserRouterLayout from "./components/Routes/NonSuperUserRouterLayout";
 
 import "./App.css";
 
@@ -61,8 +62,11 @@ function App() {
             <Route path="/postManagement/posts/:id" element={<FullPostView fetchEndpoint="/superuser/posts/"/>} />
           </Route>
 
-          <Route path="/posts" element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
-          <Route path="/posts/:id" element={<FullPostView />} />
+          <Route element={<NonSuperUserRouterLayout />}>
+            <Route path="/posts" element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
+            <Route path="/posts/:id" element={<FullPostView />} />
+          </Route>
+          
           <Route path="/users/:id" element={<FullUserProfile />} />
 
           <Route path="*" element={<PageNotFound />} />

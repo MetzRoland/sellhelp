@@ -448,7 +448,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
       user &&
       post.publisher.id !== user.id &&
       post.statusName !== "new" &&
-      !applied) ||
+      !applied && isNormalUser) ||
     (!isAuthenticated && !user && post.statusName !== "new")
   ) {
     return <PageNotFound message="A poszt már nem elérhető!" />;
@@ -515,7 +515,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               canEdit={(isOwner && !isClosed) || false}
             />
 
-            {(isNormalUser || !isAuthenticated) && (
+            {((isNormalUser && !isOwner) || !isAuthenticated || isPrivileged) && (
               <>
                 <h2>Poszt létrehozó:</h2>
 
@@ -612,7 +612,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                           jobApplication.appliedAt,
                         ).toLocaleString()}
                         actionText="Kiválaszt"
-                        btnDisabled={!!post.selectedUser}
+                        btnDisabled={(post.selectedUser && user.role === "ROLE_USER") || user.role !== "ROLE_USER"}
                         onActionClick={(e) =>
                           selectUserToPost(e, jobApplication.id)
                         }
@@ -633,7 +633,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                       ?.appliedAt.toString()}
                     actionText="Visszavonás"
                     onActionClick={(e) => rejectUserApply(e, post.id)}
-                    btnDisabled={isClosed}
+                    btnDisabled={isClosed || user.role !== "ROLE_USER"}
                   />
                 )}
               </>
