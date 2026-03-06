@@ -95,7 +95,9 @@ public class SecurityConfig {
                                 "/user/update/details",
                                 "/user/update/email",
                                 "/user/update/password/send",
-                                "/user/update/password"
+                                "/user/update/password",
+                                "/user/files/pp/**",
+                                "/user/files/public/*/pp"
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/post/**").hasRole("USER")

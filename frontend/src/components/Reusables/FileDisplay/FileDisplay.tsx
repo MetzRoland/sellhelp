@@ -1,4 +1,5 @@
 import { privateAxios, publicAxios } from "../../../config/axiosConfig";
+import { AxiosError } from "axios";
 import { useLoading } from "../../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { File } from "../../../types/FileType";
 import { useEffect, useState } from "react";
@@ -15,7 +16,7 @@ interface FileDisplayProps {
 
 function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
   const [files, setFiles] = useState<File[]>([]);
-  const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
+  const { setIsLoading, setLoadingMessage } = useLoading();
   const [filesError, setFilesError] = useState<string | null>(null);
   const [blur, setBlur] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -67,6 +68,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       }
     } catch {
       // error handling
+      setFiles([]);
     } finally {
       setIsLoading(false);
     }
@@ -85,7 +87,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
     }
   }
 
-  const onDrop = async (acceptedFiles: File[]) => {
+  const onDrop = async (acceptedFiles: globalThis.File[]) => {
     if (acceptedFiles.length < 1) {
       return;
     }
@@ -107,7 +109,8 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       });
       fetchFiles();
     }
-    catch (error) {
+    catch (err) {
+      const error = err as AxiosError<{ message?: string; }>;
       // console.error("Error uploading files:", error);
       // console.log(error?.response?.data?.message);
       setFilesError(error?.response?.data?.message || "Fájl feltöltés sikertelen.");
@@ -120,7 +123,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
 
   // Use the useDropzone hook for drag-and-drop functionality
   const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
+    onDrop: onDrop,
     multiple: true, // Allow multiple file uploads
   });
 

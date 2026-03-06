@@ -24,7 +24,7 @@ interface FullUserProfileProps {
 }
 
 function FullUserProfile({ settings }: FullUserProfileProps) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, isAuthenticated } = useAuth();
   const { id } = useParams();
 
   const [user, setUser] = useState<User | null>(null);
@@ -431,6 +431,10 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
+          {(user.banned && isAuthenticated) && (
+            <p className="message error">A felhasználót bannolták!</p>
+          )}
+
           {settings && user.authProvider === "LOCAL" && (
             <>
               <button className="btn" type="button" onClick={sendPassUpdate}>
@@ -443,11 +447,14 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
               </button>
             </>
           )}
-          <FileDisplay
-            type="user"
-            id={user.id}
-            canEdit={user.id === authUser?.id && settings}
-          />
+
+          {user.role === "ROLE_USER" && (
+            <FileDisplay
+              type="user"
+              id={user.id}
+              canEdit={user.id === authUser?.id && settings}
+            />
+          )}
         </form>
       </div>
       <Footer />

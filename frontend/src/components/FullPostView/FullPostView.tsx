@@ -48,7 +48,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     reward: "",
   });
 
-  const isClosed = post?.statusName === "closed" || post?.statusName === "unsuccessful_result_closed";
+  const isClosed =
+    post?.statusName === "closed" ||
+    post?.statusName === "unsuccessful_result_closed";
 
   const [disabledInputsMap, setDisabledInputsMap] = useState<
     Record<string, boolean>
@@ -445,7 +447,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     (isAuthenticated &&
       user &&
       post.publisher.id !== user.id &&
-      post.statusName !== "new" && !applied) ||
+      post.statusName !== "new" &&
+      !applied) ||
     (!isAuthenticated && !user && post.statusName !== "new")
   ) {
     return <PageNotFound message="A poszt már nem elérhető!" />;
@@ -466,21 +469,32 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
             {isOwner ? (
               <>
-                <InputForm<NewPostForm>
-                  inputs={postUpdateInputs}
-                  formData={formData}
-                  handleFunction={handleInputChange}
-                  errorMessage={validationErrors}
-                  options={{ cityName: cityOptions }}
-                  disabledInputsMap={disabledInputsMap}
-                  settingInputsMap={settingInputsMap}
-                  disabledToggle={toggleDisabled}
-                />
+                {!isClosed ? (
+                  <InputForm<NewPostForm>
+                    inputs={postUpdateInputs}
+                    formData={formData}
+                    handleFunction={handleInputChange}
+                    errorMessage={validationErrors}
+                    options={{ cityName: cityOptions }}
+                    disabledInputsMap={disabledInputsMap}
+                    settingInputsMap={settingInputsMap}
+                    disabledToggle={toggleDisabled}
+                  />
+                ) : (
+                  <InputForm<NewPostForm>
+                    inputs={postUpdateInputs}
+                    formData={formData}
+                    handleFunction={handleInputChange}
+                    options={{ cityName: cityOptions }}
+                    disabledInputsMap={disabledInputsMap}
+                  />
+                )}
 
                 <button
                   type="button"
                   className="btn btn-danger"
                   onClick={() => deletePostById(post.id, "/post/delete/")}
+                  disabled={isClosed}
                 >
                   Poszt törlése
                 </button>
@@ -494,8 +508,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                 disabledInputsMap={disabledInputsMap}
               />
             )}
-            
-            <FileDisplay type="post" id={post.id} canEdit={isOwner || false }/>
+
+            <FileDisplay
+              type="post"
+              id={post.id}
+              canEdit={(isOwner && !isClosed) || false}
+            />
 
             {(isNormalUser || !isAuthenticated) && (
               <>
@@ -519,12 +537,14 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                   placeholder="Kommentelj valamit..."
                   value={comment ?? ""}
                   onChange={handleCommentInputChange}
+                  disabled={isClosed}
                 ></textarea>
 
                 <button
                   type="button"
                   className="setting-btn"
                   onClick={() => addNewComment(post.id)}
+                  disabled={isClosed}
                 >
                   Küldés
                 </button>
@@ -613,6 +633,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                       ?.appliedAt.toString()}
                     actionText="Visszavonás"
                     onActionClick={(e) => rejectUserApply(e, post.id)}
+                    btnDisabled={isClosed}
                   />
                 )}
               </>

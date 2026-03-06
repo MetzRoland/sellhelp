@@ -11,6 +11,8 @@ import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.time.LocalDateTime;
@@ -143,6 +145,16 @@ public class GlobalExceptionHandler {
         GeneralErrorDTO errorDTO = createErrorDto(ex.getMessage(), HttpStatus.UNSUPPORTED_MEDIA_TYPE);
 
         return ResponseEntity.status(errorDTO.getStatus()).body(errorDTO);
+    }
+
+    @ExceptionHandler(MultipartException.class)
+    public ResponseEntity<String> handleMultipartException(MultipartException ex) {
+        if (ex.getCause() instanceof org.springframework.web.multipart.MaxUploadSizeExceededException) {
+            return ResponseEntity.status(HttpStatus.PAYLOAD_TOO_LARGE)
+                    .body("A fájl mérete nem lehet nagyobb, mint 10 MB!");
+        }
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Hibás fájl feltöltés!");
     }
 }
 

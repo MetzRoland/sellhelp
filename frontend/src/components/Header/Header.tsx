@@ -4,6 +4,7 @@ import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 import OptionsMenu from "../OptionsMenu/OptionsMenu";
+import NavDropdown from "../NavDropdown/NavDropdown";
 
 import "./Header.css";
 
@@ -11,41 +12,46 @@ function Header() {
   const { isAuthenticated, logout, user } = useAuth();
   const { setIsLoading, setLoadingMessage } = useLoading();
 
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isAuthPostsOpen, setIsAuthPostsOpen] = useState(false);
-  const [isAuthProfileOptionsOpen, setIsAuthProfileOptionsOpen] = useState(false);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
 
   const profileToggleRef = useRef<HTMLDivElement>(null);
-  const postsToggleRef = useRef<HTMLDivElement>(null);
-  const profileOptionsToggleRef = useRef<HTMLDivElement>(null);
+
+  const toggleMenu = (menu: string | null) => {
+    setOpenMenu((prev) => (prev === menu ? null : menu));
+  };
+
+  const isAdmin = user?.role !== "ROLE_USER";
 
   const userOptionsLinks = [
-    {url: "/users", label: "Felhasználók keresése"}
+    { url: "/users", label: "Felhasználók keresése" },
   ];
 
   const postOptionLinks = [
-    {url: "/posts", label: "Posztok böngészése"}
+    { url: "/posts", label: "Posztok böngészése" },
+    ...(isAuthenticated
+      ? [
+          { url: "/posts/new", label: "Poszt létrehozása" },
+          { url: "/myposts", label: "Saját posztjaim" },
+          { url: "/posts/involved", label: "Elvállalt posztjaim" },
+        ]
+      : []),
   ];
 
-  if(isAuthenticated){
-    postOptionLinks.push({url: "/posts/new", label: "Poszt létrehozása"});
-    postOptionLinks.push({url: "/myposts", label: "Saját posztjaim"});
-    postOptionLinks.push({url: "/posts/involved", label: "Elvállalt posztjaim"});
-  }
+  const adminUserManagementLinks = [
+    { url: "/userManagement", label: "Felhasználók kezelése" },
+  ];
 
-  const toggleProfile = () => {
-    setIsProfileOpen((prev) => !prev);
-  };
-
-  const togglePosts = () => {
-    setIsAuthPostsOpen((prev) => !prev);
-  };
+  const adminPostManagementLinks = [
+    { url: "/postManagement", label: "Posztok kezelése" },
+  ];
 
   const handleLogout = async () => {
-    setIsProfileOpen(false);
+    toggleMenu(null);
     setIsLoading(true);
     setLoadingMessage("Kijelentkezés...");
+
     await logout();
+
     setIsLoading(false);
     setLoadingMessage("");
   };
@@ -56,7 +62,7 @@ function Header() {
         {!isAuthenticated ? (
           <>
             <div className="left-options">
-              <Link className="nav-link" to="#">
+              <Link className="nav-link" to="/posts">
                 Posztok keresése
               </Link>
             </div>
@@ -71,6 +77,7 @@ function Header() {
               <Link className="nav-link" to="/login">
                 Bejelentkezés
               </Link>
+
               <Link className="nav-link" to="/register">
                 Regisztrálás
               </Link>
@@ -79,31 +86,43 @@ function Header() {
         ) : (
           <>
             <div className="left-options">
-              <div className="dropdown-toggle-container" ref={profileOptionsToggleRef}>
-                <Link className="nav-link" to="#" onClick={() => setIsAuthProfileOptionsOpen((prev) => !prev)}>
-                  Áttekintés
-                </Link>
+              {!isAdmin ? (
+                <>
+                  <NavDropdown
+                    label="Áttekintés"
+                    menuKey="overview"
+                    links={userOptionsLinks}
+                    openMenu={openMenu}
+                    toggleMenu={toggleMenu}
+                  />
 
-                <OptionsMenu
-                  isOpen={isAuthProfileOptionsOpen}
-                  onClose={() => setIsAuthProfileOptionsOpen(false)}
-                  toggleRef={profileOptionsToggleRef}
-                  links={userOptionsLinks}
-                />
-              </div>
+                  <NavDropdown
+                    label="Posztok keresése"
+                    menuKey="posts"
+                    links={postOptionLinks}
+                    openMenu={openMenu}
+                    toggleMenu={toggleMenu}
+                  />
+                </>
+              ) : (
+                <>
+                  <NavDropdown
+                    label="Felhasználói fiókok"
+                    menuKey="adminUsers"
+                    links={adminUserManagementLinks}
+                    openMenu={openMenu}
+                    toggleMenu={toggleMenu}
+                  />
 
-              <div className="dropdown-toggle-container" ref={postsToggleRef}>
-                <Link className="nav-link" to="#" onClick={togglePosts}>
-                  Posztok keresése
-                </Link>
-
-                <OptionsMenu
-                  isOpen={isAuthPostsOpen}
-                  onClose={() => setIsAuthPostsOpen(false)}
-                  toggleRef={postsToggleRef}
-                  links={postOptionLinks}
-                />
-              </div>
+                  <NavDropdown
+                    label="Posztok kezelése"
+                    menuKey="adminPosts"
+                    links={adminPostManagementLinks}
+                    openMenu={openMenu}
+                    toggleMenu={toggleMenu}
+                  />
+                </>
+              )}
             </div>
 
             <div className="title-option">
@@ -112,22 +131,28 @@ function Header() {
               </Link>
             </div>
 
-            <div
-              className="right-options right-options-profile"
-            >
-              <div className="dropdown-toggle-container" ref={profileToggleRef}>
+            <div className="right-options right-options-profile">
+              <div
+                className="dropdown-toggle-container"
+                ref={profileToggleRef}
+              >
                 {user && (
                   <ProfilePictureComponent
                     userId={user.id}
-                    handleOnClick={toggleProfile}
+                    handleOnClick={() => toggleMenu("profile")}
                   />
                 )}
 
                 <OptionsMenu
-                  isOpen={isProfileOpen}
-                  onClose={() => setIsProfileOpen(false)}
+                  isOpen={openMenu === "profile"}
+                  onClose={() => toggleMenu(null)}
                   toggleRef={profileToggleRef}
-                  links={[{ url: "/home/settings", label: "Felhasználói adatok" }]}
+                  links={[
+                    {
+                      url: "/home/settings",
+                      label: "Felhasználói adatok",
+                    },
+                  ]}
                 >
                   <button
                     className="user-profile-option"
