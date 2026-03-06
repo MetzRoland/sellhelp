@@ -2,6 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.*;
@@ -71,6 +72,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Create a new post and return HTTP 201")
     void createPost_success() throws Exception {
         when(postService.createPost(any())).thenReturn(postResponseDTO);
 
@@ -83,6 +85,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Update an existing post and return HTTP 200")
     void updatePost_success() throws Exception {
         when(postService.updatePostData(any(), eq(1)))
                 .thenReturn(ownedPostResponseDTO);
@@ -96,6 +99,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Delete a post by ID and return success message")
     void deletePost_success() throws Exception {
         mockMvc.perform(delete("/post/delete/1"))
                 .andExpect(status().isOk())
@@ -105,6 +109,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Retrieve all available posts and return HTTP 200")
     void getAvailablePosts_success() throws Exception {
         when(postService.getAvailablePosts())
                 .thenReturn(List.of(postResponseDTO));
@@ -116,6 +121,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Retrieve posts the user is involved in and return HTTP 200")
     void getInvolvedPosts_success() throws Exception {
         when(postService.getInvolvedPosts())
                 .thenReturn(List.of(postResponseDTO));
@@ -127,6 +133,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Retrieve posts created by the user and return HTTP 200")
     void getOwnPosts_success() throws Exception {
         when(postService.getOwnPosts())
                 .thenReturn(List.of(ownedPostResponseDTO));
@@ -138,6 +145,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Get a post by its ID and return HTTP 200")
     void getPostById_success() throws Exception {
         when(postService.getPostById(1))
                 .thenReturn(postResponseDTO);
@@ -149,6 +157,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Add a comment to a post and return HTTP 200")
     void commentToPost_success() throws Exception {
         when(postService.commentToPost(any(), eq(1)))
                 .thenReturn(postResponseDTO);
@@ -162,6 +171,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Apply to a post and return job application response")
     void applyToPost_success() throws Exception {
         when(postService.applyToPost(1))
                 .thenReturn(jobApplicationResponseDTO);
@@ -173,6 +183,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Check if the user has applied to a post and return true/false")
     void getAppliedStatus_success() throws Exception {
         when(postService.getAppliedStatus(1))
                 .thenReturn(true);
@@ -185,6 +196,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Cancel a user's application to a post and return success message")
     void cancelApply_success() throws Exception {
         mockMvc.perform(post("/post/posts/1/cancelApply"))
                 .andExpect(status().isOk())
@@ -194,6 +206,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Choose an applicant for a post and return updated post info")
     void chooseApplicant_success() throws Exception {
         when(postService.chooseApplicantForPost(1))
                 .thenReturn(ownedPostResponseDTO);
@@ -205,6 +218,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Reject an applicant for a post and return success message")
     void rejectApply_success() throws Exception {
         mockMvc.perform(get("/post/posts/1/rejectApply"))
                 .andExpect(status().isOk())
@@ -216,6 +230,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Change the status of a post and return updated status DTO")
     void changePostStatus_success() throws Exception {
         when(postService.changePostStatus(eq(1), eq("closed")))
                 .thenReturn(changePostStatusDTO);
@@ -229,6 +244,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Close a post successfully and return confirmation message")
     void closePost_success() throws Exception {
         mockMvc.perform(post("/post/1/close"))
                 .andExpect(status().isOk())
@@ -238,6 +254,7 @@ class PostControllerTest {
     }
 
     @Test
+    @DisplayName("Close an unsuccessful post and return confirmation message")
     void closeUnsuccessfulPost_success() throws Exception {
         mockMvc.perform(post("/post/1/unsuccessfulClose"))
                 .andExpect(status().isOk())

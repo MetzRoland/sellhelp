@@ -2,6 +2,7 @@ package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.security.JWTFilter;
@@ -49,6 +50,7 @@ class PostFileControllerTest {
     }
 
     @Test
+    @DisplayName("Retrieve all files for a post and return HTTP 200")
     void getAllPostFiles_success() throws Exception {
         when(postFileService.getAllFilesForPost(1))
                 .thenReturn(List.of(fileDTO));
@@ -60,6 +62,7 @@ class PostFileControllerTest {
     }
 
     @Test
+    @DisplayName("Download a specific post file by ID and return HTTP 200")
     void getPostFile_success() throws Exception {
         when(postFileService.getPostFileById(1))
                 .thenReturn(fileDTO);
@@ -71,6 +74,7 @@ class PostFileControllerTest {
     }
 
     @Test
+    @DisplayName("Upload a file to a post and return success message")
     void addFileToPost_success() throws Exception {
         MockMultipartFile multipartFile = new MockMultipartFile(
                 "file",
@@ -88,6 +92,7 @@ class PostFileControllerTest {
     }
 
     @Test
+    @DisplayName("Delete a post file by ID and return success message")
     void deletePostFile_success() throws Exception {
         mockMvc.perform(delete("/post/files/1/delete"))
                 .andExpect(status().isOk())

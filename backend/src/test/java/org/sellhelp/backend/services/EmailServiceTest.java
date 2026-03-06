@@ -3,6 +3,7 @@ package org.sellhelp.backend.services;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -17,6 +18,7 @@ import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.*;
 
@@ -25,8 +27,10 @@ class EmailServiceTest {
 
     @Mock
     private JavaMailSender javaMailSender;
+
     @Mock
     private JWTUtil jwtUtil;
+
     @Mock
     private TemplateEngine templateEngine;
 
@@ -46,6 +50,7 @@ class EmailServiceTest {
     }
 
     @Test
+    @DisplayName("registerUser sends email successfully")
     void registerUser_sendsEmail() {
         emailService.registerUser("test@test.com", "First", "Last");
 
@@ -53,12 +58,15 @@ class EmailServiceTest {
     }
 
     @Test
+    @DisplayName("loginUser sends email successfully")
     void loginUser_sendsEmail() {
         emailService.loginUser("test@test.com");
+
         verify(javaMailSender).send(mimeMessage);
     }
 
     @Test
+    @DisplayName("updatePassword sends email with generated token")
     void updatePassword_sendsEmailWithToken() {
         when(jwtUtil.generatePasswordUpdateToken("test@test.com")).thenReturn("token123");
 
@@ -69,12 +77,10 @@ class EmailServiceTest {
     }
 
     @Test
+    @DisplayName("Throws EmailException when sending email fails")
     void emailExceptionThrown_whenMailFails() throws MessagingException {
         doThrow(new MailException("fail") {}).when(javaMailSender).send(any(MimeMessage.class));
 
-        assertThrows(EmailException.class, () ->
-                emailService.loginUser("test@test.com")
-        );
+        assertThrows(EmailException.class, () -> emailService.loginUser("test@test.com"));
     }
 }
-

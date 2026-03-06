@@ -3,6 +3,7 @@ package org.sellhelp.backend.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
@@ -73,6 +74,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Get user details successfully using access token")
     void getUserDetails_success() throws Exception {
         when(userService.getUserDetails("accessToken")).thenReturn(userDTO);
 
@@ -87,6 +89,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Logout user successfully and clear cookies")
     void logout_success() throws Exception {
         when(currentUser.getCurrentlyLoggedUserEmail())
                 .thenReturn("test@example.com");
@@ -100,6 +103,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update user details successfully")
     void updateUserDetails_success() throws Exception {
         mockMvc.perform(patch("/user/update/details")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,6 +115,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update user email successfully and refresh login cookies")
     void updateUserEmail_success() throws Exception {
         TokenDTO tokenDTO = new TokenDTO("access", "refresh", null);
 
@@ -128,6 +133,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Send password update email successfully")
     void sendUserPasswordEmail_success() throws Exception {
         when(currentUser.getCurrentlyLoggedUserEmail())
                 .thenReturn("test@example.com");
@@ -140,6 +146,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update user password successfully and refresh login cookies")
     void updateUserPassword_success() throws Exception {
         TokenDTO tokenDTO = new TokenDTO("access", "refresh", null);
 

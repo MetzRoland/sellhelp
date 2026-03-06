@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.PostStatus;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class PostStatusRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a PostStatus can be added to repository and database")
     public void postStatusCanBeAddedToRepositoryAndDB() {
         PostStatus savedStatus = postStatusRepository.save(testStatus);
 
@@ -32,6 +34,7 @@ public class PostStatusRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a PostStatus can be updated in repository and database")
     public void postStatusCanBeUpdatedInRepositoryAndDB() {
         PostStatus savedStatus = postStatusRepository.save(testStatus);
 
@@ -43,6 +46,7 @@ public class PostStatusRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a PostStatus can be deleted from repository and database")
     public void postStatusCanBeDeletedFromRepositoryAndDB() {
         PostStatus savedStatus = postStatusRepository.save(testStatus);
         Integer statusId = savedStatus.getId();
@@ -53,6 +57,7 @@ public class PostStatusRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for PostStatus")
     public void postStatusGeneralCRUDFunctionalityTest() {
         PostStatus savedStatus = postStatusRepository.save(testStatus);
         Integer statusId = savedStatus.getId();

@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -38,8 +39,7 @@ class PostServiceTest {
     @Mock private CurrentUser currentUser;
     @Mock private EmailService emailService;
 
-    @InjectMocks
-    private PostService postService;
+    @InjectMocks private PostService postService;
 
     private User user;
     private User anotherUser;
@@ -71,7 +71,10 @@ class PostServiceTest {
         post.setJobApplications(new ArrayList<>());
     }
 
+    // ------------------ Create Post ------------------
+
     @Test
+    @DisplayName("Create post successfully")
     void createPost_success() {
         CreatePostDTO dto = new CreatePostDTO();
         dto.setCityName("Budapest");
@@ -90,6 +93,7 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Create post fails when user not found")
     void createPost_userNotFound() {
         CreatePostDTO dto = new CreatePostDTO();
 
@@ -100,7 +104,10 @@ class PostServiceTest {
                 () -> postService.createPost(dto));
     }
 
+    // ------------------ Update Post ------------------
+
     @Test
+    @DisplayName("Update post data successfully")
     void updatePostData_success() {
         UpdatePostDTO dto = new UpdatePostDTO();
         dto.setTitle("Updated Title");
@@ -118,9 +125,8 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Update post fails if user is not owner")
     void updatePostData_notOwner() {
-        User anotherUser = new User();
-        anotherUser.setId(2);
         post.setPostPublisher(anotherUser);
 
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
@@ -131,7 +137,10 @@ class PostServiceTest {
                 () -> postService.updatePostData(new UpdatePostDTO(), 1));
     }
 
+    // ------------------ Delete Post ------------------
+
     @Test
+    @DisplayName("Delete post successfully")
     void deletePost_success() {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@example.com");
@@ -142,7 +151,10 @@ class PostServiceTest {
         verify(postRepository).delete(post);
     }
 
+    // ------------------ Get Available Posts ------------------
+
     @Test
+    @DisplayName("Get available posts returns only new posts")
     void getAvailablePosts_returnsOnlyNew() {
         PostResponseDTO dto = new PostResponseDTO();
         dto.setStatusName("new");
@@ -155,7 +167,10 @@ class PostServiceTest {
         assertEquals(1, result.size());
     }
 
+    // ------------------ Apply to Post ------------------
+
     @Test
+    @DisplayName("Apply to a post successfully")
     void applyToPost_success() {
         post.setPostPublisher(anotherUser);
 
@@ -174,6 +189,7 @@ class PostServiceTest {
     }
 
     @Test
+    @DisplayName("Apply to own post throws InvalidPermissionException")
     void applyToPost_ownPost_throwsException() {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@example.com");
@@ -183,7 +199,10 @@ class PostServiceTest {
                 () -> postService.applyToPost(1));
     }
 
+    // ------------------ Close Post ------------------
+
     @Test
+    @DisplayName("Close post successfully")
     void closePost_success() {
         PostStatus closedStatus = new PostStatus();
         closedStatus.setStatusName("closed");
@@ -199,7 +218,10 @@ class PostServiceTest {
         verify(postRepository).save(post);
     }
 
+    // ------------------ Check Applied Status ------------------
+
     @Test
+    @DisplayName("Check applied status returns true when user has applied")
     void getAppliedStatus_true() {
         JobApplication jobApplication = new JobApplication();
         jobApplication.setApplicant(user);

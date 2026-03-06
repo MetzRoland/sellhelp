@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -26,23 +27,13 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class SuperUserServiceTest {
 
-    @Mock
-    private UserRepository userRepository;
+    @Mock private UserRepository userRepository;
+    @Mock private EmailService emailService;
+    @Mock private S3Service s3Service;
+    @Mock private UserService userService;
+    @Mock private ModelMapper modelMapper;
 
-    @Mock
-    private EmailService emailService;
-
-    @Mock
-    private S3Service s3Service;
-
-    @Mock
-    private UserService userService;
-
-    @Mock
-    private ModelMapper modelMapper;
-
-    @InjectMocks
-    private SuperUserService superUserService;
+    @InjectMocks private SuperUserService superUserService;
 
     private User user;
 
@@ -71,19 +62,20 @@ class SuperUserServiceTest {
         );
     }
 
+    // ------------------ Ban User ------------------
+
     @Test
+    @DisplayName("Admin can ban a user successfully")
     void banUser_success_asAdmin() {
         mockRole("ADMIN");
 
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setRole("ROLE_USER");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of(dto));
+        when(userService.getAllUserAccounts()).thenReturn(List.of(dto));
 
         UserDTO result = superUserService.banUser(user.getId());
 
@@ -94,42 +86,52 @@ class SuperUserServiceTest {
     }
 
     @Test
+    @DisplayName("Cannot ban a user already banned")
     void banUser_alreadyBanned() {
         mockRole("ADMIN");
         user.setBanned(true);
 
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        assertThrows(RuntimeException.class,
-                () -> superUserService.banUser(user.getId()));
+        assertThrows(RuntimeException.class, () -> superUserService.banUser(user.getId()));
     }
 
     @Test
+    @DisplayName("Ban user fails if user not found")
     void banUser_userNotFound() {
         mockRole("ADMIN");
 
-        when(userRepository.findById(any()))
-                .thenReturn(Optional.empty());
+        when(userRepository.findById(any())).thenReturn(Optional.empty());
 
-        assertThrows(UserNotFoundException.class,
-                () -> superUserService.banUser(99));
+        assertThrows(UserNotFoundException.class, () -> superUserService.banUser(99));
     }
 
     @Test
+    @DisplayName("Moderator cannot ban another moderator")
+    void moderatorCannotBanModerator() {
+        mockRole("MODERATOR");
+        user.setRole(Role.builder().roleName("ROLE_MODERATOR").build());
+
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
+
+        assertThrows(RuntimeException.class, () -> superUserService.banUser(user.getId()));
+    }
+
+    // ------------------ Unban User ------------------
+
+    @Test
+    @DisplayName("Admin can unban a user successfully")
     void unbanUser_success() {
         mockRole("ADMIN");
         user.setBanned(true);
 
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
         UserDTO dto = new UserDTO();
         dto.setId(user.getId());
         dto.setRole("ROLE_USER");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of(dto));
+        when(userService.getAllUserAccounts()).thenReturn(List.of(dto));
 
         UserDTO result = superUserService.unbanUser(user.getId());
 
@@ -140,30 +142,19 @@ class SuperUserServiceTest {
     }
 
     @Test
+    @DisplayName("Cannot unban a user who is not banned")
     void unbanUser_notBanned() {
         mockRole("ADMIN");
 
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
+        when(userRepository.findById(user.getId())).thenReturn(Optional.of(user));
 
-        assertThrows(RuntimeException.class,
-                () -> superUserService.unbanUser(user.getId()));
+        assertThrows(RuntimeException.class, () -> superUserService.unbanUser(user.getId()));
     }
 
-    @Test
-    void moderatorCannotBanModerator() {
-        mockRole("MODERATOR");
-
-        user.setRole(Role.builder().roleName("ROLE_MODERATOR").build());
-
-        when(userRepository.findById(user.getId()))
-                .thenReturn(Optional.of(user));
-
-        assertThrows(RuntimeException.class,
-                () -> superUserService.banUser(user.getId()));
-    }
+    // ------------------ Get User Accounts ------------------
 
     @Test
+    @DisplayName("Moderator sees only regular users")
     void getAllUserAccounts_asModerator_onlyUsers() {
         mockRole("MODERATOR");
 
@@ -173,8 +164,7 @@ class SuperUserServiceTest {
         UserDTO modDto = new UserDTO();
         modDto.setRole("ROLE_MODERATOR");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of(userDto, modDto));
+        when(userService.getAllUserAccounts()).thenReturn(List.of(userDto, modDto));
 
         List<UserDTO> result = superUserService.getAllUserAccounts();
 
@@ -183,6 +173,7 @@ class SuperUserServiceTest {
     }
 
     @Test
+    @DisplayName("Admin sees both users and moderators")
     void getAllUserAccounts_asAdmin_usersAndModerators() {
         mockRole("ADMIN");
 
@@ -192,8 +183,7 @@ class SuperUserServiceTest {
         UserDTO modDto = new UserDTO();
         modDto.setRole("ROLE_MODERATOR");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of(userDto, modDto));
+        when(userService.getAllUserAccounts()).thenReturn(List.of(userDto, modDto));
 
         List<UserDTO> result = superUserService.getAllUserAccounts();
 
@@ -201,6 +191,7 @@ class SuperUserServiceTest {
     }
 
     @Test
+    @DisplayName("Get specific user account successfully")
     void getUserAccount_success() {
         mockRole("ADMIN");
 
@@ -208,8 +199,7 @@ class SuperUserServiceTest {
         dto.setId(1);
         dto.setRole("ROLE_USER");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of(dto));
+        when(userService.getAllUserAccounts()).thenReturn(List.of(dto));
 
         UserDTO result = superUserService.getUserAccount(1);
 
@@ -217,13 +207,12 @@ class SuperUserServiceTest {
     }
 
     @Test
+    @DisplayName("Get user account fails if not found")
     void getUserAccount_notFound() {
         mockRole("ADMIN");
 
-        when(userService.getAllUserAccounts())
-                .thenReturn(List.of());
+        when(userService.getAllUserAccounts()).thenReturn(List.of());
 
-        assertThrows(UserNotFoundException.class,
-                () -> superUserService.getUserAccount(1));
+        assertThrows(UserNotFoundException.class, () -> superUserService.getUserAccount(1));
     }
 }

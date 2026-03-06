@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.*;
 import org.sellhelp.backend.enums.AuthProvider;
@@ -57,6 +58,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Job application can be added to repository and DB")
     public void applicantCanBeAddedToRepositoryAndDB() {
         JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
@@ -68,6 +70,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Job application can be updated in repository and DB")
     public void applicantCanBeUpdatedInRepositoryAndDB() {
         JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
@@ -88,6 +91,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Job application can be deleted from repository and DB")
     public void applicantCanBeDeletedFromRepositoryAndDB() {
         JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
         Integer id = savedJobApplication.getId();
@@ -98,6 +102,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for Job application repository")
     public void applicantGeneralCRUDFunctionalityTest() {
         JobApplication savedJobApplication = jobApplicationRepository.save(testJobApplication);
 
@@ -126,6 +131,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Deleting a job application does not delete associated user or post")
     public void deletingApplicantDoesNotDeleteUserOrPost() {
 
         Integer userId = testUser.getId();
@@ -141,6 +147,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Removing job application then deleting user should succeed")
     public void removingApplicantThenDeletingUserShouldSucceed() {
 
         jobApplicationRepository.delete(testJobApplication);
@@ -149,6 +156,7 @@ public class JobApplicationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Removing job application then deleting post should succeed")
     public void removingApplicantThenDeletingPostShouldSucceed() {
 
         jobApplicationRepository.delete(testJobApplication);

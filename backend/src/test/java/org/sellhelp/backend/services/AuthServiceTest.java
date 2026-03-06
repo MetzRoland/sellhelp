@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -92,6 +93,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Register a new local user successfully")
     void registerLocalUser_success() {
         when(cityRepository.findByCityName("Pécs")).thenReturn(Optional.of(city));
         when(roleRepository.findByRoleName(UserRole.ROLE_USER.name())).thenReturn(Optional.of(role));
@@ -119,6 +121,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Registering a user with existing email throws exception")
     void registerLocalUser_existingEmail_throwsException() {
         when(userRepository.findByEmail(registerDTO.getEmail()))
                 .thenReturn(Optional.of(new User()));
@@ -131,6 +134,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("User login succeeds without MFA enabled")
     void userLogin_success() {
         User user = new User();
         user.setEmail("test@test.com");
@@ -157,6 +161,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("User login returns temporary token when MFA is enabled")
     void userLogin_mfaEnabled() {
         User user = new User();
         user.setEmail("test@test.com");
@@ -180,6 +185,7 @@ class AuthServiceTest {
     }
 
     @Test
+    @DisplayName("Refresh token returns new access token successfully")
     void refreshToken_success() {
         RefreshDTO refreshDTO = new RefreshDTO();
         refreshDTO.setRefreshToken("refresh-token");

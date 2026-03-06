@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Role;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class RoleRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a Role can be added to repository and database")
     public void roleCanBeAddedToRepositoryAndDB() {
         Role savedRole = roleRepository.save(testRole);
 
@@ -32,6 +34,7 @@ public class RoleRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a Role can be updated in repository and database")
     public void roleCanBeUpdatedInRepositoryAndDB() {
         Role savedRole = roleRepository.save(testRole);
 
@@ -43,6 +46,7 @@ public class RoleRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a Role can be deleted from repository and database")
     public void roleCanBeDeletedFromRepositoryAndDB() {
         Role savedRole = roleRepository.save(testRole);
         Integer roleId = savedRole.getId();
@@ -53,6 +57,7 @@ public class RoleRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for Role")
     public void roleGeneralCRUDFunctionalityTest() {
         Role savedRole = roleRepository.save(testRole);
         Integer roleId = savedRole.getId();

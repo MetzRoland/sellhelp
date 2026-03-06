@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatMessage;
@@ -57,6 +58,7 @@ public class ChatMessageRepositoryTest {
     }
 
     @Test
+    @DisplayName("ChatMessage can be added to repository and DB")
     public void chatMessageCanBeAddedToRepositoryAndDB() {
         ChatMessage saved = chatMessageRepository.save(testChatMessage);
 
@@ -67,6 +69,7 @@ public class ChatMessageRepositoryTest {
     }
 
     @Test
+    @DisplayName("ChatMessage can be updated in repository and DB")
     public void chatMessageCanBeUpdatedInRepositoryAndDB() {
         ChatMessage saved = chatMessageRepository.save(testChatMessage);
 
@@ -77,6 +80,7 @@ public class ChatMessageRepositoryTest {
     }
 
     @Test
+    @DisplayName("ChatMessage can be deleted from repository and DB")
     public void chatMessageCanBeDeletedFromRepositoryAndDB() {
         ChatMessage saved = chatMessageRepository.save(testChatMessage);
         Integer id = saved.getId();
@@ -87,6 +91,7 @@ public class ChatMessageRepositoryTest {
     }
 
     @Test
+    @DisplayName("ChatMessage full CRUD operations test")
     public void chatMessageCRUDTest() {
         ChatMessage saved = chatMessageRepository.save(testChatMessage);
         Integer id = saved.getId();

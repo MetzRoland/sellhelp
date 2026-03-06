@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Comment;
 import org.sellhelp.backend.entities.Post;
@@ -57,6 +58,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
+    @DisplayName("Comment can be added to repository and DB")
     public void commentCanBeAddedToRepositoryAndDB() {
         Comment savedComment = commentRepository.save(testComment);
 
@@ -67,6 +69,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
+    @DisplayName("Comment can be updated in repository and DB")
     public void commentCanBeUpdatedInRepositoryAndDB() {
         Comment savedComment = commentRepository.save(testComment);
 
@@ -78,6 +81,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
+    @DisplayName("Comment can be deleted from repository and DB")
     public void commentCanBeDeletedFromRepositoryAndDB() {
         Comment savedComment = commentRepository.save(testComment);
         Integer commentId = savedComment.getId();
@@ -88,6 +92,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for Comment repository")
     public void commentGeneralCRUDFunctionalityTest() {
         Comment savedComment = commentRepository.save(testComment);
         Integer commentId = savedComment.getId();

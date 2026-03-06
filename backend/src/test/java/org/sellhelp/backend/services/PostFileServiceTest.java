@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,8 +34,7 @@ class PostFileServiceTest {
     @Mock private CurrentUser currentUser;
     @Mock private MultipartFile multipartFile;
 
-    @InjectMocks
-    private PostFileService postFileService;
+    @InjectMocks private PostFileService postFileService;
 
     private Post post;
     private PostFile postFile;
@@ -59,6 +59,7 @@ class PostFileServiceTest {
     // ------------------ getAllFilesForPost ------------------
 
     @Test
+    @DisplayName("Get all files for a post successfully")
     void getAllFilesForPost_success() {
         FileDTO dto = new FileDTO();
 
@@ -73,6 +74,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Get files throws EntityNotFoundException if post not found")
     void getAllFilesForPost_postNotFound() {
         when(postRepository.findById(1)).thenReturn(Optional.empty());
 
@@ -83,6 +85,7 @@ class PostFileServiceTest {
     // ------------------ getPostFileById ------------------
 
     @Test
+    @DisplayName("Get a single post file successfully")
     void getPostFileById_success() {
         FileDTO dto = new FileDTO();
 
@@ -95,6 +98,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Get a single post file throws EntityNotFoundException if file not found")
     void getPostFileById_notFound() {
         when(postFileRepository.findById(1)).thenReturn(Optional.empty());
 
@@ -105,6 +109,7 @@ class PostFileServiceTest {
     // ------------------ addFileToPost ------------------
 
     @Test
+    @DisplayName("Add a file to a post successfully")
     void addFileToPost_success() throws IOException {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
@@ -120,6 +125,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add file throws EntityNotFoundException if post not found")
     void addFileToPost_postNotFound() {
         when(postRepository.findById(1)).thenReturn(Optional.empty());
 
@@ -128,6 +134,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add file throws InvalidPermissionException if user is not owner")
     void addFileToPost_notOwner() {
         User anotherUser = new User();
         anotherUser.setId(2);
@@ -140,6 +147,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add file throws exception if file is duplicate")
     void addFileToPost_duplicateFile() {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
@@ -152,6 +160,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add file throws exception if max files exceeded")
     void addFileToPost_maxFilesExceeded() {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
@@ -165,6 +174,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Add file throws exception if S3 upload fails")
     void addFileToPost_uploadFails() throws IOException {
         when(postRepository.findById(1)).thenReturn(Optional.of(post));
         when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
@@ -173,8 +183,7 @@ class PostFileServiceTest {
         when(postFileRepository.findByPostFilePath("key")).thenReturn(Optional.empty());
         when(postFileRepository.countByPost(post)).thenReturn(0);
 
-        doThrow(IOException.class)
-                .when(s3Service).uploadFileWithKey("key", multipartFile);
+        doThrow(IOException.class).when(s3Service).uploadFileWithKey("key", multipartFile);
 
         assertThrows(RuntimeException.class,
                 () -> postFileService.addFileToPost(1, multipartFile));
@@ -183,6 +192,7 @@ class PostFileServiceTest {
     // ------------------ deletePostFile ------------------
 
     @Test
+    @DisplayName("Delete post file successfully")
     void deletePostFile_success() {
         when(postFileRepository.findById(1)).thenReturn(Optional.of(postFile));
         when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(user);
@@ -194,6 +204,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Delete post file throws EntityNotFoundException if file not found")
     void deletePostFile_notFound() {
         when(postFileRepository.findById(1)).thenReturn(Optional.empty());
 
@@ -202,6 +213,7 @@ class PostFileServiceTest {
     }
 
     @Test
+    @DisplayName("Delete post file throws InvalidPermissionException if not owner")
     void deletePostFile_notOwner() {
         User anotherUser = new User();
         anotherUser.setId(2);

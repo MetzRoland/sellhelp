@@ -1,6 +1,7 @@
 package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
@@ -50,6 +51,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Get all files for the logged-in user successfully")
     void getAllFiles_success() throws Exception {
         when(userFileService.getAllUserFiles("test@test.com"))
                 .thenReturn(List.of(new FileDTO(1, "http://url", "http://url2", "testFileName1")));
@@ -64,6 +66,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Get a specific user file by fileId successfully")
     void getUserFile_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
                 .thenReturn(new FileDTO(5, "http://download", "http://open", "MytestFileName22"));
@@ -74,11 +77,11 @@ class UserFilesControllerTest {
                 .andExpect(jsonPath("$.downloadUrl").value("http://download"))
                 .andExpect(jsonPath("$.openUrl").value("http://open"))
                 .andExpect(jsonPath("$.fileName").value("MytestFileName22"));
-
     }
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Get user file by id successfully (duplicate check)")
     void getUserFileById_success() throws Exception {
         when(userFileService.getUserFileByFileId(5))
                 .thenReturn(new FileDTO(5, "http://download", "http://open", "new-testFileName333"));
@@ -93,6 +96,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Upload a file successfully for the logged-in user")
     void uploadFile_success() throws Exception {
         when(currentUser.getCurrentlyLoggedUserEmail())
                 .thenReturn("test@test.com");
@@ -112,6 +116,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Delete a user file successfully")
     void deleteUserFile_success() throws Exception {
         mockMvc.perform(delete("/user/files/delete/{id}", 3))
                 .andExpect(status().isOk())
@@ -122,6 +127,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Get logged-in user's own profile picture successfully")
     void getOwnProfilePicture_success() throws Exception {
         when(userFileService.getOwnProfilePicture("test@test.com"))
                 .thenReturn(new ProfilePictureDTO("http://pp"));
@@ -133,6 +139,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser
+    @DisplayName("Get another user's profile picture successfully")
     void getOtherUsersProfilePicture_success() throws Exception {
         when(userFileService.getUserProfilePicture(7))
                 .thenReturn(new ProfilePictureDTO("http://pp"));
@@ -144,6 +151,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Set profile picture successfully for logged-in user")
     void setProfilePicture_success() throws Exception {
         MockMultipartFile image = new MockMultipartFile(
                 "file", "img.png",
@@ -159,6 +167,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Reject profile picture upload if file type is invalid")
     void setProfilePicture_invalidFileType() throws Exception {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "file.txt",
@@ -172,6 +181,7 @@ class UserFilesControllerTest {
 
     @Test
     @WithMockUser(username = "test@test.com")
+    @DisplayName("Remove profile picture successfully for logged-in user")
     void removeProfilePicture_success() throws Exception {
         mockMvc.perform(delete("/user/files/pp"))
                 .andExpect(status().isOk())
