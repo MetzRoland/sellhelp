@@ -1,27 +1,8 @@
 import InputComponent from "../InputComponent/InputComponent";
 import SelectComponent from "../SelectComponent/SelectComponents";
 import TextareaComponent from "../TextAreaComponent/TextAreaComponent";
-import type { FormFields } from "../../genericTypes/FormFields";
 import { useAuth } from "../../../contextProviders/AuthProvider/AuthContext";
-
-interface InputFormProps<T extends object> {
-  inputs: readonly {
-    name: keyof FormFields<T>;
-    type: string;
-    placeholder: string;
-  }[];
-  errorMessage?: Partial<Record<keyof FormFields<T>, string>>;
-  handleFunction: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
-  ) => void;
-  formData: FormFields<T>;
-  options?: {
-    [K in keyof FormFields<T>]?: { id: number; value: string; label: string }[];
-  };
-  disabledInputsMap?: Record<string, boolean>;
-  disabledToggle?: (inputName: keyof FormFields<T>) => Promise<void>;
-  settingInputsMap?: Record<string, boolean>;
-}
+import type { InputFormProps } from "./InputFormTypes";
 
 function InputForm<T extends object>({
   inputs,
