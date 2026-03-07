@@ -70,7 +70,7 @@ class EmailServiceTest {
     void updatePassword_sendsEmailWithToken() {
         when(jwtUtil.generatePasswordUpdateToken("test@test.com")).thenReturn("token123");
 
-        emailService.updatePassword("test@test.com");
+        emailService.updatePassword("test@test.com", false);
 
         verify(javaMailSender).send(mimeMessage);
         verify(jwtUtil).generatePasswordUpdateToken("test@test.com");

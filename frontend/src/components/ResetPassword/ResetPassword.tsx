@@ -6,8 +6,9 @@ import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import InputForm from "../Reusables/InputForm/InputForm";
 import { privateAxios } from "../../config/axiosConfig";
+import type { ResetPasswordProps } from "./ResetPasswordTypes";
 
-function ResetPassword() {
+function ResetPassword({ forgotPassword }: ResetPasswordProps) {
   interface ResetPasswordForm {
     password: string;
     confirm: string;
@@ -68,7 +69,9 @@ function ResetPassword() {
       setIsLoading(true);
       setLoadingMessage("Jelszómódosítás...");
 
-      await privateAxios.patch<ResetPasswordForm>("/user/update/password", {
+      const endpoint = !forgotPassword ? "/user/update/password" : "/auth/updateForgotPassword";
+
+      await privateAxios.patch<ResetPasswordForm>(endpoint, {
         password: formData.password,
         token: token
       });

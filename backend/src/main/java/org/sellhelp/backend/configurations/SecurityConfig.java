@@ -76,7 +76,9 @@ public class SecurityConfig {
                         "/auth/disable2fa",
                         "/auth/setup2fa",
                         "/auth/verify-totp",
-                        "/auth/login/refresh")
+                        "/auth/login/refresh",
+                        "/auth/updateForgotPassword",
+                        "/auth/forgotPasswordEmail")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -84,7 +86,8 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
+                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp",
+                                "/auth/login/refresh", "/auth/updateForgotPassword", "/auth/forgotPasswordEmail").permitAll()
                         .requestMatchers("/user/users/*").permitAll()
                         .requestMatchers("/post/posts/*", "/post/posts").permitAll()
                         .requestMatchers("/auth/enable2fa", "/auth/disable2fa", "/auth/setup2fa")

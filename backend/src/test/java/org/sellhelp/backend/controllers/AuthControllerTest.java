@@ -65,6 +65,8 @@ class AuthControllerTest {
     private TokenDTO tokenDTO;
     private TotpSecretDTO totpSecretDTO;
     private GenerateTotpDTO generateTotpDTO;
+    private EmailUpdateDTO emailUpdateDTO;
+    private PasswordUpdateDTO passwordUpdateDTO;
 
     @BeforeEach
     void init() {
@@ -75,6 +77,13 @@ class AuthControllerTest {
         registerDTO.setLastName("User");
         registerDTO.setCityName("Pécs");
         registerDTO.setBirthDate(LocalDate.of(2000, 12, 31));
+
+        emailUpdateDTO = new EmailUpdateDTO();
+        emailUpdateDTO.setEmail("test@test.com");
+
+        passwordUpdateDTO = new PasswordUpdateDTO();
+        passwordUpdateDTO.setToken("token");
+        passwordUpdateDTO.setPassword("NewPassword123.");
 
         loginDTO = new LoginDTO();
         loginDTO.setEmail("test@test.com");
@@ -187,5 +196,27 @@ class AuthControllerTest {
     void testLoginGoogleAuth() throws Exception {
         mockMvc.perform(get("/auth/login/google"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @DisplayName("Send forgot password email successfully")
+    void testGetForgotPasswordEmail() throws Exception {
+
+        mockMvc.perform(patch("/auth/forgotPasswordEmail")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emailUpdateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Jelszóhejreállító email elküldve!"));
+    }
+
+    @Test
+    @DisplayName("Update forgotten password successfully")
+    void testUpdateForgotPassword() throws Exception {
+
+        mockMvc.perform(patch("/auth/updateForgotPassword")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Jelszó sikeresen módosítva!"));
     }
 }

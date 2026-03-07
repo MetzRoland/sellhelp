@@ -142,7 +142,7 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Email a jelszó módosításhoz elküldve!"));
 
-        verify(emailService).updatePassword("test@example.com");
+        verify(emailService).updatePassword("test@example.com", false);
     }
 
     @Test

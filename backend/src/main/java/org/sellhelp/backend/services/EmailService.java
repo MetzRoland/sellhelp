@@ -121,13 +121,14 @@ public class EmailService {
         sendHTMLTemplateEmail(toEmail, "A fiókod újra engedélyezve lett", "emails/usermanagement/unbanned", variables);
     }
 
-    public void updatePassword(String toEmail)
+    public void updatePassword(String toEmail, boolean forgotPassword)
     {
         Map<String, Object> variables = new HashMap<>();
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
-                "http://localhost:5173/resetPassword?token=" + token;
+                !forgotPassword ? "http://localhost:5173/resetPassword?token=" + token
+                        : "http://localhost:5173/forgotPassword?token=" + token;
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 

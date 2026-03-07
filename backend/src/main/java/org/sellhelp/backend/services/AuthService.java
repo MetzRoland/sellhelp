@@ -4,10 +4,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.requests.GoogleRegisterDTO;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
+import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
@@ -50,7 +47,7 @@ public class AuthService {
     private final TempTokenService tempTokenService;
     private final EmailService emailService;
     private final CurrentUser currentUser;
-    private S3Service s3Service;
+    private final S3Service s3Service;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
@@ -296,5 +293,54 @@ public class AuthService {
         emailService.loginUser(email);
 
         return new TokenDTO(accessToken, refreshToken, null);
+    }
+
+    public void forgotUserPasswordEmailNotification(EmailUpdateDTO emailUpdateDTO) {
+        if(currentUser.getCurrentlyLoggedUserEntity() != null){
+            throw new RuntimeException("Bejelentkezett felhasználók nem kérhetnek visszaállító emailt!");
+        }
+
+        String email = emailUpdateDTO.getEmail();
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        if(user.getAuthProvider().equals(AuthProvider.GOOGLE)){
+            throw new RuntimeException("Google felhasználók csak a google fiókban állíthatnak helyre jelszót!");
+        }
+
+        emailService.updatePassword(email, true);
+    }
+
+    public void updateForgotUserPassword(PasswordUpdateDTO passwordUpdateDTO) {
+        if(currentUser.getCurrentlyLoggedUserEntity() != null){
+            throw new RuntimeException("Bejelentkezett felhasználók nem állíthatják helyre jelszavukat!");
+        }
+
+        String email = jwtUtil.extractEmail(passwordUpdateDTO.getToken());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (!jwtUtil.validatePasswordUpdateToken(passwordUpdateDTO.getToken(), userDetails)){
+            throw new InvalidTokenException("A jelszómódosító token nem érvényes!");
+        }
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg a jelenlegi jelszóval!");
+        }
+
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getLastUsedPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg az előző jelszóval!");
+        }
+
+        user.getUserSecret().setPassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
+
+        userRepository.save(user);
+
+        emailService.updatePasswordSuccess(email);
     }
 }

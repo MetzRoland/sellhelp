@@ -147,4 +147,18 @@ public class AuthController {
                 .header("Location", "http://localhost:5173/home")
                 .build();
     }
+
+    @PatchMapping("/forgotPasswordEmail")
+    public ResponseEntity<String> getForgotPasswordEmail(@Validated(ValidationOrder.class) @RequestBody EmailUpdateDTO emailUpdateDTO){
+        authService.forgotUserPasswordEmailNotification(emailUpdateDTO);
+
+        return ResponseEntity.ok("Jelszóhejreállító email elküldve!");
+    }
+
+    @PatchMapping("/updateForgotPassword")
+    public ResponseEntity<String> updateForgotPassword(@Validated(ValidationOrder.class) @RequestBody PasswordUpdateDTO passwordUpdateDTO){
+        authService.updateForgotUserPassword(passwordUpdateDTO);
+
+        return ResponseEntity.ok("Jelszó sikeresen módosítva!");
+    }
 }

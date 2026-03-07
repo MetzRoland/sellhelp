@@ -8,9 +8,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
+import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
 import org.sellhelp.backend.entities.City;
 import org.sellhelp.backend.entities.Role;
@@ -18,6 +16,7 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserSecret;
 import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.enums.UserRole;
+import org.sellhelp.backend.exceptions.InvalidTokenException;
 import org.sellhelp.backend.exceptions.UserAlreadyExistException;
 import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
@@ -203,5 +202,138 @@ class AuthServiceTest {
         assertEquals("new-access-token", result.getAccessToken());
         assertEquals("refresh-token", result.getRefreshToken());
         assertNull(result.getTempToken());
+    }
+
+    @Test
+    @DisplayName("Forgot password email notification sent successfully")
+    void forgotUserPasswordEmailNotification_success() {
+        EmailUpdateDTO dto = new EmailUpdateDTO();
+        dto.setEmail("test@test.com");
+
+        User user = new User();
+        user.setEmail("test@test.com");
+        user.setAuthProvider(AuthProvider.LOCAL);
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(null);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        authService.forgotUserPasswordEmailNotification(dto);
+
+        verify(emailService).updatePassword("test@test.com", true);
+    }
+
+    @Test
+    @DisplayName("Forgot password fails when user already logged in")
+    void forgotUserPasswordEmailNotification_userLoggedIn() {
+        EmailUpdateDTO dto = new EmailUpdateDTO();
+        dto.setEmail("test@test.com");
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(new User());
+
+        assertThrows(RuntimeException.class,
+                () -> authService.forgotUserPasswordEmailNotification(dto));
+
+        verify(emailService, never()).updatePassword(any(), anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Forgot password fails for Google users")
+    void forgotUserPasswordEmailNotification_googleUser() {
+        EmailUpdateDTO dto = new EmailUpdateDTO();
+        dto.setEmail("test@test.com");
+
+        User user = new User();
+        user.setAuthProvider(AuthProvider.GOOGLE);
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(null);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        assertThrows(RuntimeException.class,
+                () -> authService.forgotUserPasswordEmailNotification(dto));
+
+        verify(emailService, never()).updatePassword(any(), anyBoolean());
+    }
+
+    @Test
+    @DisplayName("Forgot password update succeeds")
+    void updateForgotUserPassword_success() {
+        PasswordUpdateDTO dto = new PasswordUpdateDTO();
+        dto.setToken("token");
+        dto.setPassword("newPassword");
+
+        User user = new User();
+        user.setEmail("test@test.com");
+
+        UserSecret secret = new UserSecret();
+        secret.setPassword("oldEncoded");
+        secret.setLastUsedPassword("olderEncoded");
+        user.setUserSecret(secret);
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(null);
+        when(jwtUtil.extractEmail("token")).thenReturn("test@test.com");
+
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(userDetails);
+
+        when(jwtUtil.validatePasswordUpdateToken("token", userDetails)).thenReturn(true);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("newPassword", "oldEncoded")).thenReturn(false);
+        when(passwordEncoder.matches("newPassword", "olderEncoded")).thenReturn(false);
+        when(passwordEncoder.encode("newPassword")).thenReturn("encodedNew");
+
+        authService.updateForgotUserPassword(dto);
+
+        verify(userRepository).save(user);
+        verify(emailService).updatePasswordSuccess("test@test.com");
+    }
+
+    @Test
+    @DisplayName("Forgot password update fails with invalid token")
+    void updateForgotUserPassword_invalidToken() {
+        PasswordUpdateDTO dto = new PasswordUpdateDTO();
+        dto.setToken("bad-token");
+        dto.setPassword("newPassword");
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(null);
+        when(jwtUtil.extractEmail("bad-token")).thenReturn("test@test.com");
+
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(userDetails);
+
+        when(jwtUtil.validatePasswordUpdateToken("bad-token", userDetails)).thenReturn(false);
+
+        assertThrows(InvalidTokenException.class,
+                () -> authService.updateForgotUserPassword(dto));
+    }
+
+    @Test
+    @DisplayName("Forgot password fails if new password equals current password")
+    void updateForgotUserPassword_sameAsCurrent() {
+        PasswordUpdateDTO dto = new PasswordUpdateDTO();
+        dto.setToken("token");
+        dto.setPassword("samePassword");
+
+        User user = new User();
+        user.setEmail("test@test.com");
+
+        UserSecret secret = new UserSecret();
+        secret.setPassword("encodedOld");
+        secret.setLastUsedPassword("encodedOlder");
+        user.setUserSecret(secret);
+
+        when(currentUser.getCurrentlyLoggedUserEntity()).thenReturn(null);
+        when(jwtUtil.extractEmail("token")).thenReturn("test@test.com");
+
+        UserDetails userDetails = mock(UserDetails.class);
+        when(userDetailsService.loadUserByUsername("test@test.com")).thenReturn(userDetails);
+
+        when(jwtUtil.validatePasswordUpdateToken("token", userDetails)).thenReturn(true);
+        when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
+
+        when(passwordEncoder.matches("samePassword", "encodedOld")).thenReturn(true);
+
+        assertThrows(RuntimeException.class,
+                () -> authService.updateForgotUserPassword(dto));
     }
 }

@@ -18,6 +18,7 @@ import PostsListComponent from "./components/PostsListComponent/PostsListCompone
 import NewPostComponent from "./components/NewPostComponent/NewPostComponent";
 import FullPostView from "./components/FullPostView/FullPostView";
 import NonSuperUserRouterLayout from "./components/Routes/NonSuperUserRouterLayout";
+import ForgetPasswordEmail from "./components/ForgetPasswordEmail/ForgetPasswordEmail";
 
 import "./App.css";
 
@@ -39,6 +40,8 @@ function App() {
               element={<FinishGoogleRegister />}
             />
             <Route path="/profileInactive" element={<ProfileBanned />} />
+            <Route path="/forgotPassword" element={<ResetPassword forgotPassword={true} />} />
+            <Route path="/forgotPasswordEmail" element={<ForgetPasswordEmail />} />
           </Route>
 
           <Route element={<AuthenticatedRouterLayout />}>
@@ -46,7 +49,6 @@ function App() {
             <Route path="/home/settings" element={<FullUserProfile settings={true} />} />
             <Route path="/profile" element={<FullUserProfile />} />
             <Route path="/setupmfa" element={<SetupMfa />} />
-            <Route path="/resetPassword" element={<ResetPassword />} />
           </Route>
 
           <Route element={<UserOnlyRouterLayout />}>
@@ -54,6 +56,7 @@ function App() {
             <Route path="/posts/involved" element={<PostsListComponent postFetchingEndpoint="/post/posts/involved" title="Elvállalt posztok" />} />
             <Route path="/posts/new" element={<NewPostComponent />} />
             <Route path="/users" element={<UserList />} />
+            <Route path="/resetPassword" element={<ResetPassword />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>

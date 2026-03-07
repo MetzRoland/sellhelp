@@ -119,6 +119,8 @@ function Login({ isAdminLogin }: IsAdminLogin) {
                 Bejelentkezés
               </button>
 
+              <Link to="/forgotPasswordEmail" className="message">Elfelejtette a jelszavát?</Link>
+
               {!isAdminLogin && (
                 <>
                   <button

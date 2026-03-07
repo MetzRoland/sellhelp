@@ -76,7 +76,7 @@ public class UserController {
     @GetMapping("/update/password/send")
     public ResponseEntity<String> sendUserPasswordEmail(){
         String toEmail = currentUser.getCurrentlyLoggedUserEmail();
-        emailService.updatePassword(toEmail);
+        emailService.updatePassword(toEmail, false);
 
         return ResponseEntity.ok("Email a jelszó módosításhoz elküldve!");
     }
