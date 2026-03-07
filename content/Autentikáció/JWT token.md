@@ -1,7 +1,10 @@
 ---
 title: JWT token
 ---
-JWT token bla, bla, bla...
+
+Az oldal használ `access_token`-t és `refresh_token`-t
+
+Böngésző sütikben kerül tárolásra.
 
 ## Használat
 - Bejelentkezett státus hitelesítése
