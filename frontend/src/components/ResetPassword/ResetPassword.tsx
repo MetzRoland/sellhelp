@@ -5,7 +5,7 @@ import { AxiosError } from "axios";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import InputForm from "../Reusables/InputForm/InputForm";
-import { privateAxios } from "../../config/axiosConfig";
+import { privateAxios, publicAxios } from "../../config/axiosConfig";
 import type { ResetPasswordProps } from "./ResetPasswordTypes";
 
 function ResetPassword({ forgotPassword }: ResetPasswordProps) {
@@ -37,14 +37,16 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
   const [formData, setFormData] = useState<ResetPasswordForm>({
     password: "",
     confirm: "",
-    token: ""
+    token: "",
   });
   const [validationErrors, setValidationErrors] =
     useState<ResetPasswordValidationErrors>({});
   const [resetPasswordError, setResetPasswordError] = useState("");
 
   const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -60,25 +62,36 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
-    if(formData.password !== formData.confirm){
-        setResetPasswordError("A két jelszó nem egyezik!");
-        return;
+    if (formData.password !== formData.confirm) {
+      setResetPasswordError("A két jelszó nem egyezik!");
+      return;
     }
 
     try {
       setIsLoading(true);
       setLoadingMessage("Jelszómódosítás...");
 
-      const endpoint = !forgotPassword ? "/user/update/password" : "/auth/updateForgotPassword";
+      const endpoint = !forgotPassword
+        ? "/user/update/password"
+        : "/auth/updateForgotPassword";
 
-      await privateAxios.patch<ResetPasswordForm>(endpoint, {
-        password: formData.password,
-        token: token
-      });
+      if(endpoint === "/user/update/password"){
+        await privateAxios.patch<ResetPasswordForm>(endpoint, {
+          password: formData.password,
+          token: token,
+        });
+      }
+      else{
+        await publicAxios.patch<ResetPasswordForm>(endpoint, {
+          password: formData.password,
+          token: token,
+        });
+      }
 
       setTimeout(() => {
         navigate("/home/settings");
       }, 2000);
+      
     } catch (err) {
       const error = err as AxiosError<{
         message?: string;
@@ -86,7 +99,11 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
       }>;
 
       setValidationErrors(error.response?.data?.errors ?? {});
-      setResetPasswordError(error.response?.data?.message ?? "Sikertelen jelszómódosítás!");
+      setResetPasswordError(
+        error.response?.data?.message ?? "Sikertelen jelszómódosítás!",
+      );
+
+      console.log(error.response?.data?.message);
     } finally {
       setIsLoading(false);
     }
@@ -98,7 +115,10 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
 
       <div className="main-container reset-password-container">
         <h1 className="container-title">Jelszó módosítás</h1>
-        <form className="content-container reset-password-content-container" onSubmit={handleSubmit}>
+        <form
+          className="content-container reset-password-content-container"
+          onSubmit={handleSubmit}
+        >
           <InputForm<ResetPasswordForm>
             inputs={resetPasswordInputs}
             formData={formData}
@@ -111,7 +131,9 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
           </button>
 
           {resetPasswordError && (
-            <p className="message error error-process-status">{resetPasswordError}</p>
+            <p className="message error error-process-status">
+              {resetPasswordError}
+            </p>
           )}
         </form>
       </div>
