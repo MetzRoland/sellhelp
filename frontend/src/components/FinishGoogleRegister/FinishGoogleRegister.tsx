@@ -73,9 +73,10 @@ function FinishGoogleRegister() {
     } catch (err) {
       console.error(err);
       setSuccess(false);
+      console.log(success);
     }
     finally{
-        setLoading(false);
+      setLoading(false);
     }
   };
 
