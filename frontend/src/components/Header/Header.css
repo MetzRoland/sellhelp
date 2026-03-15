@@ -1,16 +1,16 @@
-.header{
+.header {
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
-    min-height: 10vh;
+    min-height: 10rem;
     height: 20vh;
 }
 
 .header-nav{
     height: 100%;
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 1.5vw, 4rem);
     padding: 1em;
 
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: 1fr 2fr 1fr;
     align-items: center;
 
     position: relative;
@@ -32,13 +32,14 @@
 
 .main-page-link{
     color: #FAF4E6;
-    font-size: 3rem;
+    font-size: clamp(3rem, 5vw, 4rem);
 }
 
 .left-options, .right-options{
     display: flex;
     justify-content: space-around;
     gap: 1rem;
+    align-items: center;
 }
 
 .left-options{
@@ -60,7 +61,7 @@
 .profile-options-container {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   background-color: #222222;
   color: #fff;
   text-decoration: none;
@@ -96,7 +97,18 @@
     pointer-events: auto;
 }
 
-.profile-options-container button, a{
+.profile-options-container button {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+
+    transition: all .4s;
+}
+
+.profile-options-container a {
     background-color: transparent;
     border: none;
     color: #fff;
@@ -110,4 +122,62 @@
 .profile-options-container button:hover, .profile-options-container a:hover{
     color: #A6A6A6;
     text-decoration: underline;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: space-around;
+  width: 2rem;
+  height: 2rem;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.bar {
+  width: 2rem;
+  height: 0.25rem;
+  background: white;
+  border-radius: 10px;
+  transition: all 0.3s linear;
+}
+
+/* Mobile Responsive Logic */
+@media only screen and (max-width: 768px) {
+  .hamburger {
+    display: flex;
+    justify-self: start;
+  }
+
+  /* Transform left-options into a slide-out menu */
+  .left-options {
+    position: fixed;
+    top: 0;
+    left: -100%; /* Hidden by default */
+    height: 100vh;
+    width: 250px;
+    background-color: #222;
+    flex-direction: column;
+    justify-content: flex-start;
+    padding: 8rem 2rem 2rem 2rem;
+    transition: left 0.3s ease-in-out;
+    z-index: 1000;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+  }
+
+  .left-options.mobile-open {
+    left: 0; /* Slide in */
+  }
+
+  .header-nav {
+    /* Adjust grid for mobile so title stays central or moves right */
+    grid-template-columns: auto 1fr auto;
+  }
+
+  /* Animate Hamburger to X */
+  .bar.open:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
+  .bar.open:nth-child(2) { opacity: 0; }
+  .bar.open:nth-child(3) { transform: rotate(-45deg) translate(7px, -8px); }
 }

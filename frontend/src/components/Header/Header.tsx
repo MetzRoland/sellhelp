@@ -13,6 +13,8 @@ function Header() {
   const { setIsLoading, setLoadingMessage } = useLoading();
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  // State for the hamburger menu
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
   const profileToggleRef = useRef<HTMLDivElement>(null);
 
@@ -20,11 +22,13 @@ function Header() {
     setOpenMenu((prev) => (prev === menu ? null : menu));
   };
 
+  const toggleHamburger = () => {
+    setIsHamburgerOpen(!isHamburgerOpen);
+  };
+
   const isAdmin = user?.role !== "ROLE_USER";
 
-  const userOptionsLinks = [
-    { url: "/users", label: "Felhasználók keresése" },
-  ];
+  const userOptionsLinks = [{ url: "/users", label: "Felhasználók keresése" }];
 
   const postOptionLinks = [
     { url: "/posts", label: "Posztok böngészése" },
@@ -49,9 +53,7 @@ function Header() {
     toggleMenu(null);
     setIsLoading(true);
     setLoadingMessage("Kijelentkezés...");
-
     await logout();
-
     setIsLoading(false);
     setLoadingMessage("");
   };
@@ -59,112 +61,88 @@ function Header() {
   return (
     <header className="header">
       <nav className="header-nav">
-        {!isAuthenticated ? (
-          <>
-            <div className="left-options">
-              <Link className="nav-link" to="/posts">
-                Posztok keresése
-              </Link>
-            </div>
+        {/* Hamburger Icon */}
+        <button className="hamburger" onClick={toggleHamburger}>
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+        </button>
 
-            <div className="title-option">
-              <Link className="nav-link main-page-link" to="/">
-                SellHelp
-              </Link>
-            </div>
+        <div className={`left-options ${isHamburgerOpen ? "mobile-open" : ""}`}>
+          {!isAuthenticated ? (
+            <Link className="nav-link" to="/posts" onClick={() => setIsHamburgerOpen(false)}>
+              Posztok keresése
+            </Link>
+          ) : !isAdmin ? (
+            <>
+              <NavDropdown
+                label="Áttekintés"
+                menuKey="overview"
+                links={userOptionsLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+              <NavDropdown
+                label="Posztok keresése"
+                menuKey="posts"
+                links={postOptionLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+            </>
+          ) : (
+            <>
+              <NavDropdown
+                label="Felhasználói fiókok"
+                menuKey="adminUsers"
+                links={adminUserManagementLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+              <NavDropdown
+                label="Posztok kezelése"
+                menuKey="adminPosts"
+                links={adminPostManagementLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+            </>
+          )}
+        </div>
 
-            <div className="right-options">
-              <Link className="nav-link" to="/login">
-                Bejelentkezés
-              </Link>
+        <div className="title-option">
+          <Link className="nav-link main-page-link" to="/">
+            SellHelp
+          </Link>
+        </div>
 
-              <Link className="nav-link" to="/register">
-                Regisztrálás
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="left-options">
-              {!isAdmin ? (
-                <>
-                  <NavDropdown
-                    label="Áttekintés"
-                    menuKey="overview"
-                    links={userOptionsLinks}
-                    openMenu={openMenu}
-                    toggleMenu={toggleMenu}
-                  />
-
-                  <NavDropdown
-                    label="Posztok keresése"
-                    menuKey="posts"
-                    links={postOptionLinks}
-                    openMenu={openMenu}
-                    toggleMenu={toggleMenu}
-                  />
-                </>
-              ) : (
-                <>
-                  <NavDropdown
-                    label="Felhasználói fiókok"
-                    menuKey="adminUsers"
-                    links={adminUserManagementLinks}
-                    openMenu={openMenu}
-                    toggleMenu={toggleMenu}
-                  />
-
-                  <NavDropdown
-                    label="Posztok kezelése"
-                    menuKey="adminPosts"
-                    links={adminPostManagementLinks}
-                    openMenu={openMenu}
-                    toggleMenu={toggleMenu}
-                  />
-                </>
+        <div className="right-options right-options-profile">
+          {!isAuthenticated ? (
+            <>
+              <Link className="nav-link" to="/login">Bejelentkezés</Link>
+              <Link className="nav-link" to="/register">Regisztrálás</Link>
+            </>
+          ) : (
+            <div className="dropdown-toggle-container" ref={profileToggleRef}>
+              {user && (
+                <ProfilePictureComponent
+                  userId={user.id}
+                  handleOnClick={() => toggleMenu("profile")}
+                />
               )}
-            </div>
-
-            <div className="title-option">
-              <Link className="nav-link main-page-link" to="/">
-                SellHelp
-              </Link>
-            </div>
-
-            <div className="right-options right-options-profile">
-              <div
-                className="dropdown-toggle-container"
-                ref={profileToggleRef}
+              <OptionsMenu
+                isOpen={openMenu === "profile"}
+                onClose={() => toggleMenu(null)}
+                toggleRef={profileToggleRef}
+                links={[{ url: "/home/settings", label: "Felhasználói adatok" }]}
               >
-                {user && (
-                  <ProfilePictureComponent
-                    userId={user.id}
-                    handleOnClick={() => toggleMenu("profile")}
-                  />
-                )}
-
-                <OptionsMenu
-                  isOpen={openMenu === "profile"}
-                  onClose={() => toggleMenu(null)}
-                  toggleRef={profileToggleRef}
-                  links={[
-                    {
-                      url: "/home/settings",
-                      label: "Felhasználói adatok",
-                    },
-                  ]}
-                >
-                  <button
-                    className="user-profile-option"
-                    onClick={handleLogout}
-                  >
-                    Kijelentkezés
-                  </button>
-                </OptionsMenu>
-              </div>
+                <button className="user-profile-option" onClick={handleLogout}>
+                  Kijelentkezés
+                </button>
+              </OptionsMenu>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </nav>
     </header>
   );
