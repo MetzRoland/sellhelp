@@ -20,6 +20,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
   const [filesError, setFilesError] = useState<string | null>(null);
   const [blur, setBlur] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
   function getGetAllEndpoint() {
     switch (type) {
@@ -80,8 +81,10 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       const response = await privateAxios.delete(getDeleteFileEndpoint(fileId));
       console.log(response);
       setFiles((prevFiles) => prevFiles.filter((file) => file.fileId !== fileId));
+      setFilesError(null);
     } catch (error) {
       console.error("Error deleting file:", error);
+      setFilesError("Error deleting file");
     } finally {
       setBlur(false);
     }
@@ -89,6 +92,14 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
 
   const onDrop = async (acceptedFiles: globalThis.File[]) => {
     if (acceptedFiles.length < 1) {
+      return;
+    }
+
+    const tooLarge = acceptedFiles.find(file => file.size > MAX_FILE_SIZE);
+
+    if (tooLarge) {
+      console.log("FILE TOO LARGE")
+      setFilesError("A fájl mérete nem lehet nagyobb mint 10 MB.");
       return;
     }
 
@@ -101,6 +112,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
       acceptedFiles.forEach((file) => {
         formData.append("file", file);
       });
+
     
       await privateAxios.post(getUploadFileEndpoint(), formData, {
           headers: {
@@ -129,7 +141,6 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
 
   return (
     <>
-      <hr />
       <div className={`file-display-container ${(files.length < 1 && !canEdit) && "disappear"}`}>
         <div className="file-display-title">
           <div>
@@ -148,14 +159,19 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
         </div>
 
         {isUploading ? (
+          <>
+          <h3 className="file-message">
+            {filesError}
+          </h3>
           <div
             className="upload-area"
             {...getRootProps()}
-          >
+            >
             <input {...getInputProps()} />
             <p>Húzd ide a fájlt, vagy kattints a fájl választásához!</p>
             <p>Max 10 MB</p>
           </div>
+          </>
         ) : (
           <div className={`file-display-list ${blur && "blurred"}`}>
             {filesError && (

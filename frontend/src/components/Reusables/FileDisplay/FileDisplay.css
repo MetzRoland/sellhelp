@@ -156,6 +156,7 @@ hr {
 }
 
 .file-message {
+  padding: 0.2rem;
   text-align: center;
   color: red;
   font-weight: bold;
