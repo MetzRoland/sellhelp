@@ -49,9 +49,10 @@ body {
 
 .content-container {
   margin: 1.5rem auto;
-  min-width: 25vw;
-  width: 100%;
-  max-width: 90vw;
+
+  width: 50%;
+  max-width: 800px;
+  min-width: 500px;
 
   background-color: #3C3B3A;
 
@@ -61,17 +62,17 @@ body {
 
   border-radius: 20px;
   padding: 1.5em;
+  box-sizing: border-box;
 
   box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
-.filter-container{
+.filter-container {
   background-color: transparent;
   box-shadow: none;
 }
 
-.content-title
-{
+.content-title {
   font-size: 300%;
   margin-bottom: 1rem;
 }
@@ -82,7 +83,8 @@ body {
 
 .profile-picture-container {
   position: relative;
-  margin-top: -4rem; /* lift above card */
+  margin-top: -4rem;
+  /* lift above card */
   margin-bottom: 1.5rem;
 
   display: flex;
@@ -97,7 +99,7 @@ body {
 }
 
 /* Button group wrapper */
-.profile-picture-container .setting-btn + .setting-btn {
+.profile-picture-container .setting-btn+.setting-btn {
   margin-top: -0.5rem;
 }
 
@@ -163,11 +165,9 @@ body {
   appearance: none;
   -webkit-appearance: none;
 
-  background: linear-gradient(
-    90deg,
-    rgba(122, 122, 122, 1) 0%,
-    rgba(51, 51, 51, 1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(122, 122, 122, 1) 0%,
+      rgba(51, 51, 51, 1) 100%);
 
   color: #ffffff;
   font-size: 1rem;
@@ -192,11 +192,9 @@ body {
 
 .input-element:disabled {
   border: none;
-  background: linear-gradient(
-    45deg,
-    rgb(80, 80, 80) 0%,
-    rgba(51, 51, 51, 1) 20%
-  );
+  background: linear-gradient(45deg,
+      rgb(80, 80, 80) 0%,
+      rgba(51, 51, 51, 1) 20%);
 }
 
 .select-input-element option {
@@ -204,7 +202,7 @@ body {
   background-color: #ffffff;
 }
 
-.textarea-element{
+.textarea-element {
   resize: none;
   height: fit-content;
 }
@@ -290,7 +288,7 @@ body {
 /* BUTTONS FOR SETTINGS      */
 /* ========================= */
 
-.setting-container{
+.setting-container {
   display: flex;
   gap: 1rem;
   align-items: center;
@@ -298,7 +296,7 @@ body {
   width: 100%;
 }
 
-.setting-btn{
+.setting-btn {
   background-color: #212121;
   border: 1px transparent;
   color: #afafaf;
@@ -315,12 +313,12 @@ body {
   transition: all .4s;
 }
 
-.setting-btn:hover{
-    color: #eaeaea;
-    cursor: pointer;
+.setting-btn:hover {
+  color: #eaeaea;
+  cursor: pointer;
 }
 
-.setting-btn:disabled{
+.setting-btn:disabled {
   color: #8D8D8D;
   background-color: #4e4e4e;
   cursor: no-drop;
@@ -337,7 +335,8 @@ body {
 
   .content-container {
     width: 100%;
-    max-width: calc(100% - 2rem); /* 👈 space from sides */
+    max-width: calc(100% - 2rem);
+    /* 👈 space from sides */
     margin: 1.5rem auto;
     padding: 1.25em;
     border-radius: 14px;
@@ -349,17 +348,18 @@ body {
   }
 }
 
-
-/* Tablets */
-@media (min-width: 481px) and (max-width: 768px) {
+@media only screen and (max-width: 768px) {
   .content-container {
-    max-width: 400px;
+    width: 95%;
+    max-width: 100%;
+    min-width: 0;
+
+    padding: 1.5rem;
+    margin: 1rem auto;
+    border-radius: 12px;
   }
-}
 
-/* Large Screens */
-@media (min-width: 1024px) {
-  .content-container {
-    max-width: 460px;
+  .main-container {
+    padding: 1rem;
   }
 }

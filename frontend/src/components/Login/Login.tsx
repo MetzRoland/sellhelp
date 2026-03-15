@@ -8,8 +8,6 @@ import type { LoginForm } from "./LoginTypes";
 import InputForm from "../Reusables/InputForm/InputForm";
 import type { IsAdminLogin } from "./LoginTypes";
 
-import "./Login.css";
-
 function Login({ isAdminLogin }: IsAdminLogin) {
   const {
     loginLocal,
@@ -105,7 +103,7 @@ function Login({ isAdminLogin }: IsAdminLogin) {
             </h1>
 
             <form
-              className="content-container login-form"
+              className="content-container"
               onSubmit={handleSubmit}
             >
               <InputForm<LoginForm>
@@ -174,7 +172,7 @@ function Login({ isAdminLogin }: IsAdminLogin) {
             <h1 className="container-title">Hitelesítő kód ellenörzés</h1>
 
             <form
-              className="content-container login-form"
+              className="content-container"
               onSubmit={handleSubmit}
             >
               <InputForm<LoginForm>

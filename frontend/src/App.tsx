@@ -20,8 +20,6 @@ import FullPostView from "./components/FullPostView/FullPostView";
 import NonSuperUserRouterLayout from "./components/Routes/NonSuperUserRouterLayout";
 import ForgetPasswordEmail from "./components/ForgetPasswordEmail/ForgetPasswordEmail";
 
-import "./App.css";
-
 function App() {
   const location = useLocation();
 

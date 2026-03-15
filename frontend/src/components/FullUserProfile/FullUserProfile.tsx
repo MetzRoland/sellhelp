@@ -377,7 +377,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       <div className="main-container">
         <h1 className="content-title">{title}</h1>
 
-        <form className="content-container login-form content-container-has-pfp">
+        <form className="content-container content-container-has-pfp">
           <div className="profile-picture-container">
             <ProfilePictureComponent userId={user.id} />
 

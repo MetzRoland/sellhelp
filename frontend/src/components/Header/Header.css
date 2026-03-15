@@ -1,7 +1,8 @@
 .header {
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
-    min-height: 10rem;
-    height: 20vh;
+    min-height: 6rem;
+    height: 15vh;
+    max-height: 10%;
 }
 
 .header-nav{
@@ -10,8 +11,9 @@
     padding: 1em;
 
     display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
+    align-content: center;
 
     position: relative;
 }
@@ -125,59 +127,87 @@
 }
 
 .hamburger {
-  display: none;
-  flex-direction: column;
-  justify-content: space-around;
-  width: 2rem;
-  height: 2rem;
-  background: transparent;
-  border: none;
+  display: none; /* Hidden on desktop */
   cursor: pointer;
-  z-index: 1001;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 30px; /* Reference size */
+  height: 24px;
+  position: relative;
+  z-index: 2001;
+
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.bar {
-  width: 2rem;
-  height: 0.25rem;
-  background: white;
-  border-radius: 10px;
-  transition: all 0.3s linear;
-}
 
 /* Mobile Responsive Logic */
 @media only screen and (max-width: 768px) {
   .hamburger {
     display: flex;
-    justify-self: start;
   }
 
-  /* Transform left-options into a slide-out menu */
+  .bar {
+    display: block;
+    width: 100%;
+    height: 4px;
+    background-color: #fff;
+    border-radius: 4px;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+  }
+  /* 1. Animation for Top Bar */
+.bar.open:nth-child(1) {
+  transform: translateY(10px) rotate(45deg);
+}
+
+/* 2. Animation for Middle Bar (Fade out and slide) */
+.bar.open:nth-child(2) {
+  transform: translateX(-200px);
+}
+
+/* 3. Animation for Bottom Bar */
+.bar.open:nth-child(3) {
+  transform: translateY(-10px) rotate(-45deg);
+}
   .left-options {
     position: fixed;
     top: 0;
-    left: -100%; /* Hidden by default */
+    left: -100%;
     height: 100vh;
-    width: 250px;
+    width: 280px;
     background-color: #222;
+    
+    display: flex;
     flex-direction: column;
+    /* Aligns all items to the left */
+    align-items: flex-start; 
     justify-content: flex-start;
-    padding: 8rem 2rem 2rem 2rem;
-    transition: left 0.3s ease-in-out;
-    z-index: 1000;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.5);
+    
+    padding: 8rem 2rem; 
+    gap: 1.5rem;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000;
+  }
+
+  /* Ensure all children (Links and NavDropdowns) behave the same */
+  .left-options > * {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  /* If NavDropdown has internal padding or centering, override it here */
+  .left-options .nav-link {
+    width: 100%;
+    padding: 0.5rem 0;
+    justify-content: flex-start;
   }
 
   .left-options.mobile-open {
-    left: 0; /* Slide in */
+    left: 0;
   }
-
-  .header-nav {
-    /* Adjust grid for mobile so title stays central or moves right */
-    grid-template-columns: auto 1fr auto;
-  }
-
-  /* Animate Hamburger to X */
-  .bar.open:nth-child(1) { transform: rotate(45deg) translate(7px, 7px); }
-  .bar.open:nth-child(2) { opacity: 0; }
-  .bar.open:nth-child(3) { transform: rotate(-45deg) translate(7px, -8px); }
 }
