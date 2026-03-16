@@ -1,5 +1,5 @@
 import { Link } from "react-router";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
@@ -17,6 +17,10 @@ function Header() {
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
   const profileToggleRef = useRef<HTMLDivElement>(null);
+
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  const [isHamburgerVisible, setIsHamburgerVisible] = useState(false);
 
   const toggleMenu = (menu: string | null) => {
     setOpenMenu((prev) => (prev === menu ? null : menu));
@@ -49,6 +53,20 @@ function Header() {
     { url: "/postManagement", label: "Posztok kezelése" },
   ];
 
+  useEffect(() => {
+    const checkVisibility = () => {
+      const el = hamburgerRef.current;
+      if (!el) return;
+
+      setIsHamburgerVisible(el.offsetParent !== null);
+    };
+
+    checkVisibility();
+    window.addEventListener("resize", checkVisibility);
+
+    return () => window.removeEventListener("resize", checkVisibility);
+  }, []);
+
   const handleLogout = async () => {
     toggleMenu(null);
     setIsLoading(true);
@@ -62,7 +80,11 @@ function Header() {
     <header className="header">
       <nav className="header-nav">
         {/* Hamburger Icon */}
-        <button className="hamburger" onClick={toggleHamburger}>
+        <button
+          className="hamburger"
+          ref={hamburgerRef}
+          onClick={toggleHamburger}
+        >
           <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
           <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
           <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
@@ -70,9 +92,25 @@ function Header() {
 
         <div className={`left-options ${isHamburgerOpen ? "mobile-open" : ""}`}>
           {!isAuthenticated ? (
-            <Link className="nav-link" to="/posts" onClick={() => setIsHamburgerOpen(false)}>
-              Posztok keresése
-            </Link>
+            <>
+              <Link
+                className="nav-link"
+                to="/posts"
+                onClick={() => setIsHamburgerOpen(false)}
+              >
+                Posztok keresése
+              </Link>
+              {isHamburgerVisible && (
+                <>
+                  <Link className="nav-link" to="/login">
+                    Bejelentkezés
+                  </Link>
+                  <Link className="nav-link" to="/register">
+                    Regisztrálás
+                  </Link>
+                </>
+              )}
+            </>
           ) : !isAdmin ? (
             <>
               <NavDropdown
@@ -119,8 +157,16 @@ function Header() {
         <div className="right-options right-options-profile">
           {!isAuthenticated ? (
             <>
-              <Link className="nav-link" to="/login">Bejelentkezés</Link>
-              <Link className="nav-link" to="/register">Regisztrálás</Link>
+              {!isHamburgerVisible && (
+                <>
+                  <Link className="nav-link" to="/login">
+                    Bejelentkezés
+                  </Link>
+                  <Link className="nav-link" to="/register">
+                    Regisztrálás
+                  </Link>
+                </>
+              )}
             </>
           ) : (
             <div className="dropdown-toggle-container" ref={profileToggleRef}>
@@ -134,7 +180,9 @@ function Header() {
                 isOpen={openMenu === "profile"}
                 onClose={() => toggleMenu(null)}
                 toggleRef={profileToggleRef}
-                links={[{ url: "/home/settings", label: "Felhasználói adatok" }]}
+                links={[
+                  { url: "/home/settings", label: "Felhasználói adatok" },
+                ]}
               >
                 <button className="user-profile-option" onClick={handleLogout}>
                   Kijelentkezés
