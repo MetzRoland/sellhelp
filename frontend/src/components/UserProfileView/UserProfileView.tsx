@@ -23,6 +23,11 @@ function UserProfileView({
           <p className="user-profile-email">{userAccount.email}</p>
         </div>
       </div>
+
+      <button className="btn btn-highlight" onClick={handleRedirectToProfile}>
+        Profil Megtekintése
+      </button>
+
       {adminMode && (
         <button
           className="btn btn-highlight"

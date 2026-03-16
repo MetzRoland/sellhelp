@@ -9,3 +9,17 @@ export function formatDate(dateString: string): string {
 
   return `${yyyy}.${mm}.${dd} ${HH}:${MM}`;
 }
+
+export function getPostStatusName(postStatusName: string): string {
+  const statusNames: Record<string, string> = {
+    new: "Elérhető",
+    accepted: "Elvállalva",
+    started: "Folyamatban",
+    completed_by_employee: "Ellenőrzésre vár",
+    unsuccessful_result_closed: "Sikertelenül lezárva",
+    work_rejected: "Munka elutasítva",
+    closed: "Kész",
+  };
+
+  return statusNames[postStatusName];
+}

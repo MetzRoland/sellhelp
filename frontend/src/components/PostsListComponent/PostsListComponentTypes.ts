@@ -48,4 +48,5 @@ export interface PostInputField {
   name: keyof PostFilter;
   type: "text" | "select";
   placeholder: string;
+  userTitle?: string;
 }

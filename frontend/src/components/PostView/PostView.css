@@ -60,7 +60,7 @@
 }
 
 /* Reward badge */
-.post-reward {
+.post-reward, .post-city {
   align-self: center;
   padding: 0.5rem 1rem;
   border-radius: 999px;
@@ -140,6 +140,16 @@
 .post-publisher-details img:hover {
   transform: scale(1.05);
   cursor: pointer;
+}
+
+.post-status-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.post-status-details p {
+  margin: 0;
 }
 
 /* ===================== */

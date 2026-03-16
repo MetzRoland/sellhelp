@@ -19,16 +19,17 @@ function UserList({ isAdmin = false }: UserListProps) {
   const userUpdateInputs: UserInputField[] = [
     { name: "userName", type: "text", placeholder: "Felhasználónév" },
     { name: "email", type: "text", placeholder: "Email" },
-    { name: "city", type: "select", placeholder: "Válasszon települést..." },
+    { name: "city", type: "select", placeholder: "Válasszon települést..." , userTitle: "Település"},
   ];
 
   if (isAdmin) {
     userUpdateInputs.push(
-      { name: "role", type: "select", placeholder: "Válasszon szerepkört" },
+      { name: "role", type: "select", placeholder: "Válasszon szerepkört", userTitle: "Szerepkör" },
       {
         name: "banned",
         type: "select",
         placeholder: "Válasszon fiók állapotot",
+        userTitle: "Állapot"
       },
     );
   }

@@ -36,7 +36,7 @@ function PostsListComponent({
     { name: "reward", type: "text", placeholder: "Poszt munka díj" },
     { name: "publisherEmail", type: "text", placeholder: "Tulajdonos email" },
     { name: "postDate", type: "select", placeholder: "Megosztás dátuma" },
-    { name: "city", type: "select", placeholder: "Válasszon települést..." },
+    { name: "city", type: "select", placeholder: "Válasszon települést...", userTitle: "Település"},
   ] as const;
 
   const [filterFormData, setFilterFormData] = useState<PostFilter>({

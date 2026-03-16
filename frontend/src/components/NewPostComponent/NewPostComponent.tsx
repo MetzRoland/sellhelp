@@ -22,7 +22,7 @@ function NewPostComponent() {
   const newPostInputs = [
     { name: "title", type: "text", placeholder: "A poszt címe" },
     { name: "description", type: "textarea", placeholder: "Leírás" },
-    { name: "cityName", type: "select", placeholder: "Válasszon települést" },
+    { name: "cityName", type: "select", placeholder: "Válasszon települést" , userTitle: "Település"},
     { name: "reward", type: "number", placeholder: "Munkadíj" },
   ] as const;
 

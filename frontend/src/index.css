@@ -291,9 +291,24 @@ body {
 
 .setting-container {
   display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  margin-bottom: 1rem;
+  width: 100%;
+}
+
+.setting-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.5px;
+}
+
+.setting-input-row {
+  display: flex;
   gap: 1rem;
   align-items: center;
-  margin-bottom: 1rem;
   width: 100%;
 }
 
@@ -323,6 +338,68 @@ body {
   color: #8D8D8D;
   background-color: #4e4e4e;
   cursor: no-drop;
+}
+
+.post-status{
+  align-self: flex-end;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* New */
+.post-status.new{
+  color: #084298;
+  background: #cfe2ff;
+}
+
+/* Accepted */
+.post-status.accepted{
+  color: #664d03;
+  background: #fff3cd;
+}
+
+/* Started */
+.post-status.started{
+  color: #7a3e00;
+  background: #ffe5d0;
+}
+
+/* Completed */
+.post-status.completed_by_employee{
+  color: #0f5132;
+  background: #d1e7dd;
+}
+
+/* Unsuccessful */
+.post-status.unsuccessful_result_closed{
+  color: #842029;
+  background: #f8d7da;
+}
+
+/* Work rejected */
+.post-status.work_rejected{
+  color: #5a2d82;
+  background: #e2d5f1;
+}
+
+/* Closed */
+.post-status.closed{
+  color: #41464b;
+  background: #e2e3e5;
+}
+
+.post-date.post-status {
+  font-weight: 600;
+  color: #2ecc71;
+}
+
+.post-status-details{
+  width: 100%;
+  margin-bottom: 1rem;
 }
 
 /* ===================== */

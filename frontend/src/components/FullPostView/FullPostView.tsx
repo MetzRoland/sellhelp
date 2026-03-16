@@ -19,6 +19,7 @@ import PostActionButton from "../PostActionButton/PostActionButton";
 import type { FullPostViewProps } from "./FullPostViewTypes";
 import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
+import { getPostStatusName } from "../Reusables/HelperFunctions/HelperFunctions";
 
 import "./FullPostView.css";
 
@@ -35,9 +36,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
   const navigate = useNavigate();
 
   const postUpdateInputs = [
-    { name: "title", type: "text", placeholder: "A poszt címe" },
+    { name: "title", type: "text", placeholder: "A poszt címe" , userTitle: "Megnevezés"},
     { name: "description", type: "textarea", placeholder: "Leírás" },
-    { name: "cityName", type: "select", placeholder: "Válasszon települést" },
+    { name: "cityName", type: "select", placeholder: "Válasszon települést", userTitle: "Település"},
     { name: "reward", type: "number", placeholder: "Munkadíj" },
   ] as const;
 
@@ -463,9 +464,13 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
         <div className="content-container full-post-view-container">
           <div className="post-details">
-            <p className="post-date">
-              Megosztva: {formatDate(post.createdAt.toString())}
-            </p>
+            <div className="post-status-details">
+              <p className="post-date">
+                Megosztva: {formatDate(post.createdAt.toString())}
+              </p>
+
+              <p className={`post-status ${post.statusName}`}>{getPostStatusName(post.statusName)}</p>
+            </div>
 
             {isOwner ? (
               <>
@@ -654,8 +659,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
               />
             )}
           </div>
-
-          <p>{post.statusName}</p>
 
           {newPostError && (
             <p className="message error error-process-status">{newPostError}</p>

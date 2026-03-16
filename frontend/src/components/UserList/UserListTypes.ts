@@ -14,6 +14,7 @@ export interface UserInputField {
   name: keyof UserAccountFilter;
   type: "text" | "select";
   placeholder: string;
+  userTitle?: string;
 }
 
 export interface UserRole {

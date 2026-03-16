@@ -12,7 +12,7 @@ function ForgetPasswordEmail() {
   const navigator = useNavigate();
 
   const resetPasswordEmailInputs = [
-    { name: "email", type: "text", placeholder: "Adja meg az email címét..." },
+    { name: "email", type: "text", placeholder: "Adja meg az email címét..." , userTitle: "Email"},
   ] as const;
 
   const { setIsLoading, setLoadingMessage } = useLoading();

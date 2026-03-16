@@ -7,6 +7,7 @@ export interface InputFormProps<T extends object> {
     name: keyof FormFields<T>;
     type: string;
     placeholder: string;
+    userTitle?: string;
   }[];
   errorMessage?: Partial<Record<keyof FormFields<T>, string>>;
   handleFunction: (

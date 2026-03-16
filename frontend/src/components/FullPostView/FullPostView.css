@@ -60,3 +60,12 @@
   border-radius: 20px;
   margin-bottom: 1.5rem;
 }
+
+.post-status-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 2rem;
+}
