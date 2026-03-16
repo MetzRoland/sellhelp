@@ -3,7 +3,7 @@ import { describe, it, expect, vi } from "vitest";
 import PostView from "../../components/PostView/PostView";
 import type { Post } from "../../components/PostsListComponent/PostsListComponentTypes";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
-import type {ProfilePictureComponentProps} from "../../components/ProfilePictureComponent/ProfilePictureComponentTypes";
+import type { ProfilePictureComponentProps } from "../../components/ProfilePictureComponent/ProfilePictureComponentTypes";
 
 const mockNavigate = vi.fn();
 
@@ -19,6 +19,7 @@ vi.mock("../../components/ProfilePictureComponent/ProfilePictureComponent", () =
 
 vi.mock("../../components/Reusables/HelperFunctions/HelperFunctions", () => ({
   formatDate: () => "2024.01.01",
+  getPostStatusName: () => "OPEN",
 }));
 
 const mockUser: User = {
@@ -42,7 +43,7 @@ const mockPost: Post = {
   description: "This is a test description",
   cityName: "Budapest",
   reward: 1000,
-  statusName: "OPEN",
+  statusName: "open",
   createdAt: new Date(),
 
   publisher: mockUser,
@@ -66,9 +67,11 @@ describe("PostView", () => {
   it("calls handleOnClick when container is clicked", () => {
     const handleClick = vi.fn();
 
-    render(<PostView post={mockPost} handleOnClick={handleClick} />);
+    const { container } = render(
+      <PostView post={mockPost} handleOnClick={handleClick} />
+    );
 
-    fireEvent.click(screen.getByText("Test Post"));
+    fireEvent.click(container.querySelector(".post-view-container")!);
 
     expect(handleClick).toHaveBeenCalled();
   });
