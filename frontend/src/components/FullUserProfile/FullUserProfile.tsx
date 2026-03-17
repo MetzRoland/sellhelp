@@ -19,6 +19,8 @@ import type { UserUpdateFormFields } from "./FullUserProfileTypes";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 
+import "./FullUserProfile.css";
+
 interface FullUserProfileProps {
   settings?: boolean;
 }

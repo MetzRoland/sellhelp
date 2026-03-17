@@ -69,3 +69,72 @@
 
   margin-top: 2rem;
 }
+
+/* ===================== */
+/* RESPONSIVE FIXES - POST VIEW */
+/* ===================== */
+
+/* Small phones */
+@media (max-width: 480px) {
+  .full-post-view-container {
+    min-width: 0; /* override 40vw issue */
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .textarea-element {
+    min-height: 80px;
+    padding: 0.75rem;
+  }
+
+  .new-comment-div .setting-btn {
+    width: 100%; /* full width button */
+  }
+
+  .post-date {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+  .full-post-view-container {
+    min-width: 0;
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .new-comment-div .setting-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .post-status-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .full-post-view-container {
+    min-width: 0;
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Large screens polish */
+@media (min-width: 1400px) {
+  .full-post-view-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+}

@@ -1,26 +1,33 @@
-.page-not-found{
+.page-not-found {
     display: flex;
     justify-content: center;
     align-items: center;
+
+    padding: 1rem;
+    min-height: 100vh; /* center vertically properly */
 }
 
-.page-not-found-container{
-    width: 50%;
-    height: 40vh;
+.page-not-found-container {
+    width: clamp(280px, 80%, 600px);
+    min-height: 30vh;
 
-    font-size: 1rem;
+    font-size: clamp(0.9rem, 2.5vw, 1.2rem);
     font-weight: bold;
 
     display: flex;
+    flex-direction: column;
     justify-content: center;
     align-items: center;
+    text-align: center;
+
+    gap: 0.5rem;
 }
 
-.page-not-found-status{
-    font-size: 3rem;
+.page-not-found-status {
+    font-size: clamp(2rem, 8vw, 4rem);
     font-style: italic;
 }
 
-.page-not-found-title{
-    font-size: 2rem;
+.page-not-found-title {
+    font-size: clamp(1.2rem, 4vw, 2rem);
 }

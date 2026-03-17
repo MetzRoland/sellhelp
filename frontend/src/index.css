@@ -213,7 +213,7 @@ body {
 /* ===================== */
 
 .btn {
-  width: 100%;
+  width: 100% !important;
   max-width: 320px;
 
   background-color: #212121;
@@ -403,41 +403,75 @@ body {
 }
 
 /* ===================== */
-/* MEDIA QUERIES         */
+/* EXTRA RESPONSIVENESS FIXES */
 /* ===================== */
 
-@media (max-width: 480px) {
-  .main-container {
+/* Small phones (up to 400px) */
+@media (max-width: 400px) {
+  .content-container {
+    min-width: 0; /* override the 500px issue */
     padding: 1rem;
   }
 
-  .content-container {
-    width: 100%;
-    max-width: calc(100% - 2rem);
-    /* 👈 space from sides */
-    margin: 1.5rem auto;
-    padding: 1.25em;
-    border-radius: 14px;
+  .content-title {
+    font-size: 180%;
   }
 
   .btn {
-    font-size: 1.1rem;
-    padding: 0.85em;
+    font-size: 1rem;
+    padding: 0.75em;
   }
 }
 
-@media only screen and (max-width: 768px) {
+/* Phones (up to 600px) */
+@media (max-width: 600px) {
   .content-container {
-    width: 95%;
-    max-width: 100%;
     min-width: 0;
-
-    padding: 1.5rem;
-    margin: 1rem auto;
-    border-radius: 12px;
   }
 
-  .main-container {
-    padding: 1rem;
+  .content-title {
+    font-size: 180%;
+  }
+
+  .title-option{
+    font-size: 80%;
+  }
+
+  .setting-input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .setting-btn {
+    width: 100%; /* full width buttons */
+  }
+}
+
+/* Tablets (600px – 1024px) */
+@media (max-width: 1024px) {
+  .content-container {
+    width: 80%;
+    min-width: 0;
+  }
+
+  .btn {
+    max-width: 100%;
+  }
+
+  .setting-btn {
+    width: 45%;
+  }
+
+  .setting-input-row {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
+
+/* Large screens (optional polish) */
+@media (min-width: 1400px) {
+  .content-container {
+    width: 40%;
   }
 }

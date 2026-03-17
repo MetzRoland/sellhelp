@@ -141,36 +141,39 @@
   justify-content: space-between;
 }
 
-
-/* Mobile Responsive Logic */
-@media only screen and (max-width: 768px) {
+/* ======================= */
+/* MOBILE RESPONSIVE LOGIC */
+/* ======================= */
+@media only screen and (max-width: 1030px) {
   .hamburger {
     display: flex;
+    width: 28px;  /* slightly smaller */
+    height: 20px; /* slightly smaller */
   }
 
   .bar {
     display: block;
     width: 100%;
-    height: 4px;
+    height: 3px; /* thinner bars */
     background-color: #fff;
     border-radius: 4px;
     transition: all 0.3s ease-in-out;
     position: relative;
   }
-  /* 1. Animation for Top Bar */
-.bar.open:nth-child(1) {
-  transform: translateY(10px) rotate(45deg);
-}
 
-/* 2. Animation for Middle Bar (Fade out and slide) */
-.bar.open:nth-child(2) {
-  transform: translateX(-200px);
-}
+  /* Hamburger animation */
+  .bar.open:nth-child(1) {
+    transform: translateY(10px) rotate(45deg);
+  }
 
-/* 3. Animation for Bottom Bar */
-.bar.open:nth-child(3) {
-  transform: translateY(-10px) rotate(-45deg);
-}
+  .bar.open:nth-child(2) {
+    transform: translateX(-200px);
+  }
+
+  .bar.open:nth-child(3) {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+
   .left-options {
     position: fixed;
     top: 0;
@@ -178,20 +181,18 @@
     height: 100vh;
     width: 280px;
     background-color: #222;
-    
+
     display: flex;
     flex-direction: column;
-    /* Aligns all items to the left */
     align-items: flex-start; 
     justify-content: flex-start;
-    
+
     padding: 8rem 2rem; 
     gap: 1.5rem;
     transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     z-index: 2000;
   }
 
-  /* Ensure all children (Links and NavDropdowns) behave the same */
   .left-options > * {
     width: 100%;
     text-align: left;
@@ -200,14 +201,45 @@
     align-items: center;
   }
 
-  /* If NavDropdown has internal padding or centering, override it here */
   .left-options .nav-link {
     width: 100%;
     padding: 0.5rem 0;
     justify-content: flex-start;
+    font-size: 1.5rem; /* smaller nav text */
   }
 
   .left-options.mobile-open {
     left: 0;
+  }
+
+  .right-options .nav-link {
+    font-size: 1.5rem; /* smaller right-side nav text */
+  }
+
+  .main-page-link {
+    font-size: 1.8rem; /* scale main page link for mobile */
+  }
+
+  .profile-options-container button,
+  .profile-options-container a {
+    font-size: 1.2rem; /* smaller profile dropdown text */
+  }
+}
+
+@media only screen and (max-width: 600px){
+  .left-options .nav-link {
+    font-size: 1rem; /* smaller nav text */
+  }
+
+  .right-options .nav-link {
+    font-size: 1rem; /* smaller right-side nav text */
+  }
+
+  .options-container div{
+    width: 30%;
+  }
+
+  .options-container a, .options-container button{
+    font-size: 1rem;
   }
 }

@@ -1,33 +1,141 @@
-.user-profile-container{
-    transition: all .4s;
+/* ===================== */
+/* USER PROFILE CARD      */
+/* ===================== */
+
+.user-profile-container {
+  transition: all 0.4s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  border-radius: 20px;
 }
 
-.user-profile-container:hover{
-    transform: scale(1.05);
-    box-shadow: 1px 1px 10px #fff;
-    cursor: pointer;
+.user-profile-container:hover {
+  transform: scale(1.05);
+  box-shadow: 1px 1px 10px #fff;
+  cursor: pointer;
 }
 
-.user-info-container{
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-
-    gap: 10px;
+.user-info-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
 }
 
-.user-infos{
-    margin: 1em;
-    text-align: center;
+.user-infos {
+  margin: 1em;
+  text-align: center;
 }
 
-.user-profile-name{
-    font-size: 2rem;
-    font-weight: bold;
+.user-profile-name {
+  font-size: 2rem;
+  font-weight: bold;
 }
 
-.user-profile-email{
+.user-profile-email {
+  font-size: 1rem;
+  font-style: italic;
+}
+
+/* ===================== */
+/* RESPONSIVE STYLES      */
+/* ===================== */
+
+/* Small phones (<400px) */
+@media (max-width: 400px) {
+  .user-profile-container {
+    padding: 0.8rem;
+  }
+
+  .user-profile-name {
+    font-size: 1.4rem;
+  }
+
+  .user-profile-email {
+    font-size: 0.85rem;
+  }
+
+  .user-info-container {
+    gap: 6px;
+  }
+
+  .btn {
+    font-size: 0.9rem;
+    padding: 0.6em 1em;
+    width: 100%;
+    max-width: 220px;
+  }
+}
+
+/* Phones 400–600px */
+@media (min-width: 400px) and (max-width: 600px) {
+  .user-profile-container {
+    padding: 1rem;
+  }
+
+  .user-profile-name {
+    font-size: 1.6rem;
+  }
+
+  .user-profile-email {
+    font-size: 0.9rem;
+  }
+
+  .user-info-container {
+    gap: 8px;
+  }
+
+  .btn {
     font-size: 1rem;
-    font-style: italic;
+    padding: 0.7em 1.2em;
+    width: 100%;
+    max-width: 240px;
+  }
+}
+
+/* Tablets (<768px) */
+@media (max-width: 768px) {
+  .user-profile-container {
+    padding: 1.2rem;
+  }
+
+  .user-profile-name {
+    font-size: 1.8rem;
+  }
+
+  .user-profile-email {
+    font-size: 0.95rem;
+  }
+
+  .btn {
+    font-size: 1.1rem;
+    padding: 0.8em 1.3em;
+    width: 100%;
+    max-width: 260px;
+  }
+}
+
+/* Desktop (>1024px) */
+@media (min-width: 1025px) {
+  .user-profile-container {
+    padding: 1.5rem;
+  }
+
+  .user-profile-name {
+    font-size: 2rem;
+  }
+
+  .user-profile-email {
+    font-size: 1rem;
+  }
+
+  .btn {
+    font-size: 1.15rem;
+    padding: 0.9em 1.5em;
+    width: auto;
+    max-width: 320px;
+  }
 }

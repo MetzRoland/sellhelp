@@ -1,20 +1,82 @@
-.footer{
-    width: 100%;
-    min-height: 10vh;
-    height: 15vh;
-    padding: 1.5em;
+/* ===================== */
+/* FOOTER BASE STYLES    */
+/* ===================== */
+.footer {
+  width: 100%;
+  min-height: 10vh;
+  height: 15vh;
+  padding: 1.5em;
 
-    background-color: #0C0C0C;
-    color: #6D6D6D;
+  background-color: #0C0C0C;
+  color: #6D6D6D;
 
-    font-size: 1.25rem;
-    font-weight: bold;
+  font-size: 1.25rem;
+  font-weight: bold;
 
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap; /* allow wrapping on small screens */
+  gap: 0.5rem;
 }
 
 .footer a {
-    color: inherit;
+  color: inherit;
+  text-decoration: underline;
+  transition: color 0.3s ease;
+}
+
+.footer a:hover {
+  color: #ffffff;
+}
+
+/* ===================== */
+/* RESPONSIVE            */
+/* ===================== */
+
+/* Small phones (<400px) */
+@media (max-width: 400px) {
+  .footer {
+    font-size: 0.85rem;
+    flex-direction: column;
+    text-align: center;
+    padding: 1em;
+    height: auto;
+    gap: 0.3rem;
+  }
+}
+
+/* Phones 400–600px */
+@media (min-width: 400px) and (max-width: 600px) {
+  .footer {
+    font-size: 1rem;
+    flex-direction: column;
+    text-align: center;
+    padding: 1em;
+    gap: 0.4rem;
+    height: auto;
+  }
+}
+
+/* Tablets (<768px) */
+@media (max-width: 768px) {
+  .footer {
+    font-size: 1.1rem;
+    flex-direction: column;
+    text-align: center;
+    padding: 1.25em;
+    gap: 0.5rem;
+    height: auto;
+  }
+}
+
+/* Large screens (>1024px) */
+@media (min-width: 1025px) {
+  .footer {
+    font-size: 1.25rem;
+    flex-direction: row;
+    text-align: left;
+    padding: 1.5em;
+    gap: 0.5rem;
+  }
 }
