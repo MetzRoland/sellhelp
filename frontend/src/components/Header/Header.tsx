@@ -38,7 +38,7 @@ function Header() {
     { url: "/posts", label: "Posztok böngészése" },
     ...(isAuthenticated
       ? [
-          { url: "/posts/new", label: "Poszt létrehozása" },
+          { url: "/posts/new", label: "Új poszt létrehozása" },
           { url: "/myposts", label: "Saját posztjaim" },
           { url: "/posts/involved", label: "Elvállalt posztjaim" },
         ]

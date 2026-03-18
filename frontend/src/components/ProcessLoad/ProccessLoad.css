@@ -16,6 +16,7 @@
 
     z-index: 2147483647;
     pointer-events: all;
+    cursor: wait;
 }
 
 .loader-content {

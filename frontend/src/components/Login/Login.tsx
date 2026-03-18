@@ -8,6 +8,8 @@ import type { LoginForm } from "./LoginTypes";
 import InputForm from "../Reusables/InputForm/InputForm";
 import type { IsAdminLogin } from "./LoginTypes";
 
+import "./Login.css"
+
 function Login({ isAdminLogin }: IsAdminLogin) {
   const {
     loginLocal,
@@ -117,7 +119,7 @@ function Login({ isAdminLogin }: IsAdminLogin) {
                 Bejelentkezés
               </button>
 
-              <Link to="/forgotPasswordEmail" className="message">Elfelejtette a jelszavát?</Link>
+              <Link to="/forgotPasswordEmail" className="message message-link">Elfelejtette a jelszavát?</Link>
 
               {!isAdminLogin && (
                 <>

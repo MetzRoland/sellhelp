@@ -595,6 +595,24 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
             {(isOwner || isPrivileged) && (
               <>
+                <h2>Munkavállaló:</h2>
+
+                {post.selectedUser === null ? (
+                  <p>Nincs még senki kiválasztva!</p>
+                ) : (
+                  <UserListItem
+                    userId={post.selectedUser.id}
+                    email={post.selectedUser.email}
+                    date={post.jobApplications
+                      .find((a) => a.applicant.id === post.selectedUser?.id)
+                      ?.appliedAt.toString()}
+                    actionText="Visszavonás"
+                    onActionClick={(e) => rejectUserApply(e, post.id)}
+                    btnDisabled={isClosed || user.role !== "ROLE_USER"}
+                  />
+                )}
+
+
                 <h2>Jelentkezések:</h2>
 
                 <div className="user-list-container">
@@ -624,23 +642,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                       />
                     ))}
                 </div>
-
-                <h2>Munkavállaló:</h2>
-
-                {post.selectedUser === null ? (
-                  <p>Nincs még senki kiválasztva!</p>
-                ) : (
-                  <UserListItem
-                    userId={post.selectedUser.id}
-                    email={post.selectedUser.email}
-                    date={post.jobApplications
-                      .find((a) => a.applicant.id === post.selectedUser?.id)
-                      ?.appliedAt.toString()}
-                    actionText="Visszavonás"
-                    onActionClick={(e) => rejectUserApply(e, post.id)}
-                    btnDisabled={isClosed || user.role !== "ROLE_USER"}
-                  />
-                )}
               </>
             )}
 
