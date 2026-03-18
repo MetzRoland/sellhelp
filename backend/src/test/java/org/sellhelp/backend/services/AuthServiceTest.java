@@ -23,6 +23,7 @@ import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -65,6 +66,8 @@ class AuthServiceTest {
     private EmailService emailService;
     @Mock
     private CurrentUser currentUser;
+    @Mock
+    private UserNotificationManager userNotificationManager;
 
     private RegisterDTO registerDTO;
     private LoginDTO loginDTO;
@@ -112,6 +115,13 @@ class AuthServiceTest {
         authService.registerLocalUser(registerDTO, UserRole.ROLE_USER);
 
         verify(userRepository).save(any(User.class));
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Register local user"),
+                eq("Successfully registered!")
+        );
+
         verify(emailService).registerUser(
                 eq(registerDTO.getEmail()),
                 eq(registerDTO.getFirstName()),
@@ -155,6 +165,12 @@ class AuthServiceTest {
         assertEquals("access-token", tokenDTO.getAccessToken());
         assertEquals("refresh-token", tokenDTO.getRefreshToken());
         assertNull(tokenDTO.getTempToken());
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Login local user"),
+                eq("Successfully logged in!")
+        );
 
         verify(emailService).loginUser("test@test.com");
     }
@@ -218,6 +234,12 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
 
         authService.forgotUserPasswordEmailNotification(dto);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Requested forgotten password email"),
+                eq("Successfully sent forgotten password email!")
+        );
 
         verify(emailService).updatePassword("test@test.com", true);
     }
@@ -285,6 +307,13 @@ class AuthServiceTest {
         authService.updateForgotUserPassword(dto);
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Forgotten password updated"),
+                eq("Successfully updated forgotten password!")
+        );
+
         verify(emailService).updatePasswordSuccess("test@test.com");
     }
 

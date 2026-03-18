@@ -14,6 +14,7 @@ import org.sellhelp.backend.entities.Role;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -32,6 +33,7 @@ class SuperUserServiceTest {
     @Mock private S3Service s3Service;
     @Mock private UserService userService;
     @Mock private ModelMapper modelMapper;
+    @Mock private UserNotificationManager userNotificationManager;
 
     @InjectMocks private SuperUserService superUserService;
 
@@ -77,10 +79,20 @@ class SuperUserServiceTest {
 
         when(userService.getAllUserAccounts()).thenReturn(List.of(dto));
 
+        when(modelMapper.map(any(UserDTO.class), eq(User.class)))
+                .thenReturn(user);
+
         UserDTO result = superUserService.banUser(user.getId());
 
         assertTrue(user.isBanned());
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("User banned"),
+                eq("User got banned successfully!")
+        );
+
         verify(emailService).banUser(user.getEmail());
         assertEquals(user.getId(), result.getId());
     }
@@ -133,10 +145,20 @@ class SuperUserServiceTest {
 
         when(userService.getAllUserAccounts()).thenReturn(List.of(dto));
 
+        when(modelMapper.map(any(UserDTO.class), eq(User.class)))
+                .thenReturn(user);
+
         UserDTO result = superUserService.unbanUser(user.getId());
 
         assertFalse(user.isBanned());
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("User enabled after ban"),
+                eq("User got successfully enabled after banning!")
+        );
+
         verify(emailService).unbanUser(user.getEmail());
         assertEquals(user.getId(), result.getId());
     }

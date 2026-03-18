@@ -13,6 +13,7 @@ import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,6 +50,8 @@ class UserControllerTest {
     private UserDetailsService userDetailsService;
     @MockitoBean
     private JWTUtil jwtUtil;
+    @MockitoBean
+    private UserNotificationManager userNotificationManager;
 
     private UserDTO userDTO;
     private PasswordUpdateDTO passwordUpdateDTO;
@@ -97,6 +100,12 @@ class UserControllerTest {
         mockMvc.perform(get("/user/logout"))
                 .andExpect(status().isOk())
                 .andExpect(content().string("Sikeres kijelentkezés!"));
+
+        verify(userNotificationManager).createNotification(
+                eq(currentUser.getCurrentlyLoggedUserEntity()),
+                eq("Logout"),
+                eq("Successfully logged out!")
+        );
 
         verify(emailService).logoutUser("test@example.com");
         verify(cookieGenerator).deleteLogoutCookies(any(), any());

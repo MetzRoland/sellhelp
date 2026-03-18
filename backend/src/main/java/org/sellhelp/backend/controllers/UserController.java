@@ -12,6 +12,7 @@ import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.dtos.validationGroups.ValidationOrder;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.security.CurrentUser;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,14 +31,17 @@ public class UserController {
     private final EmailService emailService;
     private final CookieGenerator cookieGenerator;
     private final CurrentUser currentUser;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public UserController(UserService userService, EmailService emailService,
-                          CookieGenerator cookieGenerator, CurrentUser currentUser){
+                          CookieGenerator cookieGenerator, CurrentUser currentUser,
+                          UserNotificationManager userNotificationManager){
         this.userService = userService;
         this.emailService = emailService;
         this.cookieGenerator = cookieGenerator;
         this.currentUser = currentUser;
+        this.userNotificationManager = userNotificationManager;
     }
 
     @GetMapping("/info")
@@ -49,6 +53,8 @@ public class UserController {
     public ResponseEntity<String> logoutHandler(HttpServletRequest request, HttpServletResponse response)
     {
         String toEmail = currentUser.getCurrentlyLoggedUserEmail();
+
+        userNotificationManager.createNotification(currentUser.getCurrentlyLoggedUserEntity(), "Logout", "Successfully logged out!");
 
         emailService.logoutUser(toEmail);
 

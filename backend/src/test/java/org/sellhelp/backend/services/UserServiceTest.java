@@ -22,6 +22,7 @@ import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -48,6 +49,8 @@ class UserServiceTest {
     private EmailService emailService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private UserNotificationManager userNotificationManager;
 
     @InjectMocks
     private UserService userService;
@@ -89,6 +92,13 @@ class UserServiceTest {
         assertEquals(city, user.getCity());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User details updated"),
+                eq("User details got successfully updated!")
+        );
+
         verify(emailService).updateUserDetailsSuccess("test@example.com");
     }
 
@@ -127,6 +137,13 @@ class UserServiceTest {
         assertEquals("refreshToken", tokenDTO.getRefreshToken());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User password updated"),
+                eq("User password got successfully updated!")
+        );
+
         verify(emailService).updatePasswordSuccess("test@example.com");
     }
 
@@ -161,6 +178,14 @@ class UserServiceTest {
         assertEquals("refreshToken", tokenDTO.getRefreshToken());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User email updated"),
+                eq("User email got successfully updated!")
+        );
+
+        verify(emailService).updateUserEmailSuccess("new@example.com", "test@example.com");
     }
 
     @Test

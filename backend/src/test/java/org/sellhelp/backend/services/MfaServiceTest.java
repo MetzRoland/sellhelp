@@ -20,6 +20,7 @@ import org.sellhelp.backend.exceptions.MfaException;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 
 import java.util.Optional;
 
@@ -37,6 +38,7 @@ class MfaServiceTest {
     @Mock private TempTokenService tempTokenService;
     @Mock private CurrentUser currentUser;
     @Mock private EmailService emailService;
+    @Mock private UserNotificationManager userNotificationManager;
 
     @InjectMocks private MfaService mfaService;
 
@@ -98,6 +100,13 @@ class MfaServiceTest {
         assertEquals("SECRET", user.getUserSecret().getTotpSecret());
 
         verify(tempTokenService).removeToken("TEMP_TOKEN");
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("MFA Enable request"),
+                eq("Successfully enabled mfa!")
+        );
+
         verify(emailService).mfaEnabled("test@test.com");
         verify(userRepository).save(user);
     }
@@ -147,6 +156,13 @@ class MfaServiceTest {
         assertNull(result.getQrCode());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("MFA Disable request"),
+                eq("Successfully disabled mfa!")
+        );
+
         verify(emailService).mfaDisabled("test@test.com");
     }
 
@@ -182,6 +198,13 @@ class MfaServiceTest {
         assertNull(tokenDTO.getTempToken());
 
         verify(tempTokenService).removeToken("TEMP_TOKEN");
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Login local user"),
+                eq("Successfully logged in!")
+        );
+
         verify(emailService).loginUser("test@test.com");
     }
 

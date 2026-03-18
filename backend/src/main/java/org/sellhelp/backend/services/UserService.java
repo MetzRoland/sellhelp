@@ -18,6 +18,7 @@ import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,13 +39,13 @@ public class UserService {
     private final CurrentUser currentUser;
     private final EmailService emailService;
     private final S3Service s3Service;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public UserService(UserRepository userRepository, ModelMapper modelMapper,
                        CityRepository cityRepository, PasswordEncoder passwordEncoder,
                        JWTUtil jwtUtil, CurrentUser currentUser, EmailService emailService,
-                       S3Service s3Service)
-    {
+                       S3Service s3Service, UserNotificationManager userNotificationManager) {
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.cityRepository = cityRepository;
@@ -53,6 +54,7 @@ public class UserService {
         this.currentUser = currentUser;
         this.emailService = emailService;
         this.s3Service = s3Service;
+        this.userNotificationManager = userNotificationManager;
     }
 
     public void updateUserDetails(UserDetailsUpdateDTO userDetailsUpdateDTO)
@@ -83,6 +85,8 @@ public class UserService {
 
         userRepository.save(user);
 
+        userNotificationManager.createNotification(user, "User details updated", "User details got successfully updated!");
+
         emailService.updateUserDetailsSuccess(email);
     }
 
@@ -112,6 +116,8 @@ public class UserService {
 
         userRepository.save(user);
 
+        userNotificationManager.createNotification(user, "User password updated", "User password got successfully updated!");
+
         emailService.updatePasswordSuccess(email);
 
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
@@ -129,6 +135,10 @@ public class UserService {
         }
 
         userRepository.save(user);
+
+        userNotificationManager.createNotification(user, "User email updated", "User email got successfully updated!");
+
+        emailService.updateUserEmailSuccess(emailUpdateDTO.getEmail(), email);
 
         return new TokenDTO(jwtUtil.generateAccessToken(user.getEmail()), jwtUtil.generateRefreshToken(user.getEmail()), null);
     }

@@ -18,6 +18,7 @@ import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.*;
 import org.sellhelp.backend.security.CurrentUser;
+import org.sellhelp.backend.security.UserNotificationManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,6 +39,7 @@ class PostServiceTest {
     @Mock private ModelMapper modelMapper;
     @Mock private CurrentUser currentUser;
     @Mock private EmailService emailService;
+    @Mock private UserNotificationManager userNotificationManager;
 
     @InjectMocks private PostService postService;
 
@@ -185,6 +187,13 @@ class PostServiceTest {
 
         assertNotNull(response);
         verify(jobApplicationRepository).save(any(JobApplication.class));
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("Applied to post"),
+                eq("Successfully applied to post!")
+        );
+
         verify(emailService).appliedToPost("test@example.com");
     }
 

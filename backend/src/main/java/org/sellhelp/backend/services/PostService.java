@@ -14,6 +14,7 @@ import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.*;
 import org.sellhelp.backend.security.CurrentUser;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,27 +28,27 @@ public class PostService {
     private final UserRepository userRepository;
     private final CityRepository cityRepository;
     private final PostStatusRepository postStatusRepository;
-    private final CommentRepository commentRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final ModelMapper modelMapper;
     private final CurrentUser currentUser;
     private final EmailService emailService;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public PostService(PostRepository postRepository, UserRepository userRepository,
                        ModelMapper modelMapper, CityRepository cityRepository,
                        CurrentUser currentUser, PostStatusRepository postStatusRepository,
-                       CommentRepository commentRepository, JobApplicationRepository jobApplicationRepository,
-                       EmailService emailService){
+                       JobApplicationRepository jobApplicationRepository,
+                       EmailService emailService, UserNotificationManager userNotificationManager){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.cityRepository = cityRepository;
         this.postStatusRepository = postStatusRepository;
-        this.commentRepository = commentRepository;
         this.jobApplicationRepository = jobApplicationRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
         this.emailService = emailService;
+        this.userNotificationManager = userNotificationManager;
     }
 
     public PostResponseDTO createPost(CreatePostDTO createPostDTO){
@@ -270,6 +271,8 @@ public class PostService {
         jobApplicationRepository.save(jobApplication);
         postRepository.save(post);
 
+        userNotificationManager.createNotification(user, "Applied to post", "Successfully applied to post!");
+
         emailService.appliedToPost(publisherEmail);
 
         return modelMapper.map(jobApplication, JobApplicationResponseDTO.class);
@@ -299,6 +302,8 @@ public class PostService {
         );
 
         jobApplicationRepository.delete(jobApplication);
+
+        userNotificationManager.createNotification(user, "Cancel apply to post", "Successfully canceled apply to post!");
 
         emailService.cancelAppliedToPost(publisherEmail);
     }
@@ -331,6 +336,8 @@ public class PostService {
         post.setPostStatus(postStatus);
 
         postRepository.save(post);
+
+        userNotificationManager.createNotification(selectedUser, "Selected to post", "Successfully got selected for post!");
 
         emailService.gotSelectedToPost(selectedUser.getEmail());
 
@@ -370,9 +377,13 @@ public class PostService {
         postRepository.save(post);
 
         if(postOwned(postId)){
+            userNotificationManager.createNotification(user, "Rejected to post", "Got rejected from post!");
+
             emailService.gotRejectedToPost(user.getEmail());
         }
         else{
+            userNotificationManager.createNotification(user, "Canceled post after selection", "Successfully canceled post after selection!");
+
             emailService.cancelSelectedToPost(post.getPostPublisher().getEmail());
         }
     }
@@ -433,10 +444,17 @@ public class PostService {
         String employerEmail = post.getPostPublisher().getEmail();
         String employeeEmail = post.getSelectedUser().getEmail();
 
+        User employer = userRepository.findByEmail(employerEmail).orElse(null);
+        User employee = userRepository.findByEmail(employeeEmail).orElse(null);
+
         if(targetStatusName.equals("started") || targetStatusName.equals("completed_by_employee")){
+            userNotificationManager.createNotification(employer, "Post status changed", "Successfully updated post status!");
+
             emailService.changePostStatus(employerEmail, targetStatusName);
         }
         else {
+            userNotificationManager.createNotification(employee, "Post status changed", "Successfully updated post status!");
+
             emailService.changePostStatus(employeeEmail, targetStatusName);
         }
 

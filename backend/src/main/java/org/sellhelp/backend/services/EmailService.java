@@ -153,13 +153,14 @@ public class EmailService {
         sendHTMLTemplateEmail(toEmail, "Módosítás történ a felhasználói adatokban", "emails/usermanagement/userDetailsUpdated", variables);
     }
 
-    public void updateUserEmailSuccess(String toEmail)
+    public void updateUserEmailSuccess(String newEmail, String oldEmail)
     {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("email", toEmail);
+        variables.put("newEmail", newEmail);
+        variables.put("oldEmail", oldEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Email cím módosítva", "emails/usermanagement/userEmailUpdated", variables);
+        sendHTMLTemplateEmail(newEmail, "Email cím módosítva", "emails/usermanagement/userEmailUpdated", variables);
     }
 
     public void mfaEnabled(String toEmail)
