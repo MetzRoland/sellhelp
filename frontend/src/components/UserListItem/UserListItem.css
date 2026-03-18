@@ -131,6 +131,19 @@
 /* RESPONSIVE            */
 /* ===================== */
 
+@media (max-width: 680px) {
+  .user-list-item {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1rem;
+  }
+
+  .user-list-item > :last-child {
+    flex-basis: 100%;
+  }
+}
+
 @media (max-width: 480px) {
   .user-list-container {
     max-height: 50vh;

@@ -347,7 +347,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   };
 
   const title = settings
-    ? "Saját adatok módosítása"
+    ? "Adatok módosítása"
     : `${user.lastName} ${user.firstName}`;
 
   const deleteProfilePicture = async () => {
