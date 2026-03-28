@@ -13,6 +13,7 @@ import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -25,11 +26,12 @@ public class MfaService {
     private final TempTokenService tempTokenService;
     private final CurrentUser currentUser;
     private final EmailService emailService;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public MfaService(JWTUtil jwtUtil, UserRepository userRepository, TotpService totpService,
                       QrCodeService qrCodeService, TempTokenService tempTokenService,
-                      CurrentUser currentUser, EmailService emailService){
+                      CurrentUser currentUser, EmailService emailService, UserNotificationManager userNotificationManager){
         this.jwtUtil = jwtUtil;
         this.userRepository = userRepository;
         this.totpService = totpService;
@@ -37,6 +39,7 @@ public class MfaService {
         this.tempTokenService = tempTokenService;
         this.currentUser = currentUser;
         this.emailService = emailService;
+        this.userNotificationManager = userNotificationManager;
     }
 
     public GenerateTotpDTO generateMfa(){
@@ -93,6 +96,8 @@ public class MfaService {
 
         tempTokenService.removeToken(firstTotpValidationDTO.getTempToken());
 
+        userNotificationManager.createNotification(user, "MFA Enable request", "Successfully enabled mfa!");
+
         emailService.mfaEnabled(email);
 
         userRepository.save(user);
@@ -115,6 +120,8 @@ public class MfaService {
         userRepository.save(user);
 
         TotpSecretDTO totpSecretDTO = new TotpSecretDTO(false, null, null);
+
+        userNotificationManager.createNotification(user, "MFA Disable request", "Successfully disabled mfa!");
 
         emailService.mfaDisabled(email);
 
@@ -144,6 +151,8 @@ public class MfaService {
         tempTokenService.removeToken(tempToken);
 
         TokenDTO tokenDTO = new TokenDTO(accessToken, refreshToken, null);
+
+        userNotificationManager.createNotification(user, "Login local user", "Successfully logged in!");
 
         emailService.loginUser(email);
 

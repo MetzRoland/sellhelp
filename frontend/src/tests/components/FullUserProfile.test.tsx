@@ -1,6 +1,7 @@
 // src/tests/components/FullUserProfile.test.tsx
+
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, waitFor, fireEvent, within } from "@testing-library/react";
+import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
 import FullUserProfile from "../../components/FullUserProfile/FullUserProfile";
 import { AuthProvider } from "../../contextProviders/AuthProvider/AuthProvider";
@@ -44,8 +45,7 @@ const mockUser: User = {
   mfa: false,
   banned: false,
   createdAt: new Date(),
-  profilePicture: "",
-  accessToken: ""
+  accessToken: "",
 };
 
 describe("FullUserProfile component", () => {
@@ -76,14 +76,9 @@ describe("FullUserProfile component", () => {
       expect(privateAxios.get).toHaveBeenCalledWith("/user/users/1");
     });
 
-    const lastNameInput = await screen.findByDisplayValue("Kovács");
-    expect(lastNameInput).toBeInTheDocument();
-
-    const firstNameInput = await screen.findByDisplayValue("János");
-    expect(firstNameInput).toBeInTheDocument();
-
-    const emailNameInput = await screen.findByDisplayValue("janos@example.com");
-    expect(emailNameInput).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("Kovács")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("János")).toBeInTheDocument();
+    expect(await screen.findByDisplayValue("janos@example.com")).toBeInTheDocument();
   });
 
   it("fetches cities when settings mode is enabled", async () => {
@@ -115,22 +110,26 @@ describe("FullUserProfile component", () => {
 
     const lastNameInput = await screen.findByDisplayValue("Kovács");
 
-    const container = lastNameInput.closest("form") || lastNameInput.closest("div");
-    if (!container) throw new Error("Cannot find container for input");
+    const editButton = lastNameInput
+      .closest(".setting-container")
+      ?.querySelector("button");
 
-    // toggle edit to enable input
-    const editButton = within(container).getAllByRole("button", { name: /Módosítás|Szerkesztés/i })[0];
+    if (!editButton) throw new Error("Edit button not found");
+
+    // enable editing
     fireEvent.click(editButton);
 
+    // modify value
     fireEvent.change(lastNameInput, { target: { value: "Nagy" } });
 
-    const saveButton = within(container).getByRole("button", { name: /Mentés/i });
-    fireEvent.click(saveButton);
+    // save change
+    fireEvent.click(editButton);
 
     await waitFor(() => {
       expect(privateAxios.patch).toHaveBeenCalled();
-      expect(screen.getByText(/Frissítés sikeres/i)).toBeInTheDocument();
     });
+
+    expect(screen.getByText(/Frissítés sikeres/i)).toBeInTheDocument();
   });
 
   it("shows error message on failed update", async () => {
@@ -148,21 +147,25 @@ describe("FullUserProfile component", () => {
 
     const lastNameInput = await screen.findByDisplayValue("Kovács");
 
-    const container = lastNameInput.closest("form") || lastNameInput.closest("div");
-    if (!container) throw new Error("Cannot find container for input");
+    const editButton = lastNameInput
+      .closest(".setting-container")
+      ?.querySelector("button");
 
-    // toggle edit to enable input
-    const editButton = within(container).getAllByRole("button", { name: /Módosítás|Szerkesztés/i })[0];
+    if (!editButton) throw new Error("Edit button not found");
+
+    // enable editing
     fireEvent.click(editButton);
 
+    // modify value
     fireEvent.change(lastNameInput, { target: { value: "Nagy" } });
 
-    const saveButton = within(container).getByRole("button", { name: /Mentés/i });
-    fireEvent.click(saveButton);
+    // save change
+    fireEvent.click(editButton);
 
     await waitFor(() => {
       expect(privateAxios.patch).toHaveBeenCalled();
-      expect(screen.getByText(/Sikertelen frissítés!/i)).toBeInTheDocument();
     });
+
+    expect(screen.getByText(/Sikertelen frissítés!/i)).toBeInTheDocument();
   });
 });

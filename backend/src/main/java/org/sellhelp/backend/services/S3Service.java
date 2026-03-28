@@ -1,5 +1,7 @@
 package org.sellhelp.backend.services;
 
+import org.sellhelp.backend.dtos.responses.FileDTO;
+import org.sellhelp.backend.security.FileTypeDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -23,13 +25,15 @@ public class S3Service {
     private final S3Client s3Client;
     private final S3Presigner s3Presigner;
     private final String bucketName;
+    private final FileTypeDetector fileTypeDetector;
 
     @Autowired
     public S3Service(S3Client s3Client, S3Presigner s3Presigner,
-                     @Value("${s3.bucket}") String bucketName) {
+            @Value("${s3.bucket}") String bucketName, FileTypeDetector fileTypeDetector) {
         this.s3Client = s3Client;
         this.s3Presigner = s3Presigner;
         this.bucketName = bucketName;
+        this.fileTypeDetector = fileTypeDetector;
 
         if (!bucketExists(bucketName))
         {
@@ -63,6 +67,7 @@ public class S3Service {
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(file.getOriginalFilename())
+                .contentType(fileTypeDetector.detectType(file))
                 .build(),
                 RequestBody.fromBytes(file.getBytes())
         );
@@ -74,11 +79,11 @@ public class S3Service {
         }
 
         s3Client.putObject(PutObjectRequest.builder()
-                        .bucket(bucketName)
-                        .key(key)
-                        .build(),
-                RequestBody.fromBytes(file.getBytes())
-        );
+                .bucket(bucketName)
+                .key(key)
+                .contentType(fileTypeDetector.detectType(file))
+                .build(),
+                RequestBody.fromBytes(file.getBytes()));
     }
 
     public String uploadFileFromUrl(String imageUrl, Integer userId) {
@@ -122,7 +127,6 @@ public class S3Service {
         }
     }
 
-
     public byte[] downloadFile(String fileName) {
         try {
             return s3Client.getObjectAsBytes(
@@ -139,8 +143,8 @@ public class S3Service {
         }
     }
 
-    public void deleteFile(String fileName){
-        if(!fileExists(fileName)){
+    public void deleteFile(String fileName) {
+        if (!fileExists(fileName)) {
             throw new RuntimeException("File not found: " + fileName);
         }
 
@@ -159,6 +163,31 @@ public class S3Service {
         }
         catch (NoSuchBucketException exception) {
             return false;
+        }
+    }
+
+    public String getDownloadURL(String objectKey, boolean inline) {
+        try {
+            String fileName = Paths.get(objectKey).getFileName().toString();
+            String contentDesposition = inline ? "inline" : "attachment";
+
+            GetObjectRequest getObjectRequest = GetObjectRequest.builder()
+                    .bucket(bucketName)
+                    .key(objectKey)
+                    .responseContentDisposition(contentDesposition + "; filename=\"" + fileName + "\"")
+                    .build();
+
+            GetObjectPresignRequest presignRequest = GetObjectPresignRequest.builder()
+                    .getObjectRequest(getObjectRequest)
+                    .signatureDuration(Duration.ofMinutes(15)) // URL valid for 15 minutes
+                    .build();
+
+            return s3Presigner.presignGetObject(presignRequest).url().toString();
+
+        } catch (NoSuchKeyException e) {
+            return null;
+        } catch (S3Exception e) {
+            throw new RuntimeException("Error downloading file: " + objectKey, e);
         }
     }
 
@@ -202,18 +231,26 @@ public class S3Service {
         return "reviews/" + reviewId + "/" + fileName;
     }
 
-//    not used
-//    public String generateUploadUrl(String objectKey) {
-//        PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-//                .bucket(bucketName)
-//                .key(objectKey)
-//                .build();
-//
-//        PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-//                .putObjectRequest(putObjectRequest)
-//                .signatureDuration(Duration.ofMinutes(15)) // URL valid for 15 min
-//                .build();
-//
-//        return s3Presigner.presignPutObject(presignRequest).url().toString();
-//    }
+    public String getFileNameFromKey(String key) {
+        return key.split("/")[2];
+    }
+
+    public FileDTO createFileDTO(Integer id, String path) {
+        return new FileDTO(id, getDownloadURL(path), getDownloadURL(path, true), getFileNameFromKey(path));
+    }
+
+    // not used
+    // public String generateUploadUrl(String objectKey) {
+    // PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+    // .bucket(bucketName)
+    // .key(objectKey)
+    // .build();
+    //
+    // PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+    // .putObjectRequest(putObjectRequest)
+    // .signatureDuration(Duration.ofMinutes(15)) // URL valid for 15 min
+    // .build();
+    //
+    // return s3Presigner.presignPutObject(presignRequest).url().toString();
+    // }
 }

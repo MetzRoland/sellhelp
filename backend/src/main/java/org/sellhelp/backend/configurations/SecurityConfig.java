@@ -54,6 +54,7 @@ public class SecurityConfig {
                         "/api-docs/**",
                         "/webjars/**",
                         "/s3/**"
+                        , "/user/files/download/*", "/user/files/public/*", "/user/files/public/*/pp", "/post/files/all/*", "/post/files/*/download"
                 )
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -75,7 +76,9 @@ public class SecurityConfig {
                         "/auth/disable2fa",
                         "/auth/setup2fa",
                         "/auth/verify-totp",
-                        "/auth/login/refresh")
+                        "/auth/login/refresh",
+                        "/auth/updateForgotPassword",
+                        "/auth/forgotPasswordEmail")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -83,7 +86,10 @@ public class SecurityConfig {
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp", "/auth/login/refresh").permitAll()
+                        .requestMatchers("/auth/login", "/auth/login/superuser", "/auth/register", "/auth/verify-totp",
+                                "/auth/login/refresh", "/auth/updateForgotPassword", "/auth/forgotPasswordEmail").permitAll()
+                        .requestMatchers("/user/users/*").permitAll()
+                        .requestMatchers("/post/posts/*", "/post/posts").permitAll()
                         .requestMatchers("/auth/enable2fa", "/auth/disable2fa", "/auth/setup2fa")
                         .authenticated()
                         .requestMatchers(
@@ -92,8 +98,11 @@ public class SecurityConfig {
                                 "/user/update/details",
                                 "/user/update/email",
                                 "/user/update/password/send",
-                                "/user/update/password"
+                                "/user/update/password",
+                                "/user/files/pp/**",
+                                "/user/files/public/*/pp"
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
+                        .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/post/**").hasRole("USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
@@ -114,7 +123,7 @@ public class SecurityConfig {
     public SecurityFilterChain oauth2FilterChain(HttpSecurity http) throws Exception {
         http
                 .securityMatcher("/auth/login/google", "/auth/loginSuccess", "/oauth2/**", "/login/oauth2/**",
-                        "/auth/google/register")
+                        "/auth/google/register/**")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))

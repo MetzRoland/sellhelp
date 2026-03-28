@@ -4,23 +4,19 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
-import org.sellhelp.backend.dtos.requests.GoogleRegisterDTO;
-import org.sellhelp.backend.dtos.requests.LoginDTO;
-import org.sellhelp.backend.dtos.requests.RefreshDTO;
-import org.sellhelp.backend.dtos.requests.RegisterDTO;
+import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
-import org.sellhelp.backend.entities.City;
-import org.sellhelp.backend.entities.Role;
-import org.sellhelp.backend.entities.User;
-import org.sellhelp.backend.entities.UserSecret;
+import org.sellhelp.backend.entities.*;
 import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.exceptions.*;
 import org.sellhelp.backend.repositories.CityRepository;
+import org.sellhelp.backend.repositories.NotificationRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.DisabledException;
@@ -34,6 +30,7 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDate;
 
 @Service
@@ -50,7 +47,8 @@ public class AuthService {
     private final TempTokenService tempTokenService;
     private final EmailService emailService;
     private final CurrentUser currentUser;
-    private S3Service s3Service;
+    private final S3Service s3Service;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public AuthService(UserRepository userRepository, RoleRepository roleRepository,
@@ -58,7 +56,7 @@ public class AuthService {
                        ModelMapper modelMapper, UserDetailsService userDetailsService,
                        AuthenticationManager authenticationManager, JWTUtil jwtUtil,
                        EmailService emailService, TempTokenService tempTokenService, CurrentUser currentUser,
-                       S3Service s3Service){
+                       S3Service s3Service, UserNotificationManager userNotificationManager){
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.cityRepository = cityRepository;
@@ -71,6 +69,7 @@ public class AuthService {
         this.emailService = emailService;
         this.currentUser = currentUser;
         this.s3Service = s3Service;
+        this.userNotificationManager = userNotificationManager;
     }
 
     public void registerLocalUser(RegisterDTO registerDTO, UserRole userRole){
@@ -99,6 +98,9 @@ public class AuthService {
         user.setUserSecret(userSecret);
 
         userRepository.save(user);
+
+        userNotificationManager.createNotification(user, "Register local user", "Successfully registered!");
+
         emailService.registerUser(user.getEmail(), user.getFirstName(), user.getLastName());
     }
 
@@ -137,6 +139,8 @@ public class AuthService {
         if(!user.getUserSecret().isMfa() && user.getUserSecret().getTotpSecret() == null){
             String accessToken = jwtUtil.generateAccessToken(loginDTO.getEmail());
             String refreshToken = jwtUtil.generateRefreshToken(loginDTO.getEmail());
+
+            userNotificationManager.createNotification(user, "Login local user", "Successfully logged in!");
 
             emailService.loginUser(loginDTO.getEmail());
 
@@ -212,25 +216,12 @@ public class AuthService {
 
             tokenDTO.setTempToken(tempTokenService.create(email));
 
+            userNotificationManager.createNotification(newUser, "Register google user", "Successfully registered google user!");
+
             emailService.registerUser(email, firstName, lastName);
 
             return userRepository.save(newUser);
         });
-
-        /*
-        if(!user.getFirstName().equals(firstName)){
-            user.setFirstName(firstName);
-        }
-
-        if(!user.getLastName().equals(lastName)){
-            user.setLastName(lastName);
-        }
-
-        user.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, user.getId()));
-
-        userRepository.save(user);
-        */
-
 
         if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
 
@@ -254,6 +245,8 @@ public class AuthService {
 
             tokenDTO.setAccessToken(accessToken);
             tokenDTO.setRefreshToken(refreshToken);
+
+            userNotificationManager.createNotification(user, "Login google user", "Successfully logged in!");
 
             emailService.loginUser(email);
         }
@@ -293,8 +286,63 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(email);
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
+        userNotificationManager.createNotification(user, "Login google user", "Successfully logged in!");
+
         emailService.loginUser(email);
 
         return new TokenDTO(accessToken, refreshToken, null);
+    }
+
+    public void forgotUserPasswordEmailNotification(EmailUpdateDTO emailUpdateDTO) {
+        if(currentUser.getCurrentlyLoggedUserEntity() != null){
+            throw new RuntimeException("Bejelentkezett felhasználók nem kérhetnek visszaállító emailt!");
+        }
+
+        String email = emailUpdateDTO.getEmail();
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        if(user.getAuthProvider().equals(AuthProvider.GOOGLE)){
+            throw new RuntimeException("Google felhasználók csak a google fiókban állíthatnak helyre jelszót!");
+        }
+
+        userNotificationManager.createNotification(user, "Requested forgotten password email", "Successfully sent forgotten password email!");
+
+        emailService.updatePassword(email, true);
+    }
+
+    public void updateForgotUserPassword(PasswordUpdateDTO passwordUpdateDTO) {
+        if(currentUser.getCurrentlyLoggedUserEntity() != null){
+            throw new RuntimeException("Bejelentkezett felhasználók nem állíthatják helyre jelszavukat!");
+        }
+
+        String email = jwtUtil.extractEmail(passwordUpdateDTO.getToken());
+        UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+
+        if (!jwtUtil.validatePasswordUpdateToken(passwordUpdateDTO.getToken(), userDetails)){
+            throw new InvalidTokenException("A jelszómódosító token nem érvényes!");
+        }
+
+        User user = userRepository.findByEmail(email).orElseThrow(
+                () -> new UserNotFoundException("A felhasználó nem található!")
+        );
+
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg a jelenlegi jelszóval!");
+        }
+
+        if(passwordEncoder.matches(passwordUpdateDTO.getPassword(), user.getUserSecret().getLastUsedPassword())){
+            throw new RuntimeException("Az új jelszó nem egyezhet meg az előző jelszóval!");
+        }
+
+        user.getUserSecret().setPassword(passwordEncoder.encode(passwordUpdateDTO.getPassword()));
+
+        userRepository.save(user);
+
+        userNotificationManager.createNotification(user, "Forgotten password updated", "Successfully updated forgotten password!");
+
+        emailService.updatePasswordSuccess(email);
     }
 }

@@ -2,7 +2,7 @@ package org.sellhelp.backend.entities;
 
 import java.time.Instant;
 
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -36,6 +36,6 @@ public class Notification {
     private String message;
 
     @Column(name = "sent_at")
-    @CurrentTimestamp
+    @CreationTimestamp
     private Instant sentAt;
 }

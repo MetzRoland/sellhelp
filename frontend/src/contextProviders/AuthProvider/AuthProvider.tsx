@@ -14,7 +14,7 @@ import type {
   GoogleRegister,
 } from "./AuthProviderTypes";
 import { AuthContext } from "./AuthContext";
-import { useLocation } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
@@ -33,10 +33,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [tempToken, setTempToken] = useState<string | null>(null);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadUser = async () => {
+      if (location.pathname === "/finishGoogleRegistration") {
+        setAuthLoading(false);
+        return;
+      }
+
       setAuthLoading(true);
+
       try {
         const res = await privateAxios.get<User>("/user/info");
         setUser(res.data);
@@ -50,7 +57,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
 
     loadUser();
-  }, []);
+  }, [location.pathname]);
 
   useLayoutEffect(() => {
     const authInterceptor = privateAxios.interceptors.request.use(
@@ -81,7 +88,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         const url = originalRequest?.url;
 
         const isMfaEndpoint =
-          url?.includes("/auth/enable2fa") || url?.includes("/user/update/password");
+          url?.includes("/auth/enable2fa") ||
+          url?.includes("/user/update/password");
 
         if (isMfaEndpoint) {
           return Promise.reject(error);
@@ -186,8 +194,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const finishGoogleRegistration = async (registerData: GoogleRegister) => {
     try {
-      await privateAxios.get("/auth/loginSuccess");
-
       const queryParams = new URLSearchParams(location.search);
       const tempToken = queryParams.get("tempToken");
       setTempToken(tempToken);
@@ -203,17 +209,23 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
       setAuthError(null);
       setGoogleRegisterErrors({ cityName: "", birthDate: "" });
+
+      navigate("/home");
     } catch (error) {
       const err = error as AxiosError<{
         message?: string;
         errors?: GoogleRegister;
       }>;
+
+      console.log(err.response?.data?.message);
       setAuthError(
         err.response?.data?.message ?? "Sikertelen google fiók regisztráció!",
       );
       setGoogleRegisterErrors(
         err.response?.data?.errors ?? { cityName: "", birthDate: "" },
       );
+
+      throw err;
     }
   };
 
@@ -230,6 +242,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setValidationErrors({ email: "", password: "", totpCode: "" });
 
       localStorage.removeItem("profilePicture");
+      navigate("/login");
     }
   };
 

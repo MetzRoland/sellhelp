@@ -1,17 +1,17 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
-import UserBanning from "../../components/UserBanning/UserBanning";
-import { privateAxios } from "../../config/axiosConfig";
+import UserList from "../../components/UserList/UserList";
+import { privateAxios, publicAxios } from "../../config/axiosConfig";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 
-interface UserProfileViewProps {
+interface MockUserProfileViewProps {
   userAccount: User;
-  handleUserBanning: (userId: number, isBanned: boolean) => void;
+  handleUserBanning?: (userId: number, isBanned: boolean) => void;
 }
 
-interface InputFormProps {
+interface MockInputFormProps {
   formData: {
     userName?: string;
   };
@@ -34,23 +34,28 @@ vi.mock("../../components/Footer/Footer", () => ({
 }));
 
 vi.mock("../../components/UserProfileView/UserProfileView", () => ({
-  default: ({ userAccount, handleUserBanning }: UserProfileViewProps) => (
+  default: ({ userAccount, handleUserBanning }: MockUserProfileViewProps) => (
     <div data-testid="user-profile">
       <span>
         {userAccount.firstName} {userAccount.lastName}
       </span>
-      <button
-        data-testid={`ban-btn-${userAccount.id}`}
-        onClick={() => handleUserBanning(userAccount.id, userAccount.banned)}
-      >
-        {userAccount.banned ? "Unban" : "Ban"}
-      </button>
+
+      {handleUserBanning && (
+        <button
+          data-testid={`ban-btn-${userAccount.id}`}
+          onClick={() =>
+            handleUserBanning(userAccount.id, userAccount.banned)
+          }
+        >
+          {userAccount.banned ? "Unban" : "Ban"}
+        </button>
+      )}
     </div>
   ),
 }));
 
 vi.mock("../../components/Reusables/InputForm/InputForm", () => ({
-  default: ({ formData, handleFunction }: InputFormProps) => (
+  default: ({ formData, handleFunction }: MockInputFormProps) => (
     <input
       data-testid="mock-input"
       value={formData.userName ?? ""}
@@ -68,9 +73,12 @@ vi.mock("../../config/axiosConfig", () => ({
     get: vi.fn(),
     put: vi.fn(),
   },
+  publicAxios: {
+    get: vi.fn(),
+  },
 }));
 
-describe("UserBanning Component Core Logic", () => {
+describe("UserList Component Core Logic", () => {
   const setIsLoading = vi.fn();
   const setLoadingMessage = vi.fn();
 
@@ -94,7 +102,7 @@ describe("UserBanning Component Core Logic", () => {
         });
       }
 
-      if (url === "/superuser/users") {
+      if (url === "/superuser/users" || url === "/user/users") {
         return Promise.resolve({
           data: [
             {
@@ -104,6 +112,7 @@ describe("UserBanning Component Core Logic", () => {
               email: "john@example.com",
               banned: false,
               role: "ROLE_USER",
+              cityName: "Budapest",
             },
             {
               id: 2,
@@ -112,18 +121,20 @@ describe("UserBanning Component Core Logic", () => {
               email: "jane@example.com",
               banned: true,
               role: "ROLE_MODERATOR",
+              cityName: "Pecs",
             },
           ],
         });
       }
 
-      if (url.startsWith("/user/files/")) {
-        return Promise.resolve({
-          data: { profilePictureUrl: "mock-url" },
-        });
-      }
-
       return Promise.resolve({ data: [] });
+    });
+
+    vi.mocked(publicAxios.get).mockResolvedValue({
+      data: [
+        { id: 1, cityName: "Budapest" },
+        { id: 2, cityName: "Pecs" },
+      ],
     });
 
     vi.mocked(privateAxios.put).mockResolvedValue({
@@ -134,11 +145,12 @@ describe("UserBanning Component Core Logic", () => {
   it("renders users and header/footer", async () => {
     render(
       <MemoryRouter>
-        <UserBanning />
+        <UserList isAdmin />
       </MemoryRouter>,
     );
 
     const userProfiles = await screen.findAllByTestId("user-profile");
+
     expect(userProfiles).toHaveLength(2);
     expect(screen.getByText("Header")).toBeInTheDocument();
     expect(screen.getByText("Footer")).toBeInTheDocument();
@@ -147,11 +159,12 @@ describe("UserBanning Component Core Logic", () => {
   it("can ban a user", async () => {
     render(
       <MemoryRouter>
-        <UserBanning />
+        <UserList isAdmin />
       </MemoryRouter>,
     );
 
     const banBtn = await screen.findByTestId("ban-btn-1");
+
     fireEvent.click(banBtn);
 
     await waitFor(() => {
@@ -162,30 +175,35 @@ describe("UserBanning Component Core Logic", () => {
   it("can unban a banned user", async () => {
     render(
       <MemoryRouter>
-        <UserBanning />
+        <UserList isAdmin />
       </MemoryRouter>,
     );
 
     const unbanBtn = await screen.findByTestId("ban-btn-2");
+
     fireEvent.click(unbanBtn);
 
     await waitFor(() => {
-      expect(privateAxios.put).toHaveBeenCalledWith("/superuser/users/unban/2");
+      expect(privateAxios.put).toHaveBeenCalledWith(
+        "/superuser/users/unban/2",
+      );
     });
   });
 
   it("filters users by username", async () => {
     render(
       <MemoryRouter>
-        <UserBanning />
+        <UserList />
       </MemoryRouter>,
     );
 
     const input = await screen.findByTestId("mock-input");
+
     fireEvent.change(input, { target: { value: "Jane" } });
 
     await waitFor(() => {
       const userProfiles = screen.getAllByTestId("user-profile");
+
       expect(userProfiles).toHaveLength(1);
       expect(userProfiles[0]).toHaveTextContent("Jane Smith");
     });

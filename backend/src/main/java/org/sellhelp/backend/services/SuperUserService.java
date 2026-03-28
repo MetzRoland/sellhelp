@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import org.modelmapper.ModelMapper;
+import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
@@ -9,6 +10,7 @@ import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.PostRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,20 +24,20 @@ public class SuperUserService {
     private final UserRepository userRepository;
     private final ModelMapper modelMapper;
     private final EmailService emailService;
-    private final S3Service s3Service;
     private final UserService userService;
     private final PostRepository postRepository;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public SuperUserService(UserRepository userRepository, ModelMapper modelMapper,
-                            EmailService emailService, S3Service s3Service, UserService userService,
-                            PostRepository postRepository){
+                            EmailService emailService, UserService userService,
+                            PostRepository postRepository, UserNotificationManager userNotificationManager){
         this.userRepository = userRepository;
         this.modelMapper = modelMapper;
         this.emailService = emailService;
-        this.s3Service = s3Service;
         this.userService = userService;
         this.postRepository = postRepository;
+        this.userNotificationManager = userNotificationManager;
     }
 
     private boolean hasRole(String role) {
@@ -47,6 +49,8 @@ public class SuperUserService {
     public UserDTO banUser(Integer userId) {
         UserDTO userDTO = changeBanStatus(userId, true);
 
+        userNotificationManager.createNotification(modelMapper.map(userDTO, User.class), "User banned", "User got banned successfully!");
+
         emailService.banUser(userRepository.findById(userId).get().getEmail());
 
         return userDTO;
@@ -54,6 +58,8 @@ public class SuperUserService {
 
     public UserDTO unbanUser(Integer userId) {
         UserDTO userDTO = changeBanStatus(userId, false);
+
+        userNotificationManager.createNotification(modelMapper.map(userDTO, User.class), "User enabled after ban", "User got successfully enabled after banning!");
 
         emailService.unbanUser(userRepository.findById(userId).get().getEmail());
 
@@ -112,11 +118,22 @@ public class SuperUserService {
                 );
     }
 
+    public List<OwnedPostResponseDTO> getAllPosts(){
+        return postRepository.findAll().stream()
+                .map(post -> modelMapper.map(post, OwnedPostResponseDTO.class)).toList();
+    }
+
     public void deletePost(Integer postId){
         Post post = postRepository.findById(postId).orElseThrow(
                 () -> new EntityNotFoundException("A poszt nem található!")
         );
 
         postRepository.delete(post);
+    }
+
+    public OwnedPostResponseDTO getPostById(Integer postId) {
+        return modelMapper.map(postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem található!")
+        ), OwnedPostResponseDTO.class);
     }
 }

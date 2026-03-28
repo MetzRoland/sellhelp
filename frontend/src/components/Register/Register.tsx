@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
-import Header from "./../Header/Header";
+import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
 import InputForm from "../Reusables/InputForm/InputForm";
 import type {
@@ -16,10 +16,10 @@ import "./Register.css";
 
 function Register() {
     const registerInputs = [
-        { name: "lastName", type: "text", placeholder: "Vezetéknév" },
+        { name: "lastName", type: "text", placeholder: "Vezetéknév" }, 
         { name: "firstName", type: "text", placeholder: "Keresztnév" },
         { name: "birthDate", type: "date", placeholder: "Születési dátum" },
-        { name: "cityName", type: "select", placeholder: "Válasszon települést" },
+        { name: "cityName", type: "select", placeholder: "Válasszon települést..." , userTitle: "Település"},
         { name: "email", type: "text", placeholder: "Email" },
         { name: "password", type: "password", placeholder: "Jelszó" },
     ] as const;
@@ -50,7 +50,11 @@ function Register() {
                 setIsLoading(true);
                 const response = await publicAxios.get("/api/public/cities");
                 setCities(response.data);
-            } finally {
+            }
+            catch{
+                setCities([]);
+            }
+            finally {
                 setIsLoading(false);
             }
         };
@@ -65,7 +69,7 @@ function Register() {
     }));
 
     const handleRegisterInput = (
-        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+        e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
     ) => {
         const { name, value } = e.target;
 

@@ -6,8 +6,10 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.entities.UserFile;
 import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
+import org.sellhelp.backend.exceptions.WrongFileTypeException;
 import org.sellhelp.backend.repositories.UserFileRepository;
 import org.sellhelp.backend.repositories.UserRepository;
+import org.sellhelp.backend.security.FileTypeDetector;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,13 +24,15 @@ public class UserFileService {
     private final S3Service s3Service;
     private final UserRepository userRepository;
     private final UserFileRepository userFileRepository;
+    private final FileTypeDetector fileTypeDetector;
 
     @Autowired
     public UserFileService(S3Service s3Service, UserRepository userRepository,
-                    UserFileRepository userFileRepository) {
+                           UserFileRepository userFileRepository, FileTypeDetector fileTypeDetector) {
         this.s3Service = s3Service;
         this.userRepository = userRepository;
         this.userFileRepository = userFileRepository;
+        this.fileTypeDetector = fileTypeDetector;
     }
 
     public List<FileDTO> getAllUserFiles(String email) {
@@ -40,10 +44,8 @@ public class UserFileService {
         List<FileDTO> fileDtos = new ArrayList<>();
         try {
 
-            for (UserFile file : files)
-            {
-                String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url));
+            for (UserFile file : files) {
+                fileDtos.add(s3Service.createFileDTO(file.getId(), file.getFilePath()));
             }
 
         }
@@ -64,10 +66,8 @@ public class UserFileService {
         List<FileDTO> fileDtos = new ArrayList<>();
         try {
 
-            for (UserFile file : files)
-            {
-                String url = s3Service.getDownloadURL(file.getFilePath());
-                fileDtos.add(new FileDTO(file.getId(), url));
+            for (UserFile file : files) {
+                fileDtos.add(s3Service.createFileDTO(file.getId(), file.getFilePath()));
             }
 
         }
@@ -93,9 +93,8 @@ public class UserFileService {
 
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
-        }
-        catch (NoSuchKeyException e) {
+            return s3Service.createFileDTO(file.getId(), file.getFilePath());
+        } catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
         }
         catch (Exception e) {
@@ -109,9 +108,8 @@ public class UserFileService {
         );
 
         try {
-            return new FileDTO(file.getId(), s3Service.getDownloadURL(file.getFilePath()));
-        }
-        catch (NoSuchKeyException e) {
+            return s3Service.createFileDTO(file.getId(), file.getFilePath());
+        } catch (NoSuchKeyException e) {
             throw new RuntimeException("Nincs ilyen fájl!");
         }
         catch (Exception e) {
@@ -124,6 +122,10 @@ public class UserFileService {
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
 
+        String key = s3Service.userFileKey(user.getId(), file.getOriginalFilename());
+        if (userFileRepository.findByFilePath(key).isPresent())
+        {throw new RuntimeException("Ez a fájl már létezik");}
+
         if (userFileRepository.countByUser(user) >= 10)
         {
             throw new RuntimeException("Maximum 10 fájlt lehet feltölteni.");
@@ -131,7 +133,7 @@ public class UserFileService {
 
         UserFile newFile = UserFile.builder()
                 .user(user)
-                .filePath(s3Service.userFileKey(user.getId(), file.getOriginalFilename()))
+                .filePath(key)
                 .build();
 
         try {
@@ -169,15 +171,17 @@ public class UserFileService {
         }
     }
 
-    public ProfilePictureDTO getProfilePictureByUser(User user){
+    public ProfilePictureDTO getProfilePictureByUser(User user) {
         if (user.getProfilePicturePath() == null) {
             return new ProfilePictureDTO(null);
         }
 
-//        if (user.getAuthProvider() == AuthProvider.GOOGLE
-//                && user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/")) {
-//            return new ProfilePictureDTO(user.getProfilePicturePath());
-//        }
+        // if (user.getAuthProvider() == AuthProvider.GOOGLE
+        // &&
+        // user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/"))
+        // {
+        // return new ProfilePictureDTO(user.getProfilePicturePath());
+        // }
 
         return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
     }
@@ -201,6 +205,9 @@ public class UserFileService {
         User user = userRepository.findByEmail(email).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
+
+        if (!fileTypeDetector.detectType(file).startsWith("image/"))
+        {throw new WrongFileTypeException("A fájl kép kell legyen!");}
 
         String key = s3Service.ppKey(user.getId());
 

@@ -1,7 +1,7 @@
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useParams, useNavigate } from "react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
 import Header from "../Header/Header";
 import Footer from "../Footer/Footer";
@@ -16,13 +16,17 @@ import type {
 import { AxiosError } from "axios";
 import { type City } from "../Register/RegisterTypes";
 import type { UserUpdateFormFields } from "./FullUserProfileTypes";
+import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
+
+import "./FullUserProfile.css";
 
 interface FullUserProfileProps {
   settings?: boolean;
 }
 
 function FullUserProfile({ settings }: FullUserProfileProps) {
-  const { user: authUser } = useAuth();
+  const { user: authUser, isAuthenticated } = useAuth();
   const { id } = useParams();
 
   const [user, setUser] = useState<User | null>(null);
@@ -30,6 +34,37 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const [cities, setCities] = useState<City[]>([]);
 
   const navigator = useNavigate();
+
+  const handleProfilePictureUpdate = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
+    if (!e.target.files?.[0]) return;
+
+    const file: File = e.target.files?.[0];
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      setIsLoading(true);
+      setLoadingMessage("Profilkép frissítése...");
+
+      await privateAxios.post("/user/files/pp", formData, {
+        transformRequest: (data) => data,
+      });
+
+      setSuccess(true);
+      setUserUpdateError("");
+
+      location.reload();
+    } catch {
+      setUserUpdateError("Profilkép frissítése sikertelen!");
+      setSuccess(false);
+    } finally {
+      setIsLoading(false);
+      e.target.value = "";
+    }
+  };
 
   const userUpdateInputs = [
     { name: "lastName", type: "text", placeholder: "Vezetéknév" },
@@ -71,6 +106,8 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const [validationErrors, setValidationErrors] =
     useState<UserUpdateValidationErrors>({});
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   const [formData, setFormData] = useState<UserUpdateFormFields>({
     lastName: "",
     firstName: "",
@@ -95,6 +132,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
     const fetchUserById = async () => {
       setIsLoading(true);
+
       try {
         setLoadingMessage("A fiók adatainak betöltése...");
 
@@ -127,7 +165,18 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchCities();
   }, [setIsLoading, settings]);
 
-  const setUserData = () => {
+  // const setUserData = () => {
+  //   setFormData({
+  //     lastName: user?.lastName,
+  //     firstName: user?.firstName,
+  //     birthDate: user?.birthDate?.toString(),
+  //     cityName: user?.cityName,
+  //     email: user?.email,
+  //     role: getUserRoleLabel(user?.role),
+  //   });
+  // };
+
+  useEffect(() => {
     setFormData({
       lastName: user?.lastName,
       firstName: user?.firstName,
@@ -136,10 +185,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       email: user?.email,
       role: getUserRoleLabel(user?.role),
     });
-  };
-
-  useEffect(() => {
-    setUserData();
   }, [user]);
 
   if (isLoading && !user) {
@@ -168,14 +213,16 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     if (typeof newValue === "string" && newValue.trim() === "") return {};
 
     if (newValue === original[fieldName]) {
-      return {  };
+      return {};
     }
 
     return { [fieldName]: newValue };
   };
 
   const handleUpdateInput = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>,
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >,
   ) => {
     const { name, value } = e.target;
 
@@ -216,7 +263,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       const payload = getUpdatedField(user, formData, inputName);
 
       if (Object.keys(payload).length === 0) {
-        setFormData(prev => ({ ...prev, [inputName]: user[inputName] }));
+        setFormData((prev) => ({ ...prev, [inputName]: user[inputName] }));
         return;
       }
 
@@ -231,7 +278,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
         if (response.status === 200) {
           setSuccess(true);
-          setUser(prev => prev ? { ...prev, ...payload } as User : prev);
+          setUser((prev) => (prev ? ({ ...prev, ...payload } as User) : prev));
           setUserUpdateError("");
           setValidationErrors({});
         }
@@ -303,13 +350,67 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     ? "Adatok módosítása"
     : `${user.lastName} ${user.firstName}`;
 
+  const deleteProfilePicture = async () => {
+    try {
+      setIsLoading(true);
+      setLoadingMessage("Profilkép törlése...");
+
+      const response = await privateAxios.delete("/user/files/pp");
+
+      if (response.status === 200) {
+        setSuccess(true);
+        setUserUpdateError("");
+
+        setUser((prev) => (prev ? { ...prev } : prev));
+
+        location.reload();
+      }
+    } catch {
+      setUserUpdateError("Profilkép törlése sikertelen!");
+      setSuccess(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <>
       <Header />
       <div className="main-container">
         <h1 className="content-title">{title}</h1>
 
-        <form className="content-container login-form">
+        <form className="content-container content-container-has-pfp">
+          <div className="profile-picture-container">
+            <ProfilePictureComponent userId={user.id} />
+
+            {settings && user.id === authUser?.id && (
+              <>
+                <input
+                  type="file"
+                  accept="image/*"
+                  ref={fileInputRef}
+                  onChange={handleProfilePictureUpdate}
+                  style={{ display: "none" }}
+                />
+
+                <button
+                  type="button"
+                  className="setting-btn"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  Módosítás
+                </button>
+
+                <button
+                  type="button"
+                  className="setting-btn"
+                  onClick={deleteProfilePicture}
+                >
+                  Törlés
+                </button>
+              </>
+            )}
+          </div>
           {userUpdateError && (
             <p className="message error error-process-status">
               {userUpdateError}
@@ -332,6 +433,10 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
+          {(user.banned && isAuthenticated) && (
+            <p className="message error">A felhasználót bannolták!</p>
+          )}
+
           {settings && user.authProvider === "LOCAL" && (
             <>
               <button className="btn" type="button" onClick={sendPassUpdate}>
@@ -343,6 +448,14 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
                   : "Két faktoros hitelesítés bekapcsolása"}
               </button>
             </>
+          )}
+
+          {user.role === "ROLE_USER" && (
+            <FileDisplay
+              type="user"
+              id={user.id}
+              canEdit={user.id === authUser?.id && settings}
+            />
           )}
         </form>
       </div>

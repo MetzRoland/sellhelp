@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatMessage;
@@ -16,7 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import static org.junit.jupiter.api.Assertions.*;
 
 @DataJpaTest
-class ChatRepositoryTest {
+public class ChatRepositoryTest {
 
     @Autowired
     private ChatRepository chatRepository;
@@ -53,6 +54,7 @@ class ChatRepositoryTest {
     }
 
     @Test
+    @DisplayName("Chat can be added to repository and DB")
     void chatCanBeAddedToRepositoryAndDB()
     {
         Chat savedChat = chatRepository.save(testChat);
@@ -63,6 +65,7 @@ class ChatRepositoryTest {
     }
 
     @Test
+    @DisplayName("Chat can be updated in repository and DB")
     void chatCanBeUpdatedToRepositoryAndDB()
     {
         Chat savedChat = chatRepository.save(testChat);
@@ -70,12 +73,12 @@ class ChatRepositoryTest {
 
         ArrayList<ChatMessage> chatMessages =
                 new ArrayList<ChatMessage>(List.of(
-                ChatMessage.builder()
-                        .chat(savedChat)
-                        .messageSender(testhost)
-                        .message("Halo")
-                        .build()
-        ));
+                        ChatMessage.builder()
+                                .chat(savedChat)
+                                .messageSender(testhost)
+                                .message("Halo")
+                                .build()
+                ));
         savedChat.setChatMessages(chatMessages);
         Chat updatedChat = chatRepository.save(savedChat);
 
@@ -86,6 +89,7 @@ class ChatRepositoryTest {
     }
 
     @Test
+    @DisplayName("Chat can be deleted from repository and DB")
     void chatCanBeDeletedFromRepositoryAndDB()
     {
         Chat savedChat = chatRepository.save(testChat);

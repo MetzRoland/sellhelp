@@ -1,4 +1,5 @@
 import type { ProccessLoadProp } from "./ProccessLoadTypes";
+
 import "./ProccessLoad.css";
 
 function ProccessLoad({ message }: ProccessLoadProp){

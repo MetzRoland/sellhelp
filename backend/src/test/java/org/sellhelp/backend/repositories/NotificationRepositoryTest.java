@@ -1,13 +1,13 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Notification;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 
 @DataJpaTest
 public class NotificationRepositoryTest {
@@ -25,17 +25,17 @@ public class NotificationRepositoryTest {
     }
 
     @Test
+    @DisplayName("Notification can be added to repository and DB")
     public void notificationFileCanBeAddedToNotificationFileRepositoryAndDB(){
         Notification savedNotification = notificationRepository.save(testNotification);
 
         assertNotNull(savedNotification.getId());
-
         assertEquals("Notification 1", savedNotification.getTitle());
         assertEquals("Notification 1 message", savedNotification.getMessage());
-
     }
 
     @Test
+    @DisplayName("Notification can be updated in repository and DB")
     public void notificationFileCanBeUpdatedTonotificationFileRepositoryAndDB(){
         notificationRepository.save(testNotification);
 
@@ -45,12 +45,12 @@ public class NotificationRepositoryTest {
         Notification updatedNotification = notificationRepository.save(testNotification);
 
         assertNotNull(updatedNotification.getId());
-
         assertEquals("Title updated", updatedNotification.getTitle());
         assertEquals("Message updated", updatedNotification.getMessage());
     }
 
     @Test
+    @DisplayName("Notification can be deleted from repository and DB")
     public void notificationFileCanBeDeletedFromNotificationFileRepositoryAndDB(){
         Notification savedNotification = notificationRepository.save(testNotification);
         Integer savedNotificationId = savedNotification.getId();
@@ -61,13 +61,12 @@ public class NotificationRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for Notification repository")
     public void userGeneralCRUDFunctionalityTest(){
         Notification savedNotification = notificationRepository.save(testNotification);
-
         Integer savedNotificationId = savedNotification.getId();
 
         assertNotNull(savedNotificationId);
-
         assertEquals("Notification 1", savedNotification.getTitle());
         assertEquals("Notification 1 message", savedNotification.getMessage());
 

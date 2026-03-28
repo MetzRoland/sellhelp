@@ -39,15 +39,20 @@ body {
   text-align: center;
 }
 
+.disappear {
+  display: none;
+}
+
 /* ===================== */
 /* CONTENT CARD          */
 /* ===================== */
 
 .content-container {
   margin: 1.5rem auto;
-  min-width: 25vw;
-  width: 100%;
-  max-width: 90vw;
+
+  width: 50%;
+  max-width: 800px;
+  min-width: 500px;
 
   background-color: #3C3B3A;
 
@@ -57,13 +62,50 @@ body {
 
   border-radius: 20px;
   padding: 1.5em;
+  box-sizing: border-box;
 
   box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
-.content-title
-{
+.filter-container {
+  background-color: transparent;
+  box-shadow: none;
+}
+
+.content-title {
   font-size: 300%;
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+/* ===================== */
+/* PROFILE PICTURE BLOCK */
+/* ===================== */
+
+.profile-picture-container {
+  position: relative;
+  margin-top: -4rem;
+  /* lift above card */
+  margin-bottom: 1.5rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* Buttons row under image */
+.profile-picture-container .setting-btn {
+  width: 160px;
+}
+
+/* Button group wrapper */
+.profile-picture-container .setting-btn+.setting-btn {
+  margin-top: -0.5rem;
+}
+
+.content-container-has-pfp {
+  margin-top: 3rem;
 }
 
 /* ===================== */
@@ -124,11 +166,9 @@ body {
   appearance: none;
   -webkit-appearance: none;
 
-  background: linear-gradient(
-    90deg,
-    rgba(122, 122, 122, 1) 0%,
-    rgba(51, 51, 51, 1) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(122, 122, 122, 1) 0%,
+      rgba(51, 51, 51, 1) 100%);
 
   color: #ffffff;
   font-size: 1rem;
@@ -153,11 +193,9 @@ body {
 
 .input-element:disabled {
   border: none;
-  background: linear-gradient(
-    45deg,
-    rgb(80, 80, 80) 0%,
-    rgba(51, 51, 51, 1) 20%
-  );
+  background: linear-gradient(45deg,
+      rgb(80, 80, 80) 0%,
+      rgba(51, 51, 51, 1) 20%);
 }
 
 .select-input-element option {
@@ -165,12 +203,17 @@ body {
   background-color: #ffffff;
 }
 
+.textarea-element {
+  resize: none;
+  height: fit-content;
+}
+
 /* ===================== */
 /* BUTTONS               */
 /* ===================== */
 
 .btn {
-  width: 100%;
+  width: 100% !important;
   max-width: 320px;
 
   background-color: #212121;
@@ -225,18 +268,51 @@ body {
     inset 0px 6px 4px rgba(234, 234, 234, 0.5);
 }
 
+.btn-danger {
+  color: #eaeaea;
+  box-shadow:
+    inset -3px 0px 2px rgba(190, 44, 44, 0.5),
+    inset 3px 0px 2px rgba(190, 44, 44, 0.5),
+    inset 0px -3px 2px rgba(190, 44, 44, 0.5),
+    inset 0px 3px 2px rgba(190, 44, 44, 0.5);
+}
+
+.btn-danger:hover {
+  box-shadow:
+    inset -6px 0px 4px rgba(190, 44, 44, 0.5),
+    inset 6px 0px 4px rgba(190, 44, 44, 0.5),
+    inset 0px -6px 4px rgba(190, 44, 44, 0.5),
+    inset 0px 6px 4px rgba(190, 44, 44, 0.5);
+}
+
 /* ========================= */
 /* BUTTONS FOR SETTINGS      */
 /* ========================= */
 
-.setting-container{
+.setting-container {
   display: flex;
-  gap: 1rem;
+  flex-direction: column;
+  gap: 0.3rem;
   margin-bottom: 1rem;
   width: 100%;
 }
 
-.setting-btn{
+.setting-label {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 0.25rem;
+  letter-spacing: 0.5px;
+}
+
+.setting-input-row {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  width: 100%;
+}
+
+.setting-btn {
   background-color: #212121;
   border: 1px transparent;
   color: #afafaf;
@@ -253,51 +329,149 @@ body {
   transition: all .4s;
 }
 
-.setting-btn:hover{
-    color: #eaeaea;
-    cursor: pointer;
+.setting-btn:hover {
+  color: #eaeaea;
+  cursor: pointer;
 }
 
-.setting-btn:disabled{
+.setting-btn:disabled {
   color: #8D8D8D;
   background-color: #4e4e4e;
   cursor: no-drop;
 }
 
+.post-status{
+  align-self: flex-end;
+  font-size: 0.85rem;
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+
+/* New */
+.post-status.new{
+  color: #084298;
+  background: #cfe2ff;
+}
+
+/* Accepted */
+.post-status.accepted{
+  color: #664d03;
+  background: #fff3cd;
+}
+
+/* Started */
+.post-status.started{
+  color: #7a3e00;
+  background: #ffe5d0;
+}
+
+/* Completed */
+.post-status.completed_by_employee{
+  color: #0f5132;
+  background: #d1e7dd;
+}
+
+/* Unsuccessful */
+.post-status.unsuccessful_result_closed{
+  color: #842029;
+  background: #f8d7da;
+}
+
+/* Work rejected */
+.post-status.work_rejected{
+  color: #5a2d82;
+  background: #e2d5f1;
+}
+
+/* Closed */
+.post-status.closed{
+  color: #41464b;
+  background: #e2e3e5;
+}
+
+.post-date.post-status {
+  font-weight: 600;
+  color: #2ecc71;
+}
+
+.post-status-details{
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
 /* ===================== */
-/* MEDIA QUERIES         */
+/* EXTRA RESPONSIVENESS FIXES */
 /* ===================== */
 
-@media (max-width: 480px) {
-  .main-container {
+/* Small phones (up to 400px) */
+@media (max-width: 400px) {
+  .content-container {
+    min-width: 0; /* override the 500px issue */
     padding: 1rem;
   }
 
-  .content-container {
-    width: 100%;
-    max-width: calc(100% - 2rem); /* 👈 space from sides */
-    margin: 1.5rem auto;
-    padding: 1.25em;
-    border-radius: 14px;
+  .content-title {
+    font-size: 180%;
   }
 
   .btn {
-    font-size: 1.1rem;
-    padding: 0.85em;
+    font-size: 1rem;
+    padding: 0.75em;
   }
 }
 
-
-/* Tablets */
-@media (min-width: 481px) and (max-width: 768px) {
+/* Phones (up to 600px) */
+@media (max-width: 600px) {
   .content-container {
-    max-width: 400px;
+    min-width: 0;
+  }
+
+  .content-title {
+    font-size: 180%;
+  }
+
+  .title-option{
+    font-size: 80%;
+  }
+
+  .setting-input-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .setting-btn {
+    width: 100%; /* full width buttons */
   }
 }
 
-/* Large Screens */
-@media (min-width: 1024px) {
+/* Tablets (600px – 1024px) */
+@media (max-width: 1024px) {
   .content-container {
-    max-width: 460px;
+    width: 80%;
+    min-width: 0;
+  }
+
+  .btn {
+    max-width: 100%;
+  }
+
+  .setting-btn {
+    width: 45%;
+  }
+
+  .setting-input-row {
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+}
+
+/* Large screens (optional polish) */
+@media (min-width: 1400px) {
+  .content-container {
+    width: 40%;
   }
 }

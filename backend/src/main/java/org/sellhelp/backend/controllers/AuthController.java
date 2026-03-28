@@ -113,38 +113,56 @@ public class AuthController {
     }
 
     @GetMapping("/loginSuccess")
-    public ResponseEntity<Void> handleGoogleSuccess(OAuth2AuthenticationToken oAuth2AuthenticationToken, HttpServletResponse response) throws IOException {
-        TokenDTO tokenDTO = new TokenDTO();
+    public void handleGoogleSuccess(
+            OAuth2AuthenticationToken auth,
+            HttpServletResponse response) throws IOException {
 
-        String redirectUrl = "";
+        try {
+            TokenDTO tokenDTO = authService.loginRegisterByGoogleOauth2(auth);
 
-        try{
-            tokenDTO = authService.loginRegisterByGoogleOauth2(oAuth2AuthenticationToken);
-        } catch (Exception e) {
+            if (tokenDTO.getTempToken() == null) {
+
+                cookieGenerator.generateLoginCookies(
+                        response,
+                        tokenDTO.getAccessToken(),
+                        tokenDTO.getRefreshToken()
+                );
+
+                response.sendRedirect("http://localhost:5173/home");
+
+            } else {
+                response.sendRedirect(
+                        "http://localhost:5173/finishGoogleRegistration?tempToken="
+                                + tokenDTO.getTempToken()
+                );
+            }
+
+        }
+        catch (Exception e) {
             response.sendRedirect("http://localhost:5173/profileInactive");
         }
-
-        if(tokenDTO.getTempToken() == null){
-            cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
-            redirectUrl = "http://localhost:5173/home";
-        }
-        else{
-            redirectUrl = "http://localhost:5173/finishGoogleRegistration?tempToken=" + tokenDTO.getTempToken();
-        }
-
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", redirectUrl)
-                .build();
     }
 
     @PostMapping("/google/register")
-    public ResponseEntity<Void> finishGoogleRegistration(@Validated(ValidationOrder.class) @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
+    public ResponseEntity<TokenDTO> finishGoogleRegistration(@Validated(ValidationOrder.class) @RequestBody GoogleRegisterDTO googleRegisterDTO, @RequestParam String tempToken, HttpServletResponse response){
         TokenDTO tokenDTO = authService.finishGoogleRegistration(googleRegisterDTO, tempToken);
 
         cookieGenerator.generateLoginCookies(response, tokenDTO.getAccessToken(), tokenDTO.getRefreshToken());
 
-        return ResponseEntity.status(HttpStatus.FOUND)
-                .header("Location", "http://localhost:5173/home")
-                .build();
+        return ResponseEntity.ok(tokenDTO);
+    }
+
+    @PatchMapping("/forgotPasswordEmail")
+    public ResponseEntity<String> getForgotPasswordEmail(@Validated(ValidationOrder.class) @RequestBody EmailUpdateDTO emailUpdateDTO){
+        authService.forgotUserPasswordEmailNotification(emailUpdateDTO);
+
+        return ResponseEntity.ok("Jelszóhejreállító email elküldve!");
+    }
+
+    @PatchMapping("/updateForgotPassword")
+    public ResponseEntity<String> updateForgotPassword(@Validated(ValidationOrder.class) @RequestBody PasswordUpdateDTO passwordUpdateDTO){
+        authService.updateForgotUserPassword(passwordUpdateDTO);
+
+        return ResponseEntity.ok("Jelszó sikeresen módosítva!");
     }
 }

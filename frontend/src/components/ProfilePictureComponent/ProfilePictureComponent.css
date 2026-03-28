@@ -1,0 +1,42 @@
+.profile-picture-img,
+.profile-picture-skeleton {
+  width: clamp(3rem, 10vw, 6rem);
+  height: clamp(3rem, 10vw, 6rem);
+
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+/* Image specific styles */
+.profile-picture-img {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 2px solid white;
+}
+
+.profile-picture-img:hover {
+  box-shadow: 0px 0px 10px #fff;
+  transform: scale(1.05);
+}
+
+/* Skeleton loading */
+.profile-picture-skeleton {
+  background: linear-gradient(
+    90deg,
+    #eee 25%,
+    #ddd 37%,
+    #eee 63%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+/* Animation */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}

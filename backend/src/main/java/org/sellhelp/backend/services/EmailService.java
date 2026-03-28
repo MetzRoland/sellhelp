@@ -121,13 +121,14 @@ public class EmailService {
         sendHTMLTemplateEmail(toEmail, "A fiókod újra engedélyezve lett", "emails/usermanagement/unbanned", variables);
     }
 
-    public void updatePassword(String toEmail)
+    public void updatePassword(String toEmail, boolean forgotPassword)
     {
         Map<String, Object> variables = new HashMap<>();
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
-                "http://localhost:5173/resetPassword?token=" + token;
+                !forgotPassword ? "http://localhost:5173/resetPassword?token=" + token
+                        : "http://localhost:5173/forgotPassword?token=" + token;
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 
@@ -152,13 +153,14 @@ public class EmailService {
         sendHTMLTemplateEmail(toEmail, "Módosítás történ a felhasználói adatokban", "emails/usermanagement/userDetailsUpdated", variables);
     }
 
-    public void updateUserEmailSuccess(String toEmail)
+    public void updateUserEmailSuccess(String newEmail, String oldEmail)
     {
         Map<String, Object> variables = new HashMap<>();
-        variables.put("email", toEmail);
+        variables.put("newEmail", newEmail);
+        variables.put("oldEmail", oldEmail);
         variables.put("timestamp", emailSentTimeStamp());
 
-        sendHTMLTemplateEmail(toEmail, "Email cím módosítva", "emails/usermanagement/userEmailUpdated", variables);
+        sendHTMLTemplateEmail(newEmail, "Email cím módosítva", "emails/usermanagement/userEmailUpdated", variables);
     }
 
     public void mfaEnabled(String toEmail)
@@ -217,5 +219,24 @@ public class EmailService {
         variables.put("timestamp", emailSentTimeStamp());
 
         sendHTMLTemplateEmail(toEmail, "A munkavállaló visszautasította a posztot", "emails/postmanagement/cancelSelectedToPost", variables);
+    }
+
+    public void changePostStatus(String toEmail, String postStatus){
+        Map<String, Object> variables = new HashMap<>();
+        variables.put("email", toEmail);
+        variables.put("timestamp", emailSentTimeStamp());
+
+        switch (postStatus) {
+            case "started" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkavállaló elkezdte a munkát", "emails/postmanagement/startedPost", variables);
+            case "completed_by_employee" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkavállaló leadta a munkáját ellenőrzésre", "emails/postmanagement/sentWorkToCheck", variables);
+            case "unsuccessful_result_closed" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató lezárta a posztot sikertelen eredmény miatt", "emails/postmanagement/closedUnsuccessfully", variables);
+            case "work_rejected" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató visszadobta a munkát javításra", "emails/postmanagement/workRejected", variables);
+            case "closed" ->
+                    sendHTMLTemplateEmail(toEmail, "A munkáltató lezárta a posztot sikeres eredménnyel", "emails/postmanagement/closedSuccessfully", variables);
+        }
     }
 }

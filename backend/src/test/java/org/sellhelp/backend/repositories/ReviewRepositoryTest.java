@@ -3,6 +3,7 @@ package org.sellhelp.backend.repositories;
 import java.time.LocalDate;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Review;
 import org.sellhelp.backend.entities.User;
@@ -52,6 +53,7 @@ class ReviewRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a Review can be saved to repository and database")
     void reviewCanBeSavedToReviewRepositoryAndDB() {
         Review savedReview = reviewRepository.save(testReview);
 
@@ -64,6 +66,7 @@ class ReviewRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a Review can be updated in repository and database")
     void reviewCanBeUpdatedToReviewRepositoryAndDB() {
         Review savedReview = reviewRepository.save(testReview);
 
@@ -76,11 +79,9 @@ class ReviewRepositoryTest {
         assertEquals((byte) 4, updated.getRating());
     }
 
-
-
     @Test
-    public void reviewGeneralCRUDFunctionalityTest()
-    {
+    @DisplayName("General CRUD functionality test for Review")
+    public void reviewGeneralCRUDFunctionalityTest() {
         Review savedReview = reviewRepository.save(testReview);
 
         String originalComment = savedReview.getComment();
@@ -101,8 +102,8 @@ class ReviewRepositoryTest {
     }
 
     @Test
-    public void deleteUserWithReviewTest()
-    {
+    @DisplayName("Verify behavior when deleting a user associated with a Review")
+    public void deleteUserWithReviewTest() {
         Review savedReview = reviewRepository.save(testReview);
         Integer sReviewId = savedReview.getId();
 
@@ -110,6 +111,5 @@ class ReviewRepositoryTest {
         savedReview.setSenderUser(null);
 
         assertEquals(1, userRepository.count());
-
     }
 }

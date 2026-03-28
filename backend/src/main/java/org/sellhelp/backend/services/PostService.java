@@ -2,6 +2,7 @@ package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.ChangePostStatusDTO;
 import org.sellhelp.backend.dtos.requests.CreatePostDTO;
@@ -13,6 +14,7 @@ import org.sellhelp.backend.exceptions.InvalidPermissionException;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.*;
 import org.sellhelp.backend.security.CurrentUser;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,32 +22,33 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class PostService {
     private final PostRepository postRepository;
     private final UserRepository userRepository;
     private final CityRepository cityRepository;
     private final PostStatusRepository postStatusRepository;
-    private final CommentRepository commentRepository;
     private final JobApplicationRepository jobApplicationRepository;
     private final ModelMapper modelMapper;
     private final CurrentUser currentUser;
     private final EmailService emailService;
+    private final UserNotificationManager userNotificationManager;
 
     @Autowired
     public PostService(PostRepository postRepository, UserRepository userRepository,
                        ModelMapper modelMapper, CityRepository cityRepository,
                        CurrentUser currentUser, PostStatusRepository postStatusRepository,
-                       CommentRepository commentRepository, JobApplicationRepository jobApplicationRepository,
-                       EmailService emailService){
+                       JobApplicationRepository jobApplicationRepository,
+                       EmailService emailService, UserNotificationManager userNotificationManager){
         this.postRepository = postRepository;
         this.userRepository = userRepository;
         this.cityRepository = cityRepository;
         this.postStatusRepository = postStatusRepository;
-        this.commentRepository = commentRepository;
         this.jobApplicationRepository = jobApplicationRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
         this.emailService = emailService;
+        this.userNotificationManager = userNotificationManager;
     }
 
     public PostResponseDTO createPost(CreatePostDTO createPostDTO){
@@ -127,6 +130,8 @@ public class PostService {
 
         String publisherEmail = currentUser.getCurrentlyLoggedUserEmail();
 
+        log.info(publisherEmail);
+
         User user = userRepository.findByEmail(publisherEmail).orElseThrow(
                 () -> new UserNotFoundException("A felhasználó nem található!")
         );
@@ -141,10 +146,25 @@ public class PostService {
                 .toList();
     }
 
-    public List<PostResponseDTO> getInvolvedPosts(){
+    public List<PostResponseDTO> getInvolvedPosts() {
+        Integer currentUserId = currentUser.getCurrentlyLoggedUserEntity().getId();
+
         return postRepository.findAll().stream()
-                .map(post -> modelMapper.map(post, PostResponseDTO.class))
-                .filter(postResponseDTO -> !Objects.equals(postResponseDTO.getStatusName(), "new"))
+                .map(post -> modelMapper.map(post, OwnedPostResponseDTO.class))
+                .filter(
+                        ownedPostResponseDTO ->
+                                (ownedPostResponseDTO.getSelectedUser() != null &&
+                                        Objects.equals(ownedPostResponseDTO.getSelectedUser().getId(), currentUserId))
+                                        ||
+                                        ownedPostResponseDTO.getJobApplications().stream()
+                                                .anyMatch(jobApplicationResponseDTO ->
+                                                        Objects.equals(
+                                                                jobApplicationResponseDTO.getApplicant().getId(),
+                                                                currentUserId
+                                                        )
+                                                )
+                )
+                .map(ownedPostResponseDTO -> modelMapper.map(ownedPostResponseDTO, PostResponseDTO.class))
                 .filter(postResponseDTO -> !postOwned(postResponseDTO.getId()))
                 .toList();
     }
@@ -160,10 +180,16 @@ public class PostService {
                 () -> new EntityNotFoundException("A poszt nem található!")
         );
 
+        if(currentUser.getCurrentlyLoggedUserEntity() == null){
+            return modelMapper.map(post, PostResponseDTO.class);
+        }
+
         if (postOwned(postId)) {
+            log.info("tulajdonos");
             return modelMapper.map(post, OwnedPostResponseDTO.class);
         }
         else {
+            log.info("nem tulajdonos");
             return modelMapper.map(post, PostResponseDTO.class);
         }
     }
@@ -245,6 +271,8 @@ public class PostService {
         jobApplicationRepository.save(jobApplication);
         postRepository.save(post);
 
+        userNotificationManager.createNotification(user, "Applied to post", "Successfully applied to post!");
+
         emailService.appliedToPost(publisherEmail);
 
         return modelMapper.map(jobApplication, JobApplicationResponseDTO.class);
@@ -274,6 +302,8 @@ public class PostService {
         );
 
         jobApplicationRepository.delete(jobApplication);
+
+        userNotificationManager.createNotification(user, "Cancel apply to post", "Successfully canceled apply to post!");
 
         emailService.cancelAppliedToPost(publisherEmail);
     }
@@ -306,6 +336,8 @@ public class PostService {
         post.setPostStatus(postStatus);
 
         postRepository.save(post);
+
+        userNotificationManager.createNotification(selectedUser, "Selected to post", "Successfully got selected for post!");
 
         emailService.gotSelectedToPost(selectedUser.getEmail());
 
@@ -345,9 +377,13 @@ public class PostService {
         postRepository.save(post);
 
         if(postOwned(postId)){
+            userNotificationManager.createNotification(user, "Rejected to post", "Got rejected from post!");
+
             emailService.gotRejectedToPost(user.getEmail());
         }
         else{
+            userNotificationManager.createNotification(user, "Canceled post after selection", "Successfully canceled post after selection!");
+
             emailService.cancelSelectedToPost(post.getPostPublisher().getEmail());
         }
     }
@@ -356,8 +392,13 @@ public class PostService {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
 
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+        if(!postOwned(postId) && !Objects.equals(post.getSelectedUser().getId(), currentUser.getCurrentlyLoggedUserEntity().getId())){
+            throw new InvalidPermissionException("Nem te vagy a munkavállaló, nincs jogusultságot!");
+        }
+
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
         String currentStatus = post.getPostStatus().getStatusName();
         boolean isEmployer = postOwned(postId);
@@ -400,6 +441,23 @@ public class PostService {
         post.setPostStatus(newStatus);
         postRepository.save(post);
 
+        String employerEmail = post.getPostPublisher().getEmail();
+        String employeeEmail = post.getSelectedUser().getEmail();
+
+        User employer = userRepository.findByEmail(employerEmail).orElse(null);
+        User employee = userRepository.findByEmail(employeeEmail).orElse(null);
+
+        if(targetStatusName.equals("started") || targetStatusName.equals("completed_by_employee")){
+            userNotificationManager.createNotification(employer, "Post status changed", "Successfully updated post status!");
+
+            emailService.changePostStatus(employerEmail, targetStatusName);
+        }
+        else {
+            userNotificationManager.createNotification(employee, "Post status changed", "Successfully updated post status!");
+
+            emailService.changePostStatus(employeeEmail, targetStatusName);
+        }
+
         return new ChangePostStatusDTO(targetStatusName);
     }
 
@@ -424,7 +482,8 @@ public class PostService {
         if (isUnsuccessful) {
             closedStatus = postStatusRepository.findByStatusName("unsuccessful_result_closed")
                     .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
-        } else {
+        }
+        else {
             closedStatus = postStatusRepository.findByStatusName("closed")
                     .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));
         }
@@ -437,5 +496,21 @@ public class PostService {
     {
         return post.getPostStatus().getStatusName().equals("closed") ||
                 post.getPostStatus().getStatusName().equals("unsuccessful_result_closed");
+    }
+
+    public Boolean getAppliedStatus(Integer postId) {
+        Post post = postRepository.findById(postId).orElseThrow(
+                () -> new EntityNotFoundException("A poszt nem létezik!")
+        );
+
+        User user = currentUser.getCurrentlyLoggedUserEntity();
+
+        for(JobApplication jobApplication: post.getJobApplications()){
+            if(Objects.equals(jobApplication.getApplicant().getId(), user.getId())){
+                return true;
+            }
+        }
+
+        return false;
     }
 }

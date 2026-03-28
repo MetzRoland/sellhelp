@@ -1,0 +1,247 @@
+/* ===================== */
+/* FILE DISPLAY BASE     */
+/* ===================== */
+.file-display-container {
+  width: 100%;
+  height: fit-content;
+  margin-top: 1rem;
+  border-radius: 20px;
+}
+
+.file-display-title {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.file-display-title h1 {
+  width: fit-content;
+  font-size: 1.5rem;
+}
+
+.file-display-list {
+  display: block;
+  width: 100%;
+  text-overflow: ellipsis;
+  transition: filter 0.3s ease-in-out;
+}
+
+.one-file {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-radius: 20px;
+  background-color: #171717;
+  padding: 0.6rem;
+  margin: 0.3rem 0;
+  width: 100%;
+  box-shadow: 1px 1px 1px 1px rgba(0, 0, 0, 0.25);
+  flex-wrap: wrap;
+}
+
+.one-file a {
+  display: flex;
+  align-items: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-size: 100%;
+  text-decoration: underline;
+  color: #fff;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.one-file a img {
+  max-height: 1rem;
+  margin-left: 0.2rem;
+  margin-right: 0.5rem;
+}
+
+.file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.file-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-top: 0.3rem;
+}
+
+.delete-btn,
+.download-btn {
+  display: inline-flex;
+  padding: 0.3rem 0.5rem;
+  border-radius: 15px;
+  text-align: center;
+  cursor: pointer;
+  font-weight: bold;
+  color: white;
+  border: none;
+  font-size: 0.85rem;
+  white-space: nowrap;
+}
+
+.delete-btn {
+  background-color: #d41d1d;
+}
+
+.download-btn {
+  background-color: #1d9cce;
+  text-decoration: none !important;
+}
+
+.file-display-list.blurred {
+  filter: blur(5px);
+  pointer-events: none;
+}
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  min-height: 120px;
+  border: 2px dashed #6a6a6a;
+  background-color: #a7a7a7;
+  border-radius: 15px;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  cursor: pointer;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.upload-area:hover {
+  background-color: #8c8c8c;
+  border-color: #4d4d4d;
+}
+
+.upload-area p {
+  font-size: 14px;
+  color: #555;
+  margin-top: 5px;
+  font-weight: normal;
+}
+
+.upload-area input[type="file"] {
+  display: none;
+}
+
+.file-message {
+  padding: 0.2rem;
+  text-align: center;
+  color: red;
+  font-weight: bold;
+}
+
+/* ===================== */
+/* MEDIA QUERIES         */
+/* ===================== */
+
+/* Small phones (<400px) */
+@media (max-width: 400px) {
+  .file-display-title h1 {
+    font-size: 1.2rem;
+  }
+
+  .delete-btn,
+  .download-btn {
+    font-size: 0.7rem;
+    padding: 0.25rem 0.4rem;
+  }
+
+  .file-name {
+    font-size: 0.8rem;
+  }
+
+  .upload-area p {
+    font-size: 12px;
+  }
+
+  .one-file {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
+
+  .file-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Phones 400–600px */
+@media (min-width: 400px) and (max-width: 600px) {
+  .file-display-title h1 {
+    font-size: 1.3rem;
+  }
+
+  .delete-btn,
+  .download-btn {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .file-name {
+    font-size: 0.85rem;
+  }
+
+  .upload-area p {
+    font-size: 13px;
+  }
+
+  .one-file {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.4rem;
+  }
+
+  .file-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+}
+
+/* Tablets (<768px) */
+@media (max-width: 768px) {
+  .file-display-title {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+
+  .file-display-title h1 {
+    font-size: 1.4rem;
+  }
+
+  .delete-btn,
+  .download-btn {
+    font-size: 0.8rem;
+    padding: 0.3rem 0.5rem;
+  }
+
+  .file-name {
+    font-size: 0.9rem;
+  }
+
+  .upload-area p {
+    font-size: 14px;
+  }
+}
+
+/* Large screens (>1024px) */
+@media (min-width: 1025px) {
+  .file-display-title h1 {
+    font-size: 1.5rem;
+  }
+
+  .delete-btn,
+  .download-btn {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.6rem;
+  }
+}

@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.modelmapper.ModelMapper;
@@ -21,6 +22,7 @@ import org.sellhelp.backend.repositories.CityRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -47,6 +49,8 @@ class UserServiceTest {
     private EmailService emailService;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private UserNotificationManager userNotificationManager;
 
     @InjectMocks
     private UserService userService;
@@ -67,6 +71,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Update user details successfully")
     void updateUserDetails_success() {
         UserDetailsUpdateDTO dto = new UserDetailsUpdateDTO();
         dto.setFirstName("Jane");
@@ -87,10 +92,18 @@ class UserServiceTest {
         assertEquals(city, user.getCity());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User details updated"),
+                eq("User details got successfully updated!")
+        );
+
         verify(emailService).updateUserDetailsSuccess("test@example.com");
     }
 
     @Test
+    @DisplayName("Throw exception when updating details for nonexistent user")
     void updateUserDetails_userNotFound() {
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@example.com");
         when(userRepository.findByEmail(anyString())).thenReturn(Optional.empty());
@@ -100,6 +113,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Update user password successfully")
     void updateUserPassword_success() {
         PasswordUpdateDTO dto = new PasswordUpdateDTO();
         dto.setPassword("newPassword");
@@ -123,10 +137,18 @@ class UserServiceTest {
         assertEquals("refreshToken", tokenDTO.getRefreshToken());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User password updated"),
+                eq("User password got successfully updated!")
+        );
+
         verify(emailService).updatePasswordSuccess("test@example.com");
     }
 
     @Test
+    @DisplayName("Throw exception when password update token is invalid")
     void updateUserPassword_invalidToken() {
         PasswordUpdateDTO dto = new PasswordUpdateDTO();
         dto.setToken("invalidToken");
@@ -139,6 +161,7 @@ class UserServiceTest {
     }
 
     @Test
+    @DisplayName("Update user email successfully")
     void updateUserEmail_success() {
         EmailUpdateDTO dto = new EmailUpdateDTO();
         dto.setEmail("new@example.com");
@@ -155,9 +178,18 @@ class UserServiceTest {
         assertEquals("refreshToken", tokenDTO.getRefreshToken());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                eq(user),
+                eq("User email updated"),
+                eq("User email got successfully updated!")
+        );
+
+        verify(emailService).updateUserEmailSuccess("new@example.com", "test@example.com");
     }
 
     @Test
+    @DisplayName("Get user details successfully")
     void getUserDetails_success() {
         UserDTO userDTO = new UserDTO();
 
@@ -171,4 +203,3 @@ class UserServiceTest {
         verify(modelMapper).map(user, UserDTO.class);
     }
 }
-

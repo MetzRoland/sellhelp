@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.Report;
 import org.sellhelp.backend.entities.ReportType;
@@ -27,10 +28,8 @@ public class ReportRepositoryTest {
     private Report testReport;
     private ReportType testReportType;
 
-
     @BeforeEach
-    public void init()
-    {
+    public void init() {
         testSenderUser = userRepository.save(User.builder()
                 .firstName("Kis")
                 .lastName("Béla")
@@ -52,16 +51,15 @@ public class ReportRepositoryTest {
                 .build());
 
         testReport = reportRepository.save(Report.builder()
-                        .senderUser(testSenderUser)
-                        .reportedUser(testReportedUser)
-                        .reportType(testReportType)
+                .senderUser(testSenderUser)
+                .reportedUser(testReportedUser)
+                .reportType(testReportType)
                 .build());
     }
 
-
     @Test
-    public void reportCanBeSavedToReportRepositoryAndDB()
-    {
+    @DisplayName("Verify that a Report can be saved to repository and database")
+    public void reportCanBeSavedToReportRepositoryAndDB() {
         Report savedReport = reportRepository.save(testReport);
 
         assertNotNull(savedReport.getId());
@@ -71,10 +69,9 @@ public class ReportRepositoryTest {
         assertNotNull(savedReport.getCreatedAt());
     }
 
-    // report should not be updated by anyone
     @Test
-    public void reportCanBeUpdatedToReportRepositoryAndDB()
-    {
+    @DisplayName("Verify that updating a Report preserves original integrity")
+    public void reportCanBeUpdatedToReportRepositoryAndDB() {
         Report savedReport = reportRepository.save(testReport);
         savedReport.setReportType(ReportType.builder().name("").build());
 
@@ -93,8 +90,8 @@ public class ReportRepositoryTest {
     }
 
     @Test
-    public void reportCanBeDeletedFromReportRepositoryAndDB()
-    {
+    @DisplayName("Verify that a Report can be deleted from repository and database")
+    public void reportCanBeDeletedFromReportRepositoryAndDB() {
         Report savedReport = reportRepository.save(testReport);
         Integer reportId = savedReport.getId();
 

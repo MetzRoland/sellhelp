@@ -9,5 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class FileDTO {
     private Integer fileId;
-    private String url;
+    private String downloadUrl;
+    private String openUrl;
+    private String fileName;
 }

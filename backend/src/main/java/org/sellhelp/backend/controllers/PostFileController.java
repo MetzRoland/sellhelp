@@ -20,7 +20,7 @@ public class PostFileController {
         this.postFileService = postFileService;
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/all/{postId}")
     public ResponseEntity<List<FileDTO>> getAllPostFiles(@PathVariable int postId)
     {
         return ResponseEntity.ok(postFileService.getAllFilesForPost(postId));
@@ -32,14 +32,14 @@ public class PostFileController {
         return ResponseEntity.ok(postFileService.getPostFileById(fileId));
     }
 
-    @PostMapping("/{postId}/upload")
+    @PostMapping("/upload/{postId}")
     public ResponseEntity<String> addFileToPost(@PathVariable int postId, @RequestParam("file") MultipartFile file)
     {
         postFileService.addFileToPost(postId, file);
         return ResponseEntity.ok("Fájl sikeresen feltöltve a poszthoz.");
     }
 
-    @DeleteMapping("/{fileId}")
+    @DeleteMapping("/{fileId}/delete")
     public ResponseEntity<String> deletePostFile(@PathVariable int fileId)
     {
         postFileService.deletePostFile(fileId);

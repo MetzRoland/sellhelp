@@ -1,6 +1,7 @@
 package org.sellhelp.backend.services;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -19,6 +20,7 @@ import org.sellhelp.backend.exceptions.MfaException;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 
 import java.util.Optional;
 
@@ -29,23 +31,16 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 class MfaServiceTest {
 
-    @Mock
-    private JWTUtil jwtUtil;
-    @Mock
-    private UserRepository userRepository;
-    @Mock
-    private TotpService totpService;
-    @Mock
-    private QrCodeService qrCodeService;
-    @Mock
-    private TempTokenService tempTokenService;
-    @Mock
-    private CurrentUser currentUser;
-    @Mock
-    private EmailService emailService;
+    @Mock private JWTUtil jwtUtil;
+    @Mock private UserRepository userRepository;
+    @Mock private TotpService totpService;
+    @Mock private QrCodeService qrCodeService;
+    @Mock private TempTokenService tempTokenService;
+    @Mock private CurrentUser currentUser;
+    @Mock private EmailService emailService;
+    @Mock private UserNotificationManager userNotificationManager;
 
-    @InjectMocks
-    private MfaService mfaService;
+    @InjectMocks private MfaService mfaService;
 
     private User user;
 
@@ -60,6 +55,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Generate MFA for a user successfully")
     void generateMfa_success() {
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
@@ -75,6 +71,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Generate MFA throws exception if already enabled")
     void generateMfa_alreadyEnabled_throws() {
         user.getUserSecret().setMfa(true);
 
@@ -85,6 +82,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Enable MFA successfully")
     void enableMfa_success() {
         FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
         dto.setTempToken("TEMP_TOKEN");
@@ -102,11 +100,19 @@ class MfaServiceTest {
         assertEquals("SECRET", user.getUserSecret().getTotpSecret());
 
         verify(tempTokenService).removeToken("TEMP_TOKEN");
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("MFA Enable request"),
+                eq("Successfully enabled mfa!")
+        );
+
         verify(emailService).mfaEnabled("test@test.com");
         verify(userRepository).save(user);
     }
 
     @Test
+    @DisplayName("Enable MFA throws exception for invalid temp token")
     void enableMfa_invalidToken_throws() {
         FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
         dto.setTempToken("TEMP_TOKEN");
@@ -119,6 +125,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Enable MFA throws exception for invalid TOTP code")
     void enableMfa_invalidTotp_throws() {
         FirstTotpValidationDTO dto = new FirstTotpValidationDTO();
         dto.setTempToken("TEMP_TOKEN");
@@ -134,6 +141,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Disable MFA successfully")
     void disableMfa_success() {
         user.getUserSecret().setMfa(true);
         user.getUserSecret().setTotpSecret("SECRET");
@@ -148,10 +156,18 @@ class MfaServiceTest {
         assertNull(result.getQrCode());
 
         verify(userRepository).save(user);
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("MFA Disable request"),
+                eq("Successfully disabled mfa!")
+        );
+
         verify(emailService).mfaDisabled("test@test.com");
     }
 
     @Test
+    @DisplayName("Disable MFA throws exception if not enabled")
     void disableMfa_notEnabled_throws() {
         when(currentUser.getCurrentlyLoggedUserEmail()).thenReturn("test@test.com");
         when(userRepository.findByEmail("test@test.com")).thenReturn(Optional.of(user));
@@ -160,6 +176,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Validate TOTP code successfully")
     void validateTotpCode_success() {
         TotpCodeDTO totpCodeDTO = new TotpCodeDTO();
         totpCodeDTO.setTempToken("TEMP_TOKEN");
@@ -181,10 +198,18 @@ class MfaServiceTest {
         assertNull(tokenDTO.getTempToken());
 
         verify(tempTokenService).removeToken("TEMP_TOKEN");
+
+        verify(userNotificationManager).createNotification(
+                any(User.class),
+                eq("Login local user"),
+                eq("Successfully logged in!")
+        );
+
         verify(emailService).loginUser("test@test.com");
     }
 
     @Test
+    @DisplayName("Validate TOTP code throws exception for invalid token")
     void validateTotpCode_invalidToken_throws() {
         TotpCodeDTO dto = new TotpCodeDTO();
         dto.setTempToken("TEMP_TOKEN");
@@ -195,6 +220,7 @@ class MfaServiceTest {
     }
 
     @Test
+    @DisplayName("Validate TOTP code throws exception for invalid TOTP code")
     void validateTotpCode_invalidTotp_throws() {
         TotpCodeDTO dto = new TotpCodeDTO();
         dto.setTempToken("TEMP_TOKEN");

@@ -1,6 +1,7 @@
 package org.sellhelp.backend.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.JWTFilter;
@@ -47,6 +48,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    @DisplayName("Admin retrieves all users successfully")
     void getAllUsers_asAdmin_success() throws Exception {
         UserDTO dto = new UserDTO();
         dto.setId(1);
@@ -62,6 +64,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "MODERATOR")
+    @DisplayName("Moderator retrieves all users successfully")
     void getAllUsers_asModerator_success() throws Exception {
         UserDTO dto = new UserDTO();
         dto.setId(1);
@@ -77,6 +80,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
+    @DisplayName("Regular user is forbidden from retrieving all users")
     void getAllUsers_forbidden() throws Exception {
         mockMvc.perform(get("/superuser/users"))
                 .andExpect(status().isBadRequest())
@@ -85,6 +89,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    @DisplayName("Admin retrieves a user by ID successfully")
     void getUserById_success() throws Exception {
         UserDTO dto = new UserDTO();
         dto.setId(5);
@@ -99,6 +104,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "ADMIN")
+    @DisplayName("Admin bans a user successfully")
     void banUser_success() throws Exception {
         UserDTO dto = new UserDTO();
         dto.setId(2);
@@ -113,6 +119,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "USER")
+    @DisplayName("Regular user is forbidden from banning a user")
     void banUser_forbidden() throws Exception {
         mockMvc.perform(put("/superuser/users/ban/{id}", 2))
                 .andExpect(status().isBadRequest())
@@ -121,6 +128,7 @@ class SuperUserControllerTest {
 
     @Test
     @WithMockUser(roles = "MODERATOR")
+    @DisplayName("Moderator unbans a user successfully")
     void unbanUser_success() throws Exception {
         UserDTO dto = new UserDTO();
         dto.setId(3);

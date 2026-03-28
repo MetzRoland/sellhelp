@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.*;
 import org.sellhelp.backend.enums.AuthProvider;
@@ -86,6 +87,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a post can be added to the repository and database")
     public void postCanBeAddedToRepositoryAndDB() {
         assertNotNull(testPost.getId());
         assertEquals("Test Post", testPost.getTitle());
@@ -96,6 +98,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a post can be updated in the repository and database")
     public void postCanBeUpdatedInRepositoryAndDB() {
         testPost.setReward(8000);
         testPost.getPostFiles().clear(); // remove files
@@ -107,6 +110,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a post can be deleted from the repository and database")
     public void postCanBeDeletedFromRepositoryAndDB() {
         Integer postId = testPost.getId();
 
@@ -116,6 +120,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that deleting a post cascades to files, comments, and job applications")
     public void deletingPostCascadesToFilesCommentsApplications() {
         Integer fileId = testPost.getPostFiles().get(0).getId();
         Integer commentId = testPost.getPostComments().get(0).getId();
@@ -129,6 +134,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that deleting a post does not delete the user")
     public void deletingPostDoesNotDeleteUser() {
         Integer userId = testUser.getId();
 
@@ -138,6 +144,7 @@ public class PostRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for posts")
     public void postGeneralCRUDFunctionalityTest() {
         Post savedPost = postRepository.save(testPost);
         Integer postId = savedPost.getId();

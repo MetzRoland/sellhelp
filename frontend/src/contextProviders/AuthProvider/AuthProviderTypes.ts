@@ -17,7 +17,6 @@ export interface User {
   cityName: string;
   role: string;
   createdAt: Date;
-  profilePicture: string;
   authProvider: string;
   accessToken: string;
 }

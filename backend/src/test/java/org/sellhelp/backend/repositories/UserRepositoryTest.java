@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.*;
 import org.sellhelp.backend.enums.AuthProvider;
@@ -47,12 +48,10 @@ public class UserRepositoryTest {
 
         List<UserFile> userFiles = new ArrayList<>();
         userFiles.add(testFile);
-
         userFileRepository.save(testFile);
 
         List<Notification> notifications = new ArrayList<>();
         notifications.add(testNotification);
-
         notificationRepository.save(testNotification);
 
         testUser = User.builder()
@@ -68,6 +67,7 @@ public class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a User can be added to repository and database")
     public void userCanBeAddedToUserRepositoryAndDB() {
         User savedUser = userRepository.save(testUser);
 
@@ -79,11 +79,11 @@ public class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that updating a User cascades changes to UserSecret, UserFiles, and Notifications")
     public void userCascadeUpdateTest() {
         User savedUser = userRepository.save(testUser);
 
         savedUser.getUserSecret().setPassword("newpass");
-
         savedUser.getUserFiles().clear();
         savedUser.getUserNotifications().clear();
 
@@ -95,6 +95,7 @@ public class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a User can be deleted from repository and database")
     public void userCanBeDeletedFromUserRepositoryAndDB() {
         User savedUser = userRepository.save(testUser);
 
@@ -109,9 +110,9 @@ public class UserRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for User")
     public void userGeneralCRUDFunctionalityTest() {
         User savedUser = userRepository.save(testUser);
-
         Integer savedUserId = savedUser.getId();
 
         assertNotNull(savedUserId);

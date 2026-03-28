@@ -1,6 +1,7 @@
 package org.sellhelp.backend.repositories;
 
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.entities.ReportType;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,7 @@ public class ReportTypeRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a ReportType can be added to repository and database")
     public void reportTypeCanBeAddedToRepositoryAndDB() {
         ReportType savedType = reportTypeRepository.save(testReportType);
 
@@ -32,6 +34,7 @@ public class ReportTypeRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a ReportType can be updated in repository and database")
     public void reportTypeCanBeUpdatedInRepositoryAndDB() {
         ReportType savedType = reportTypeRepository.save(testReportType);
 
@@ -43,6 +46,7 @@ public class ReportTypeRepositoryTest {
     }
 
     @Test
+    @DisplayName("Verify that a ReportType can be deleted from repository and database")
     public void reportTypeCanBeDeletedFromRepositoryAndDB() {
         ReportType savedType = reportTypeRepository.save(testReportType);
         Integer typeId = savedType.getId();
@@ -53,6 +57,7 @@ public class ReportTypeRepositoryTest {
     }
 
     @Test
+    @DisplayName("General CRUD functionality test for ReportType")
     public void reportTypeGeneralCRUDFunctionalityTest() {
         ReportType savedType = reportTypeRepository.save(testReportType);
         Integer typeId = savedType.getId();

@@ -1,4 +1,5 @@
 import type { UserProfileProps } from "./UserProfileViewTypes";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 
 import "./UserProfileView.css";
 
@@ -6,16 +7,15 @@ function UserProfileView({
   userAccount,
   handleUserBanning,
   adminMode,
-  handleRedirectToProfile
+  handleRedirectToProfile,
 }: UserProfileProps) {
   return (
-    <div className="content-container user-profile-container" onClick={handleRedirectToProfile}>
+    <div
+      className="content-container user-profile-container"
+      onClick={handleRedirectToProfile}
+    >
       <div className="user-info-container">
-        <img
-          className="profile-picture-img"
-          src={userAccount.profilePicture ?? "/images/profile.svg"}
-          alt="Profile picture"
-        />
+        <ProfilePictureComponent userId={userAccount.id} />
         <div className="user-infos">
           <p className="user-profile-name">
             {userAccount.lastName} {userAccount.firstName}
@@ -23,12 +23,20 @@ function UserProfileView({
           <p className="user-profile-email">{userAccount.email}</p>
         </div>
       </div>
+
+      <button className="btn btn-highlight" onClick={handleRedirectToProfile}>
+        Profil Megtekintése
+      </button>
+
       {adminMode && (
         <button
           className="btn btn-highlight"
           onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
             e.stopPropagation();
-            handleUserBanning(userAccount.id, userAccount.banned)
+            
+            if (adminMode && handleUserBanning) {
+              handleUserBanning(userAccount.id, userAccount.banned);
+            }
           }}
         >
           {!userAccount.banned ? "Fiók tiltása" : "Fiók engedélyezése"}

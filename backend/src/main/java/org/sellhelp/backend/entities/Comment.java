@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.time.Instant;
 
-import org.hibernate.annotations.CurrentTimestamp;
+import org.hibernate.annotations.CreationTimestamp;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -37,6 +37,6 @@ public class Comment {
     private String message;
 
     @Column(name = "created_at")
-    @CurrentTimestamp
+    @CreationTimestamp
     private Instant createdAt;
 }

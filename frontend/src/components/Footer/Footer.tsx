@@ -3,7 +3,9 @@ import "./Footer.css";
 function Footer(){
     return (
         <footer className="footer">
-            <p>Minden jog fenttartva</p>
+            <a href="https://docs.sellhelp.org" target="_blank" rel="noopener noreferrer">
+                Dokumentáció
+            </a>
             <p>Roland és Jani oldala</p>
         </footer>
     );

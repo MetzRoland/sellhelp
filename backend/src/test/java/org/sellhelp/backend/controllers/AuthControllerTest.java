@@ -3,6 +3,7 @@ package org.sellhelp.backend.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
@@ -64,6 +65,8 @@ class AuthControllerTest {
     private TokenDTO tokenDTO;
     private TotpSecretDTO totpSecretDTO;
     private GenerateTotpDTO generateTotpDTO;
+    private EmailUpdateDTO emailUpdateDTO;
+    private PasswordUpdateDTO passwordUpdateDTO;
 
     @BeforeEach
     void init() {
@@ -74,6 +77,13 @@ class AuthControllerTest {
         registerDTO.setLastName("User");
         registerDTO.setCityName("Pécs");
         registerDTO.setBirthDate(LocalDate.of(2000, 12, 31));
+
+        emailUpdateDTO = new EmailUpdateDTO();
+        emailUpdateDTO.setEmail("test@test.com");
+
+        passwordUpdateDTO = new PasswordUpdateDTO();
+        passwordUpdateDTO.setToken("token");
+        passwordUpdateDTO.setPassword("NewPassword123.");
 
         loginDTO = new LoginDTO();
         loginDTO.setEmail("test@test.com");
@@ -98,6 +108,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Register a new user with role ROLE_USER and return created status with email")
     void authControllerRegisterUser() throws Exception {
         mockMvc.perform(post("/auth/register")
                         .param("userRole", "ROLE_USER")
@@ -108,6 +119,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Login a regular user and return access and refresh tokens")
     void testLoginUserHandler() throws Exception {
         when(authService.userLogin(any(LoginDTO.class))).thenReturn(tokenDTO);
 
@@ -118,6 +130,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Login a superuser and return access and refresh tokens")
     void testLoginSuperUserHandler() throws Exception {
         when(authService.superUserLogin(any(LoginDTO.class))).thenReturn(tokenDTO);
 
@@ -128,6 +141,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Refresh JWT token using refresh token cookie")
     void testRefreshHandler() throws Exception {
         when(authService.refresh(anyString())).thenReturn(tokenDTO);
 
@@ -137,6 +151,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Generate TOTP for 2FA setup and return secret, QR code, and temporary token")
     void testSetupMfa() throws Exception {
         when(mfaService.generateMfa()).thenReturn(generateTotpDTO);
 
@@ -148,6 +163,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Enable MFA with first-time TOTP validation")
     void testEnableMfa() throws Exception {
         mockMvc.perform(post("/auth/enable2fa")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -156,6 +172,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Disable MFA and return TotpSecretDTO")
     void testDisableMfa() throws Exception {
         when(mfaService.disableMfa()).thenReturn(totpSecretDTO);
 
@@ -164,6 +181,7 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Verify TOTP code and return access and refresh tokens")
     void testVerifyTotp() throws Exception {
         when(mfaService.validateTotpCode(any(TotpCodeDTO.class))).thenReturn(tokenDTO);
 
@@ -174,8 +192,31 @@ class AuthControllerTest {
     }
 
     @Test
+    @DisplayName("Redirect user to Google authentication login page")
     void testLoginGoogleAuth() throws Exception {
         mockMvc.perform(get("/auth/login/google"))
                 .andExpect(status().is3xxRedirection());
+    }
+
+    @Test
+    @DisplayName("Send forgot password email successfully")
+    void testGetForgotPasswordEmail() throws Exception {
+
+        mockMvc.perform(patch("/auth/forgotPasswordEmail")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(emailUpdateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Jelszóhejreállító email elküldve!"));
+    }
+
+    @Test
+    @DisplayName("Update forgotten password successfully")
+    void testUpdateForgotPassword() throws Exception {
+
+        mockMvc.perform(patch("/auth/updateForgotPassword")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(passwordUpdateDTO)))
+                .andExpect(status().isOk())
+                .andExpect(content().string("Jelszó sikeresen módosítva!"));
     }
 }

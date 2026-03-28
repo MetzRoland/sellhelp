@@ -3,6 +3,7 @@ package org.sellhelp.backend.controllers;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.Cookie;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.sellhelp.backend.dtos.requests.EmailUpdateDTO;
 import org.sellhelp.backend.dtos.requests.PasswordUpdateDTO;
@@ -12,6 +13,7 @@ import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.security.JWTUtil;
+import org.sellhelp.backend.security.UserNotificationManager;
 import org.sellhelp.backend.services.EmailService;
 import org.sellhelp.backend.services.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +50,8 @@ class UserControllerTest {
     private UserDetailsService userDetailsService;
     @MockitoBean
     private JWTUtil jwtUtil;
+    @MockitoBean
+    private UserNotificationManager userNotificationManager;
 
     private UserDTO userDTO;
     private PasswordUpdateDTO passwordUpdateDTO;
@@ -73,6 +77,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Get user details successfully using access token")
     void getUserDetails_success() throws Exception {
         when(userService.getUserDetails("accessToken")).thenReturn(userDTO);
 
@@ -87,6 +92,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Logout user successfully and clear cookies")
     void logout_success() throws Exception {
         when(currentUser.getCurrentlyLoggedUserEmail())
                 .thenReturn("test@example.com");
@@ -95,11 +101,18 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Sikeres kijelentkezés!"));
 
+        verify(userNotificationManager).createNotification(
+                eq(currentUser.getCurrentlyLoggedUserEntity()),
+                eq("Logout"),
+                eq("Successfully logged out!")
+        );
+
         verify(emailService).logoutUser("test@example.com");
         verify(cookieGenerator).deleteLogoutCookies(any(), any());
     }
 
     @Test
+    @DisplayName("Update user details successfully")
     void updateUserDetails_success() throws Exception {
         mockMvc.perform(patch("/user/update/details")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -111,6 +124,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Update user email successfully and refresh login cookies")
     void updateUserEmail_success() throws Exception {
         TokenDTO tokenDTO = new TokenDTO("access", "refresh", null);
 
@@ -128,6 +142,7 @@ class UserControllerTest {
     }
 
     @Test
+    @DisplayName("Send password update email successfully")
     void sendUserPasswordEmail_success() throws Exception {
         when(currentUser.getCurrentlyLoggedUserEmail())
                 .thenReturn("test@example.com");
@@ -136,10 +151,11 @@ class UserControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(content().string("Email a jelszó módosításhoz elküldve!"));
 
-        verify(emailService).updatePassword("test@example.com");
+        verify(emailService).updatePassword("test@example.com", false);
     }
 
     @Test
+    @DisplayName("Update user password successfully and refresh login cookies")
     void updateUserPassword_success() throws Exception {
         TokenDTO tokenDTO = new TokenDTO("access", "refresh", null);
 

@@ -3,7 +3,9 @@ package org.sellhelp.backend.controllers;
 import org.apache.coyote.BadRequestException;
 import org.sellhelp.backend.dtos.responses.FileDTO;
 import org.sellhelp.backend.dtos.responses.ProfilePictureDTO;
+import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.services.UserFileService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,9 +19,13 @@ import java.util.List;
 @RequestMapping("/user/files")
 public class UserFilesController {
     private final UserFileService userFileService;
+    private final CurrentUser currentUser;
 
-    public UserFilesController(UserFileService userFileService) {
+    @Autowired
+    public UserFilesController(UserFileService userFileService, CurrentUser currentUser) {
+
         this.userFileService = userFileService;
+        this.currentUser = currentUser;
     }
 
     // endpoints for self
@@ -40,8 +46,7 @@ public class UserFilesController {
 
     @PostMapping("/upload")
     public ResponseEntity<String> addUserFile(@RequestParam("file") MultipartFile file) {
-        UserDetails userDetails = (UserDetails) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
+        String email = currentUser.getCurrentlyLoggedUserEmail();
 
         userFileService.addUserFile(email, file);
 
@@ -54,7 +59,7 @@ public class UserFilesController {
         String email = userDetails.getUsername();
         userFileService.deleteUserFile(email, fileId);
 
-        return ResponseEntity.ok("Profilkép törölve!");
+        return ResponseEntity.ok("Fájl sikeresen törölve!");
     }
 
     @GetMapping("/pp")
@@ -93,13 +98,13 @@ public class UserFilesController {
     // endpoints for someone else
     // "/user/files"
 
-    @GetMapping("/{userId}")
+    @GetMapping("/public/{userId}")
     public ResponseEntity<List<FileDTO>> getAllUserFilesById(@PathVariable Integer userId) {
 
         return ResponseEntity.status(HttpStatus.OK).body(userFileService.getAllUserFilesByUserId(userId));
     }
 
-    @GetMapping("{userId}/pp")
+    @GetMapping("/public/{userId}/pp")
     public ResponseEntity<ProfilePictureDTO> gerUserProfilePictureById(@PathVariable Integer userId){
         return ResponseEntity.ok(userFileService.getUserProfilePicture(userId));
     }

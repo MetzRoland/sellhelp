@@ -1,0 +1,139 @@
+.full-post-view-container{
+    min-width: 40vw;
+}
+
+.post-details{
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+/* ===================== */
+/* COMMENTS SECTION      */
+/* ===================== */
+
+.full-post-view-container {
+  width: 100%;
+}
+
+/* Comment title */
+.full-post-view-container h2 {
+  margin-top: 2rem;
+  margin-bottom: 1.5rem;
+  font-size: 1.6rem;
+  align-self: flex-start;
+  color: #FAF4E6;
+}
+
+/* ===================== */
+/* NEW COMMENT INPUT     */
+/* ===================== */
+
+.new-comment-div {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+}
+
+.textarea-element {
+  border-radius: 18px;
+  min-height: 100px;
+  resize: none;
+  padding: 1rem;
+}
+
+.new-comment-div .setting-btn {
+  align-self: flex-end;
+  width: 140px;
+}
+
+.post-date {
+  align-self: flex-end;
+  font-size: 0.85rem;
+  color: rgba(250, 244, 230, 0.8);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.4rem 0.9rem;
+  border-radius: 20px;
+  margin-bottom: 1.5rem;
+}
+
+.post-status-container{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  margin-top: 2rem;
+}
+
+/* ===================== */
+/* RESPONSIVE FIXES - POST VIEW */
+/* ===================== */
+
+/* Small phones */
+@media (max-width: 480px) {
+  .full-post-view-container {
+    min-width: 0; /* override 40vw issue */
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.3rem;
+  }
+
+  .textarea-element {
+    min-height: 80px;
+    padding: 0.75rem;
+  }
+
+  .new-comment-div .setting-btn {
+    width: 100%; /* full width button */
+  }
+
+  .post-date {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.7rem;
+  }
+}
+
+/* Phones */
+@media (max-width: 768px) {
+  .full-post-view-container {
+    min-width: 0;
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .new-comment-div .setting-btn {
+    width: 100%;
+    align-self: stretch;
+  }
+
+  .post-status-container {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .full-post-view-container {
+    min-width: 0;
+  }
+
+  .full-post-view-container h2 {
+    font-size: 1.5rem;
+  }
+}
+
+/* Large screens polish */
+@media (min-width: 1400px) {
+  .full-post-view-container {
+    max-width: 900px;
+  }
+}

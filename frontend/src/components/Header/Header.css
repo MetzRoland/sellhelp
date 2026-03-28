@@ -1,17 +1,19 @@
-.header{
+.header {
     background: linear-gradient(to right, rgb(60, 59, 58) 55%, rgba(162, 159, 157, .3) 100%);
-    min-height: 10vh;
-    height: 20vh;
+    min-height: 6rem;
+    height: 15vh;
+    max-height: 10%;
 }
 
 .header-nav{
     height: 100%;
-    font-size: 1.5rem;
+    font-size: clamp(1.5rem, 1.5vw, 4rem);
     padding: 1em;
 
     display: grid;
-    grid-template-columns: 1fr auto 1fr;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
+    align-content: center;
 
     position: relative;
 }
@@ -32,13 +34,14 @@
 
 .main-page-link{
     color: #FAF4E6;
-    font-size: 3rem;
+    font-size: clamp(3rem, 5vw, 4rem);
 }
 
 .left-options, .right-options{
     display: flex;
     justify-content: space-around;
     gap: 1rem;
+    align-items: center;
 }
 
 .left-options{
@@ -60,7 +63,7 @@
 .profile-options-container {
   position: absolute;
   top: 100%;
-  right: 0;
+  left: 0;
   background-color: #222222;
   color: #fff;
   text-decoration: none;
@@ -96,7 +99,18 @@
     pointer-events: auto;
 }
 
-.profile-options-container button, a{
+.profile-options-container button {
+    background-color: transparent;
+    border: none;
+    color: #fff;
+    text-decoration: none;
+    font-size: 1.5rem;
+    cursor: pointer;
+
+    transition: all .4s;
+}
+
+.profile-options-container a {
     background-color: transparent;
     border: none;
     color: #fff;
@@ -112,36 +126,120 @@
     text-decoration: underline;
 }
 
-.profile-picture-img{
-    width: 5.8125rem;
-    height: 5.8125rem;
+.hamburger {
+  display: none; /* Hidden on desktop */
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 30px; /* Reference size */
+  height: 24px;
+  position: relative;
+  z-index: 2001;
 
-    border-radius: 50%;
-    cursor: pointer;
-
-    transition: all .4s;
+  flex-direction: column;
+  justify-content: space-between;
 }
 
-.profile-picture-img:hover{
-    box-shadow: 0px 0px 10px #fff;
+/* ======================= */
+/* MOBILE RESPONSIVE LOGIC */
+/* ======================= */
+@media only screen and (max-width: 1030px) {
+  .hamburger {
+    display: flex;
+    width: 28px;  /* slightly smaller */
+    height: 20px; /* slightly smaller */
+  }
 
-    transform: scale(1.05);
+  .bar {
+    display: block;
+    width: 100%;
+    height: 3px; /* thinner bars */
+    background-color: #fff;
+    border-radius: 4px;
+    transition: all 0.3s ease-in-out;
+    position: relative;
+  }
+
+  /* Hamburger animation */
+  .bar.open:nth-child(1) {
+    transform: translateY(10px) rotate(45deg);
+  }
+
+  .bar.open:nth-child(2) {
+    transform: translateX(-200px);
+  }
+
+  .bar.open:nth-child(3) {
+    transform: translateY(-10px) rotate(-45deg);
+  }
+
+  .left-options {
+    position: fixed;
+    top: 0;
+    left: -100%;
+    height: 100vh;
+    width: 280px;
+    background-color: #222;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; 
+    justify-content: flex-start;
+
+    padding: 8rem 2rem; 
+    gap: 1.5rem;
+    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 2000;
+  }
+
+  .left-options > * {
+    width: 100%;
+    text-align: left;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .left-options .nav-link {
+    width: 100%;
+    padding: 0.5rem 0;
+    justify-content: flex-start;
+    font-size: 1.5rem; /* smaller nav text */
+  }
+
+  .left-options.mobile-open {
+    left: 0;
+  }
+
+  .right-options .nav-link {
+    font-size: 1.5rem; /* smaller right-side nav text */
+  }
+
+  .main-page-link {
+    font-size: 2rem; /* scale main page link for mobile */
+  }
+
+  .profile-options-container button,
+  .profile-options-container a {
+    font-size: 1.2rem; /* smaller profile dropdown text */
+  }
 }
 
-.profile-picture-skeleton {
-  width: 5.8125rem;
-  height: 5.8125rem;
-  border-radius: 50%;
-  background: linear-gradient(
-    90deg,
-    #eee 25%,
-    #ddd 37%,
-    #eee 63%
-  );
-  animation: shimmer 1.4s infinite;
-}
+@media only screen and (max-width: 600px){
+  .left-options .nav-link {
+    font-size: 1rem; /* smaller nav text */
+  }
 
-@keyframes shimmer {
-  0% { background-position: -100px 0; }
-  100% { background-position: 100px 0; }
+  .right-options .nav-link {
+    font-size: 1rem; /* smaller right-side nav text */
+  }
+
+  .options-container div{
+    width: 30%;
+  }
+
+  .options-container a, .options-container button{
+    font-size: 1rem;
+  }
 }

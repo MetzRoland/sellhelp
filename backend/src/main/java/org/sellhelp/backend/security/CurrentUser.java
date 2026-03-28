@@ -1,14 +1,19 @@
 package org.sellhelp.backend.security;
 
+import lombok.extern.slf4j.Slf4j;
 import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import java.security.Principal;
+
 @Component
+@Slf4j
 public class CurrentUser {
     @Autowired
     private UserRepository userRepository;
@@ -26,14 +31,25 @@ public class CurrentUser {
     }
 
     public String getCurrentlyLoggedUserEmail() {
-        return SecurityContextHolder.getContext()
-                .getAuthentication()
-                .getName();
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null ||
+                !authentication.isAuthenticated() ||
+                authentication.getPrincipal().equals("anonymousUser")) {
+            return null;
+        }
+
+        return authentication.getName();
     }
 
-    public User getCurrentlyLoggedUserEntity()
-    {
-        return userRepository.findByEmail(SecurityContextHolder.getContext().getAuthentication().getName())
-                .orElseThrow(() -> new UserNotFoundException("A felhasználó nem létezik!"));
+
+    public User getCurrentlyLoggedUserEntity() {
+        String email = getCurrentlyLoggedUserEmail();
+
+        if (email == null) {
+            return null;
+        }
+
+        return userRepository.findByEmail(email).orElse(null);
     }
 }

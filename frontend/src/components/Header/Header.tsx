@@ -1,174 +1,196 @@
 import { Link } from "react-router";
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { useLoading } from "../../contextProviders/ProccessLoadProvider/ProccessLoadContext";
-import { privateAxios } from "../../config/axiosConfig";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
+import OptionsMenu from "../OptionsMenu/OptionsMenu";
+import NavDropdown from "../NavDropdown/NavDropdown";
+
 import "./Header.css";
 
-type CachedProfilePicture = {
-  url: string;
-  expiresAt: number;
-};
-
 function Header() {
-  const { isAuthenticated, logout } = useAuth();
-  const [profilePicture, setProfilePicture] = useState<string | null>(null);
-  const [ppLoading, setPpLoading] = useState<boolean>(true);
-  const [isProfileOpen, setIsProfileOpen] = useState<boolean>(false);
-
+  const { isAuthenticated, logout, user } = useAuth();
   const { setIsLoading, setLoadingMessage } = useLoading();
 
-  const profileRef = useRef<HTMLDivElement | null>(null);
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  // State for the hamburger menu
+  const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
+
+  const profileToggleRef = useRef<HTMLDivElement>(null);
+
+  const hamburgerRef = useRef<HTMLButtonElement>(null);
+
+  const [isHamburgerVisible, setIsHamburgerVisible] = useState(false);
+
+  const toggleMenu = (menu: string | null) => {
+    setOpenMenu((prev) => (prev === menu ? null : menu));
+  };
+
+  const toggleHamburger = () => {
+    setIsHamburgerOpen(!isHamburgerOpen);
+  };
+
+  const isAdmin = user?.role !== "ROLE_USER";
+
+  const userOptionsLinks = [{ url: "/users", label: "Felhasználók keresése" }];
+
+  const postOptionLinks = [
+    { url: "/posts", label: "Posztok böngészése" },
+    ...(isAuthenticated
+      ? [
+          { url: "/posts/new", label: "Új poszt létrehozása" },
+          { url: "/myposts", label: "Saját posztjaim" },
+          { url: "/posts/involved", label: "Elvállalt posztjaim" },
+        ]
+      : []),
+  ];
+
+  const adminUserManagementLinks = [
+    { url: "/userManagement", label: "Felhasználók kezelése" },
+  ];
+
+  const adminPostManagementLinks = [
+    { url: "/postManagement", label: "Posztok kezelése" },
+  ];
 
   useEffect(() => {
-    if (!isAuthenticated) return;
-    if (profilePicture) return;
+    const checkVisibility = () => {
+      const el = hamburgerRef.current;
+      if (!el) return;
 
-    const cachedPp = localStorage.getItem("profilePicture");
-
-    if (cachedPp) {
-      const parsed: CachedProfilePicture = JSON.parse(cachedPp);
-
-      if (Date.now() < parsed.expiresAt) {
-        setProfilePicture(parsed.url);
-
-        setTimeout(() => {
-          setPpLoading(false);
-        }, 1000);
-
-        return;
-      } 
-      else {
-        localStorage.removeItem("profilePicture");
-      }
-    }
-
-    const fetchProfilePicture = async () => {
-      try {
-        const response = await privateAxios.get("/user/files/pp");
-        setProfilePicture(response.data.profilePictureUrl);
-
-        if (response.data.profilePictureUrl) {
-          const expiresInMs = 15 * 60 * 1000;
-
-          localStorage.setItem(
-            "profilePicture",
-            JSON.stringify({
-              url: response.data.profilePictureUrl,
-              expiresAt: Date.now() + expiresInMs,
-            }),
-          );
-        }
-      } catch {
-        setProfilePicture(null);
-      } finally {
-        setPpLoading(false);
-      }
+      setIsHamburgerVisible(el.offsetParent !== null);
     };
 
-    fetchProfilePicture();
-  }, [isAuthenticated, profilePicture]);
+    checkVisibility();
+    window.addEventListener("resize", checkVisibility);
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        profileRef.current &&
-        !profileRef.current.contains(event.target as Node)
-      ) {
-        setIsProfileOpen(false);
-      }
-    };
-
-    document.addEventListener("mousedown", handleClickOutside);
-
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => window.removeEventListener("resize", checkVisibility);
   }, []);
 
-  const handleProfileDropDown = () => {
-    setIsProfileOpen((prev) => !prev);
+  const handleLogout = async () => {
+    toggleMenu(null);
+    setIsLoading(true);
+    setLoadingMessage("Kijelentkezés...");
+    await logout();
+    setIsLoading(false);
+    setLoadingMessage("");
   };
 
   return (
     <header className="header">
       <nav className="header-nav">
-        {!isAuthenticated ? (
-          <>
-            <div className="left-options">
-              <Link className="nav-link" to="#">
+        {/* Hamburger Icon */}
+        <button
+          className="hamburger"
+          ref={hamburgerRef}
+          onClick={toggleHamburger}
+        >
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+          <span className={`bar ${isHamburgerOpen ? "open" : ""}`}></span>
+        </button>
+
+        <div className={`left-options ${isHamburgerOpen ? "mobile-open" : ""}`}>
+          {!isAuthenticated ? (
+            <>
+              <Link
+                className="nav-link"
+                to="/posts"
+                onClick={() => setIsHamburgerOpen(false)}
+              >
                 Posztok keresése
               </Link>
-            </div>
-            <div className="title-option">
-              <Link className="nav-link main-page-link" to="/">
-                SellHelp
-              </Link>
-            </div>
-            <div className="right-options">
-              <Link className="nav-link" to="/login">
-                Bejelentkezés
-              </Link>
-              <Link className="nav-link" to="/register">
-                Regiszrálás
-              </Link>
-            </div>
-          </>
-        ) : (
-          <>
-            <div className="left-options">
-              <Link className="nav-link" to="#">
-                Áttekintés
-              </Link>
-              <Link className="nav-link" to="#">
-                Posztok keresése
-              </Link>
-            </div>
-            <div className="title-option">
-              <Link className="nav-link main-page-link" to="/">
-                SellHelp
-              </Link>
-            </div>
-            <div
-              className="right-options right-options-profile"
-              ref={profileRef}
-            >
-              {ppLoading ? (
-                <div className="profile-picture-skeleton" />
-              ) : (
-                <img
-                  className="profile-picture-img"
-                  src={profilePicture || "images/profile.svg"}
-                  alt="Profile picture"
-                  onClick={handleProfileDropDown}
+              {isHamburgerVisible && (
+                <>
+                  <Link className="nav-link" to="/login">
+                    Bejelentkezés
+                  </Link>
+                  <Link className="nav-link" to="/register">
+                    Regisztrálás
+                  </Link>
+                </>
+              )}
+            </>
+          ) : !isAdmin ? (
+            <>
+              <NavDropdown
+                label="Áttekintés"
+                menuKey="overview"
+                links={userOptionsLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+              <NavDropdown
+                label="Posztok keresése"
+                menuKey="posts"
+                links={postOptionLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+            </>
+          ) : (
+            <>
+              <NavDropdown
+                label="Felhasználói fiókok"
+                menuKey="adminUsers"
+                links={adminUserManagementLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+              <NavDropdown
+                label="Posztok kezelése"
+                menuKey="adminPosts"
+                links={adminPostManagementLinks}
+                openMenu={openMenu}
+                toggleMenu={toggleMenu}
+              />
+            </>
+          )}
+        </div>
+
+        <div className="title-option">
+          <Link className="nav-link main-page-link" to="/">
+            SellHelp
+          </Link>
+        </div>
+
+        <div className="right-options right-options-profile">
+          {!isAuthenticated ? (
+            <>
+              {!isHamburgerVisible && (
+                <>
+                  <Link className="nav-link" to="/login">
+                    Bejelentkezés
+                  </Link>
+                  <Link className="nav-link" to="/register">
+                    Regisztrálás
+                  </Link>
+                </>
+              )}
+            </>
+          ) : (
+            <div className="dropdown-toggle-container" ref={profileToggleRef}>
+              {user && (
+                <ProfilePictureComponent
+                  userId={user.id}
+                  handleOnClick={() => toggleMenu("profile")}
                 />
               )}
-              <div
-                className={`profile-options-container ${
-                  isProfileOpen ? "open" : "closed"
-                }`}
+              <OptionsMenu
+                isOpen={openMenu === "profile"}
+                onClose={() => toggleMenu(null)}
+                toggleRef={profileToggleRef}
+                links={[
+                  { url: "/home/settings", label: "Felhasználói adatok" },
+                ]}
               >
-                <Link className="user-profile-option" to="/profile">
-                  Felhasználói adatok
-                </Link>
-                <button
-                  className="user-profile-option"
-                  onClick={async () => {
-                    handleProfileDropDown();
-                    setIsProfileOpen(false);
-                    setIsLoading(true);
-                    setLoadingMessage("Kijelentkezés...");
-                    await logout();
-                    setIsLoading(false);
-                    setLoadingMessage("");
-                  }}
-                >
+                <button className="user-profile-option" onClick={handleLogout}>
                   Kijelentkezés
                 </button>
-              </div>
+              </OptionsMenu>
             </div>
-          </>
-        )}
+          )}
+        </div>
       </nav>
     </header>
   );

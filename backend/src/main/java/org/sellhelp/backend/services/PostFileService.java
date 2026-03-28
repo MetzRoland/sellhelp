@@ -38,9 +38,8 @@ public class PostFileService {
         List<PostFile> postFiles = postFileRepository.findAllByPost(post);
 
         List<FileDTO> files = new ArrayList<>();
-        for (PostFile f: postFiles)
-        {
-            FileDTO dto = new FileDTO(f.getId(), s3Service.getDownloadURL(f.getPostFilePath()));
+        for (PostFile f : postFiles) {
+            FileDTO dto = s3Service.createFileDTO(f.getId(), f.getPostFilePath());
             files.add(dto);
         }
 
@@ -52,13 +51,20 @@ public class PostFileService {
         PostFile postFile = postFileRepository.findById(postFileId)
                 .orElseThrow(() -> new EntityNotFoundException("A fájl nem létezik!"));
 
-        return new FileDTO(postFile.getId(), s3Service.getDownloadURL(postFile.getPostFilePath()));
+        return s3Service.createFileDTO(postFile.getId(), postFile.getPostFilePath());
     }
 
     public void addFileToPost(int postId, MultipartFile file)
     {
         Post post = postRepository.findById(postId)
                 .orElseThrow(() -> new EntityNotFoundException("A poszt nem létezik!"));
+
+        if (post.getPostPublisher().getId() != currentUser.getCurrentlyLoggedUserEntity().getId())
+        {throw new InvalidPermissionException("Nincs jogosultság!");}
+
+        String key = s3Service.postFileKey(post.getId(), file.getOriginalFilename());
+        if (postFileRepository.findByPostFilePath(key).isPresent())
+        {throw new RuntimeException("Ez a fájl már létezik");}
 
         if (postFileRepository.countByPost(post) >= 10)
         {
@@ -67,7 +73,7 @@ public class PostFileService {
 
         PostFile newPostFile = PostFile.builder()
                 .post(post)
-                .postFilePath(s3Service.postFileKey(post.getId(), file.getOriginalFilename()))
+                .postFilePath(key)
                 .build();
 
         try {

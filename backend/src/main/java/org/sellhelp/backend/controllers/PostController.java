@@ -77,6 +77,11 @@ public class PostController {
         return ResponseEntity.ok(postService.applyToPost(postId));
     }
 
+    @GetMapping("/posts/{postId}/applied-status")
+    public ResponseEntity<Boolean> getAppliedStatus(@PathVariable Integer postId){
+        return ResponseEntity.ok(postService.getAppliedStatus(postId));
+    }
+
     @PostMapping("/posts/{postId}/cancelApply")
     public ResponseEntity<String> cancelApply(@PathVariable Integer postId){
         postService.cancelApply(postId);
