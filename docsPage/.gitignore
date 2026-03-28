@@ -1,0 +1,15 @@
+.env*
+minio_data/*
+restartDocker*
+note-*
+
+.DS_Store
+node_modules
+public
+prof
+tsconfig.tsbuildinfo
+.obsidian
+.quartz-cache
+private/
+.replit
+replit.nix
