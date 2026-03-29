@@ -48,7 +48,7 @@ services:
       - storage
 
   bridge:
-    image: shenxn/protonmail-bridge
+    image: dancwilliams/protonmail-bridge
     ports:
       - 1025:25/tcp
       - 1143:143/tcp
