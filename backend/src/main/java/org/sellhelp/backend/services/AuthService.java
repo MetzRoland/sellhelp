@@ -212,11 +212,15 @@ public class AuthService {
             newUser.setRole(role);
             newUser.setCity(city);
 
-            newUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
+            User savedUser = userRepository.save(newUser);
+
+            savedUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
+
+            userRepository.save(savedUser);
 
             tokenDTO.setTempToken(tempTokenService.create(email));
 
-            userNotificationManager.createNotification(newUser, "Register google user", "Successfully registered google user!");
+            userNotificationManager.createNotification(savedUser, "Register google user", "Successfully registered google user!");
 
             emailService.registerUser(email, firstName, lastName);
 
