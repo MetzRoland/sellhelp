@@ -214,7 +214,7 @@ public class AuthService {
 
             User savedUser = userRepository.save(newUser);
 
-            savedUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
+            savedUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, savedUser.getId()));
 
             userRepository.save(savedUser);
 
@@ -290,7 +290,7 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(email);
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
-        userNotificationManager.createNotification(user, "Login google user", "Successfully logged in!");
+        userNotificationManager.createNotification(newUser, "Login google user", "Successfully logged in!");
 
         emailService.loginUser(email);
 

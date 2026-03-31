@@ -10,13 +10,13 @@ END;
 $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER trg_update_last_used_pass
-BEFORE UPDATE OF password ON "user_secrets"
+BEFORE UPDATE ON "user_secrets"
 FOR EACH ROW
 EXECUTE FUNCTION update_last_used_pass();
 
-CREATE INDEX idx_cities_city_name ON cities (city_name);
+-- CREATE INDEX idx_cities_city_name ON cities (city_name);
 
-CREATE EXTENSION IF NOT EXISTS postgres_fdw;
+/* CREATE EXTENSION IF NOT EXISTS postgres_fdw;
 
 CREATE EXTENSION IF NOT EXISTS pg_cron;
 
@@ -55,4 +55,4 @@ DROP SCHEMA public CASCADE;
 CREATE SCHEMA public;
 
 GRANT ALL ON SCHEMA public TO sandbox;
-GRANT ALL ON SCHEMA public TO public;
+GRANT ALL ON SCHEMA public TO public; */
