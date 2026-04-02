@@ -5,6 +5,8 @@ import io.swagger.v3.oas.annotations.info.Info;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
+import java.util.TimeZone;
+
 @OpenAPIDefinition(
 		info = @Info(
 				title = "SellHelp API",
@@ -16,6 +18,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class BackendApplication {
 
 	public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Europe/Budapest"));
+
 		SpringApplication.run(BackendApplication.class, args);
 	}
 

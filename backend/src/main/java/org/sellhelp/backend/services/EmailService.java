@@ -127,8 +127,8 @@ public class EmailService {
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
-                !forgotPassword ? "http://localhost:5173/resetPassword?token=" + token
-                        : "http://localhost:5173/forgotPassword?token=" + token;
+                !forgotPassword ? "http://127.0.0.1:5173/resetPassword?token=" + token
+                        : "http://127.0.0.1:5173/forgotPassword?token=" + token;
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 

@@ -128,18 +128,18 @@ public class AuthController {
                         tokenDTO.getRefreshToken()
                 );
 
-                response.sendRedirect("http://localhost:5173/home");
+                response.sendRedirect("http://127.0.0.1:5173/home");
 
             } else {
                 response.sendRedirect(
-                        "http://localhost:5173/finishGoogleRegistration?tempToken="
+                        "http://127.0.0.1:5173/finishGoogleRegistration?tempToken="
                                 + tokenDTO.getTempToken()
                 );
             }
 
         }
         catch (Exception e) {
-            response.sendRedirect("http://localhost:5173/profileInactive");
+            response.sendRedirect("http://127.0.0.1:5173/profileInactive");
         }
     }
 

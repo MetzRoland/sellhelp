@@ -189,7 +189,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleGoogleLogin = async () => {
-    window.location.href = "http://localhost:8080/auth/login/google";
+    window.location.href = "http://127.0.0.1:8080/auth/login/google";
   };
 
   const finishGoogleRegistration = async (registerData: GoogleRegister) => {

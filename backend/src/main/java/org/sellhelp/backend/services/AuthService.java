@@ -224,7 +224,7 @@ public class AuthService {
 
             emailService.registerUser(email, firstName, lastName);
 
-            return userRepository.save(newUser);
+            return savedUser;
         });
 
         if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
