@@ -1,3 +1,1 @@
 docker run --rm -it -v ./protonmail:/root dancwilliams/protonmail-bridge init
-OR
-docker compose run protonmail-bridge init
