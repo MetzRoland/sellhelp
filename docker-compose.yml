@@ -4,26 +4,17 @@ services:
       ports:
         - 8080:8080
       depends_on:
-        database:
-          condition: service_healthy
-        storage:
-          condition: service_started
-        bridge:
-          condition: service_started
-        nginx:
-          condition: service_started
+        - database
+        - storage
+        - bridge
       env_file: '.env-docker'
 
-  sellhelp-frontend:
-    image: sellhelp-frontend
+  frontend:
+    image: frontend:latest
     ports:
       - 5173:5173
     depends_on:
      - sellhelp
-     - database
-     - storage
-     - bridge
-     - nginx
     env_file: '.env-docker'
 
   database:
@@ -33,11 +24,6 @@ services:
       env_file: '.env-docker'
       volumes:
         - ./data:/docker-entrypoint-initdb.d
-      healthcheck:
-        test: ["CMD-SHELL", "psql -U $${POSTGRES_USER} -d $${POSTGRES_DB} -c 'SELECT 1' || exit 1"]
-        interval: 5s
-        timeout: 5s
-        retries: 5
 
   adminer:
     image: adminer
@@ -46,7 +32,6 @@ services:
       - 8888:8080
     depends_on:
       - database
-
 
   storage:
     image: 'minio/minio:latest'
@@ -58,6 +43,11 @@ services:
       - ./minio_data:/data
     command: server /data --console-address ":9001"
 
+  docs:
+    image: shdocs:latest
+    ports:
+      - 7999:7999
+
   nginx:
     image: nginx:alpine
     volumes:
@@ -66,7 +56,10 @@ services:
       - 80:80
       - 443:443
     depends_on:
+      - docs
+      - sellhelp
       - storage
+      - frontend
 
   bridge:
     image: dancwilliams/protonmail-bridge
