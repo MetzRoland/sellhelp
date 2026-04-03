@@ -31,6 +31,9 @@ public class EmailService {
     @Value("${spring.mail.from}")
     private String fromEmail;
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     @Autowired
     public EmailService(JavaMailSender javaMailSender, JWTUtil jwtUtil,
                         TemplateEngine templateEngine){
@@ -127,8 +130,8 @@ public class EmailService {
         String token = jwtUtil.generatePasswordUpdateToken(toEmail);
 
         String resetLink =
-                !forgotPassword ? "http://127.0.0.1:5173/resetPassword?token=" + token
-                        : "http://127.0.0.1:5173/forgotPassword?token=" + token;
+                !forgotPassword ? frontendUrl + "/resetPassword?token=" + token
+                        : frontendUrl + "/forgotPassword?token=" + token;
         variables.put("resetLink", resetLink);
         variables.put("timestamp", emailSentTimeStamp());
 
