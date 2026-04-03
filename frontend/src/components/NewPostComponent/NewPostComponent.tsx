@@ -83,7 +83,7 @@ function NewPostComponent() {
       const response = await privateAxios.post("/post/new", formData);
       console.log(response.data);
 
-      navigate("/myposts");
+      navigate(`/posts/${response.data.id}`);
     } catch (err) {
       const error = err as AxiosError<{
         message?: string;
