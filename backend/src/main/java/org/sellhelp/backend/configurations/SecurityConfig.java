@@ -153,7 +153,7 @@ public class SecurityConfig {
                 "http://sellhelp.org",
                 "https://www.sellhelp.org",
                 "https://sellhelp.org",
-                "https://accounts.google.com"
+                "https://accounts.google.com/*"
                 ));
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));

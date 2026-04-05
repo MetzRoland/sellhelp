@@ -1,4 +1,4 @@
-FROM node:24 as build
+FROM node:24 AS build
 WORKDIR /frontend
 COPY . .
 RUN npm install && npm run build
