@@ -212,15 +212,19 @@ public class AuthService {
             newUser.setRole(role);
             newUser.setCity(city);
 
-            newUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, newUser.getId()));
+            User savedUser = userRepository.save(newUser);
+
+            savedUser.setProfilePicturePath(s3Service.uploadFileFromUrl(picturePath, savedUser.getId()));
+
+            userRepository.save(savedUser);
 
             tokenDTO.setTempToken(tempTokenService.create(email));
 
-            userNotificationManager.createNotification(newUser, "Register google user", "Successfully registered google user!");
+            userNotificationManager.createNotification(savedUser, "Register google user", "Successfully registered google user!");
 
             emailService.registerUser(email, firstName, lastName);
 
-            return userRepository.save(newUser);
+            return savedUser;
         });
 
         if(user.isBanned()) throw new UserBannedException("A felhasználó le van tiltva!");
@@ -286,7 +290,7 @@ public class AuthService {
         String accessToken = jwtUtil.generateAccessToken(email);
         String refreshToken = jwtUtil.generateRefreshToken(email);
 
-        userNotificationManager.createNotification(user, "Login google user", "Successfully logged in!");
+        userNotificationManager.createNotification(newUser, "Login google user", "Successfully logged in!");
 
         emailService.loginUser(email);
 

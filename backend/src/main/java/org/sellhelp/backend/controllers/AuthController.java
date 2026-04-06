@@ -1,7 +1,6 @@
 package org.sellhelp.backend.controllers;
 
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import org.sellhelp.backend.dtos.requests.*;
 import org.sellhelp.backend.dtos.responses.GenerateTotpDTO;
 import org.sellhelp.backend.dtos.responses.TokenDTO;
@@ -12,6 +11,7 @@ import org.sellhelp.backend.security.CookieGenerator;
 import org.sellhelp.backend.services.AuthService;
 import org.sellhelp.backend.services.MfaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
@@ -26,6 +26,9 @@ public class AuthController {
     private final AuthService authService;
     private final MfaService mfaService;
     private final CookieGenerator cookieGenerator;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @Autowired
     public AuthController(AuthService authService, MfaService mfaService,
@@ -128,18 +131,18 @@ public class AuthController {
                         tokenDTO.getRefreshToken()
                 );
 
-                response.sendRedirect("http://localhost:5173/home");
+                response.sendRedirect(frontendUrl + "/home");
 
             } else {
                 response.sendRedirect(
-                        "http://localhost:5173/finishGoogleRegistration?tempToken="
+                        frontendUrl + "/finishGoogleRegistration?tempToken="
                                 + tokenDTO.getTempToken()
                 );
             }
 
         }
         catch (Exception e) {
-            response.sendRedirect("http://localhost:5173/profileInactive");
+            response.sendRedirect(frontendUrl + "/profileInactive");
         }
     }
 

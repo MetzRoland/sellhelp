@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>org.sellhelp</groupId>
 	<artifactId>sellHelpBackend</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.1.0</version>
 	<name>backend</name>
 	<description>Backend code for sellhelp.org</description>
 	<url/>

@@ -17,6 +17,8 @@ import { AuthContext } from "./AuthContext";
 import { useLocation, useNavigate } from "react-router";
 
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
+  const baseUrl = import.meta.env.VITE_API_BASE_URL;
+
   const [user, setUser] = useState<User | null>(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [authError, setAuthError] = useState<string | null>(null);
@@ -189,7 +191,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   const handleGoogleLogin = async () => {
-    window.location.href = "http://localhost:8080/auth/login/google";
+    window.location.href = baseUrl + "/auth/login/google";
   };
 
   const finishGoogleRegistration = async (registerData: GoogleRegister) => {
