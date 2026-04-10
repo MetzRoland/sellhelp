@@ -29,13 +29,12 @@
 }
 
 .footer-left a{
-  text-decoration: none;
+  text-decoration: underline;
   color: #6D6D6D;
   transition: all .4s;
 }
 
 .footer-left a:hover{
-  text-decoration: none;
   color: #eaeaea;
 }
 
