@@ -413,6 +413,10 @@ body {
     padding: 1rem;
   }
 
+  .main-container{
+    margin: 0;
+  }
+
   .content-title {
     font-size: 180%;
   }

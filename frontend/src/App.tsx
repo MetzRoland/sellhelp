@@ -29,7 +29,7 @@ function App() {
       <Routes location={location}>
         <Route element={<DelayedLayout />}>
           <Route element={<PublicRouterLayout />}>
-            <Route index element={<div>Főoldal</div>} />
+            <Route index element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/adminLogin" element={<Login isAdminLogin={true} />} />
             <Route path="/register" element={<Register />} />

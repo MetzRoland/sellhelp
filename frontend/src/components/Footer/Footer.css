@@ -1,10 +1,6 @@
-/* ===================== */
-/* FOOTER BASE STYLES    */
-/* ===================== */
 .footer {
   width: 100%;
   min-height: 10vh;
-  height: 15vh;
   padding: 1.5em;
 
   background-color: #0C0C0C;
@@ -14,69 +10,59 @@
   font-weight: bold;
 
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  flex-wrap: wrap; /* allow wrapping on small screens */
-  gap: 0.5rem;
+  justify-content: space-between;
 }
 
-.footer a {
-  color: inherit;
-  text-decoration: underline;
-  transition: color 0.3s ease;
+/* sections */
+.footer-left,
+.footer-center,
+.footer-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
 }
 
-.footer a:hover {
-  color: #ffffff;
+/* alignment */
+.footer-left {
+  justify-content: flex-start;
 }
 
-/* ===================== */
-/* RESPONSIVE            */
-/* ===================== */
-
-/* Small phones (<400px) */
-@media (max-width: 400px) {
-  .footer {
-    font-size: 0.85rem;
-    flex-direction: column;
-    text-align: center;
-    padding: 1em;
-    height: auto;
-    gap: 0.3rem;
-  }
+.footer-left a{
+  text-decoration: none;
+  color: #6D6D6D;
+  transition: all .4s;
 }
 
-/* Phones 400–600px */
-@media (min-width: 400px) and (max-width: 600px) {
-  .footer {
-    font-size: 1rem;
-    flex-direction: column;
-    text-align: center;
-    padding: 1em;
-    gap: 0.4rem;
-    height: auto;
-  }
+.footer-left a:hover{
+  text-decoration: none;
+  color: #eaeaea;
 }
 
-/* Tablets (<768px) */
+.footer-center {
+  justify-content: center;
+}
+
+.footer-right {
+  justify-content: flex-end;
+}
+
+/* logo */
+.footer img {
+  width: 4rem;
+}
+
+/* responsive */
 @media (max-width: 768px) {
   .footer {
-    font-size: 1.1rem;
     flex-direction: column;
     text-align: center;
-    padding: 1.25em;
-    gap: 0.5rem;
-    height: auto;
+    gap: 1rem;
   }
-}
 
-/* Large screens (>1024px) */
-@media (min-width: 1025px) {
-  .footer {
-    font-size: 1.25rem;
-    flex-direction: row;
-    text-align: left;
-    padding: 1.5em;
-    gap: 0.5rem;
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    justify-content: center;
   }
 }
