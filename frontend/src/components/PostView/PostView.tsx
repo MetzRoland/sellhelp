@@ -15,7 +15,7 @@ function PostView({ post, handleOnClick }: PostViewProps) {
   return (
     <>
       <div
-        className="content-container post-view-container"
+        className="post-view-container"
         onClick={handleOnClick}
       >
         <div className="post-status-details">
@@ -56,7 +56,7 @@ function PostView({ post, handleOnClick }: PostViewProps) {
               handleProfileClick(post.publisher.id);
             }}
           >
-            <p>Poszt létrehozója:</p>
+            <p>Létrehozta:</p>
 
             <div className="post-publisher-details">
               <ProfilePictureComponent

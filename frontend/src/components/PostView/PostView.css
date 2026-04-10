@@ -1,13 +1,3 @@
-.post-view-container{
-    transition: all .4s;
-}
-
-.post-view-container:hover{
-    transform: scale(1.05);
-    box-shadow: 1px 1px 10px #fff;
-    cursor: pointer;
-}
-
 /* ===================== */
 /* POST VIEW CARD        */
 /* ===================== */
@@ -21,6 +11,18 @@
     rgba(60, 59, 58, 1) 0%,
     rgba(45, 45, 45, 1) 100%
   );
+
+  flex: 1 1 25rem;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  border-radius: 20px;
+  padding: 1.5em;
+  box-sizing: border-box;
+
+  box-shadow: 5px 5px 10px 5px rgba(0, 0, 0, 0.25);
 }
 
 /* Hover lift effect */
@@ -194,7 +196,6 @@
 
   .post-view-container h1 {
     font-size: 1.1rem;
-    text-align: left;
   }
 
   .post-details {
@@ -203,7 +204,6 @@
 
   .post-description {
     font-size: 0.85rem;
-    text-align: left;
   }
 
   .post-city,
@@ -264,7 +264,6 @@
 
   .post-view-container h1 {
     font-size: 1.2rem;
-    text-align: left;
   }
 
   .post-details {
@@ -273,7 +272,6 @@
 
   .post-description {
     font-size: 0.9rem;
-    text-align: left;
   }
 
   .post-city,

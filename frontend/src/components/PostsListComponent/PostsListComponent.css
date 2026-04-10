@@ -1,4 +1,10 @@
 .posts-list-container{
     background-color: transparent;
     box-shadow: none;
+    display: flex;
+    width: 100%;
+    flex-wrap: wrap;
+    justify-content: space-evenly;
+    align-content: space-between;
+    gap: 2rem;
 }
