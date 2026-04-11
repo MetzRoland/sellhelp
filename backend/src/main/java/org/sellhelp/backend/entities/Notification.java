@@ -32,7 +32,7 @@ public class Notification {
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "message", nullable = false)
+    @Column(name = "message", nullable = false, length = 2000)
     private String message;
 
     @Column(name = "sent_at")

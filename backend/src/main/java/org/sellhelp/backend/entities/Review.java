@@ -36,7 +36,7 @@ public class Review {
     @Column(name = "rating", nullable = false)
     private byte rating;
 
-    @Column(name = "comment")
+    @Column(name = "comment", length = 2000)
     private String comment;
 
     @Column(name = "created_at", nullable = false)

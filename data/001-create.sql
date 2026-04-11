@@ -466,26 +466,3 @@ CREATE TABLE review_files (
     file_path VARCHAR(255) NOT NULL,
     CONSTRAINT FK_review_files_review_id FOREIGN KEY (review_id) REFERENCES reviews(id)
 );
-
--- -----------------------------
--- Ensure all VARCHAR(n) lengths (safety)
--- -----------------------------
-ALTER TABLE posts ALTER COLUMN title TYPE VARCHAR(100);
-ALTER TABLE posts ALTER COLUMN description TYPE VARCHAR(2000);
-
-ALTER TABLE comments ALTER COLUMN message TYPE VARCHAR(2000);
-ALTER TABLE chat_messages ALTER COLUMN message TYPE VARCHAR(2000);
-ALTER TABLE notifications ALTER COLUMN message TYPE VARCHAR(2000);
-ALTER TABLE reviews ALTER COLUMN comment TYPE VARCHAR(2000);
-
-ALTER TABLE users ALTER COLUMN first_name TYPE VARCHAR(50);
-ALTER TABLE users ALTER COLUMN last_name TYPE VARCHAR(50);
-ALTER TABLE users ALTER COLUMN email TYPE VARCHAR(50);
-ALTER TABLE users ALTER COLUMN profile_picture_path TYPE VARCHAR(255);
-
-ALTER TABLE user_secrets ALTER COLUMN totp_secret TYPE VARCHAR(60);
-
-ALTER TABLE chat_files ALTER COLUMN file_path TYPE VARCHAR(255);
-ALTER TABLE post_files ALTER COLUMN file_path TYPE VARCHAR(255);
-ALTER TABLE user_files ALTER COLUMN file_path TYPE VARCHAR(255);
-ALTER TABLE review_files ALTER COLUMN file_path TYPE VARCHAR(255);
