@@ -18,6 +18,8 @@ import { type City } from "../Register/RegisterTypes";
 import type { UserUpdateFormFields } from "./FullUserProfileTypes";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
+import type { Post } from "../PostsListComponent/PostsListComponentTypes";
+import PostView from "../PostView/PostView";
 
 import "./FullUserProfile.css";
 
@@ -32,6 +34,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const [user, setUser] = useState<User | null>(null);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
   const [cities, setCities] = useState<City[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const navigator = useNavigate();
 
@@ -164,6 +167,22 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
 
     fetchCities();
   }, [setIsLoading, settings]);
+
+  useEffect(() => {
+    const fetchPostsForUser = async () => {
+      try {
+        setIsLoading(true);
+        const response = await publicAxios.get<Post[]>("/post/posts");
+        setPosts(
+          response.data.filter((post) => post.publisher.id === user?.id),
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPostsForUser();
+  }, [setIsLoading, user?.id]);
 
   // const setUserData = () => {
   //   setFormData({
@@ -433,7 +452,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
-          {(user.banned && isAuthenticated) && (
+          {user.banned && isAuthenticated && (
             <p className="message error">A felhasználót bannolták!</p>
           )}
 
@@ -458,6 +477,28 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             />
           )}
         </form>
+
+        {user.id !== authUser?.id && (
+          <>
+            <h2 className="profile-posts-content-title">{user.lastName + " " + user.firstName + " posztjai:"}</h2>
+
+            {posts.length === 0 && !isLoading && <p>Nincsenek posztok</p>}
+
+            <div className="posts-list-container">
+              {posts.map((post) => {
+                return (
+                  <PostView
+                    key={post.id}
+                    post={post}
+                    handleOnClick={() => {
+                      navigator("/posts/" + `${post.id}`);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
       <Footer />
     </>
