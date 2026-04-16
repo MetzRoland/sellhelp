@@ -56,8 +56,6 @@ class PostFileServiceTest {
                 .build();
     }
 
-    // ------------------ getAllFilesForPost ------------------
-
     @Test
     @DisplayName("Get all files for a post successfully")
     void getAllFilesForPost_success() {
@@ -82,8 +80,6 @@ class PostFileServiceTest {
                 () -> postFileService.getAllFilesForPost(1));
     }
 
-    // ------------------ getPostFileById ------------------
-
     @Test
     @DisplayName("Get a single post file successfully")
     void getPostFileById_success() {
@@ -105,8 +101,6 @@ class PostFileServiceTest {
         assertThrows(EntityNotFoundException.class,
                 () -> postFileService.getPostFileById(1));
     }
-
-    // ------------------ addFileToPost ------------------
 
     @Test
     @DisplayName("Add a file to a post successfully")
@@ -188,8 +182,6 @@ class PostFileServiceTest {
         assertThrows(RuntimeException.class,
                 () -> postFileService.addFileToPost(1, multipartFile));
     }
-
-    // ------------------ deletePostFile ------------------
 
     @Test
     @DisplayName("Delete post file successfully")

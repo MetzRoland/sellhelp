@@ -6,7 +6,6 @@ import Login from "../../components/Login/Login";
 import type { AuthContextType } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 import type { GoogleRegister } from "../../contextProviders/AuthProvider/AuthProviderTypes";
 
-// Mock useNavigate from react-router
 const mockNavigate = vi.fn();
 vi.mock("react-router", async (importOriginal) => {
   const actual = await importOriginal<typeof import("react-router")>();
@@ -16,7 +15,6 @@ vi.mock("react-router", async (importOriginal) => {
   };
 });
 
-// Mock Auth Context
 let authMockState: AuthContextType;
 const mockLoginLocal = vi.fn();
 const mockVerifyTotp = vi.fn();
@@ -28,7 +26,6 @@ vi.mock("../../contextProviders/AuthProvider/AuthContext", () => ({
   useAuth: () => authMockState,
 }));
 
-// Mock Loading Context
 vi.mock(
   "../../contextProviders/ProccessLoadProvider/ProccessLoadContext",
   () => ({
@@ -39,7 +36,6 @@ vi.mock(
   }),
 );
 
-// Mock Header/Footer
 vi.mock("../Header/Header", () => ({ default: () => <div data-testid="header" /> }));
 vi.mock("../Footer/Footer", () => ({ default: () => <div data-testid="footer" /> }));
 

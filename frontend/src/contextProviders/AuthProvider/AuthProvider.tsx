@@ -66,7 +66,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       (config: InternalAxiosRequestConfigWithRetry) => {
         if (accessToken && !config._retry) {
           config.headers.set("Authorization", `Bearer ${accessToken}`);
-          console.log(accessToken);
         }
         return config;
       },
@@ -111,7 +110,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           try {
             const refreshRes = await refreshAxios.get("/auth/login/refresh");
 
-            console.log(refreshRes.data.accessToken);
             setAccessToken(refreshRes.data.accessToken);
             originalRequest.headers.set(
               "Authorization",
@@ -219,7 +217,6 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         errors?: GoogleRegister;
       }>;
 
-      console.log(err.response?.data?.message);
       setAuthError(
         err.response?.data?.message ?? "Sikertelen google fiók regisztráció!",
       );

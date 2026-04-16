@@ -54,8 +54,6 @@ class UserFileServiceTest {
                 .build();
     }
 
-    // ------------------ Get User Files ------------------
-
     @Test
     @DisplayName("Get all user files successfully")
     void getAllUserFiles_success() {
@@ -90,8 +88,6 @@ class UserFileServiceTest {
 
         assertEquals(userFile.getId(), dto.getFileId());
     }
-
-    // ------------------ Add User Files ------------------
 
     @Test
     @DisplayName("Add user file successfully")
@@ -144,8 +140,6 @@ class UserFileServiceTest {
                 () -> userFileService.addUserFile(user.getEmail(), multipartFile));
     }
 
-    // ------------------ Delete User Files ------------------
-
     @Test
     @DisplayName("Delete user file successfully")
     void deleteUserFile_success() {
@@ -170,8 +164,6 @@ class UserFileServiceTest {
         assertThrows(InvalidPermissionException.class,
                 () -> userFileService.deleteUserFile(user.getEmail(), userFile.getId()));
     }
-
-    // ------------------ Profile Picture ------------------
 
     @Test
     @DisplayName("Get profile picture returns null when none set")

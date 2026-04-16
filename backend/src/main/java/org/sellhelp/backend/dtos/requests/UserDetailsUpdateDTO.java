@@ -1,7 +1,6 @@
 package org.sellhelp.backend.dtos.requests;
 
 import jakarta.validation.constraints.Past;
-import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;

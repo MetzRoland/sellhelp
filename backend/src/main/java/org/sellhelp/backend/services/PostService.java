@@ -215,7 +215,6 @@ public class PostService {
         comment.setPost(post);
         post.getPostComments().add(comment);
         postRepository.save(post);
-        //commentRepository.save(comment);
 
         if(postOwned(postId)){
             OwnedPostResponseDTO postResponseDTO = modelMapper.map(post, OwnedPostResponseDTO.class);
@@ -470,15 +469,16 @@ public class PostService {
                 () -> new EntityNotFoundException("A poszt nem létezik!")
         );
 
-        if (isClosed(post))
-        {throw new IllegalStateException("A poszt már le van zárva");}
+        if (isClosed(post)) {
+            throw new IllegalStateException("A poszt már le van zárva");
+        }
 
-        if (post.getPostStatus().getStatusName().equals("closed"))
-        {
+        if (post.getPostStatus().getStatusName().equals("closed")) {
             throw new InvalidPermissionException("A poszt már le van zárva.");
         }
 
         PostStatus closedStatus;
+
         if (isUnsuccessful) {
             closedStatus = postStatusRepository.findByStatusName("unsuccessful_result_closed")
                     .orElseThrow(() -> new EntityNotFoundException("A poszt státusz nem létezik!"));

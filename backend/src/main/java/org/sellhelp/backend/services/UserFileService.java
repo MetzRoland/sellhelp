@@ -154,7 +154,6 @@ public class UserFileService {
                 () -> new RuntimeException("A fájl nem található!")
         );
 
-        // check ownership
         if (file.getUser().getId() != user.getId()) {
             throw new InvalidPermissionException("Nincs hozzáférés");
         }
@@ -175,13 +174,6 @@ public class UserFileService {
         if (user.getProfilePicturePath() == null) {
             return new ProfilePictureDTO(null);
         }
-
-        // if (user.getAuthProvider() == AuthProvider.GOOGLE
-        // &&
-        // user.getProfilePicturePath().startsWith("https://lh3.googleusercontent.com/"))
-        // {
-        // return new ProfilePictureDTO(user.getProfilePicturePath());
-        // }
 
         return new ProfilePictureDTO(s3Service.getDownloadURL(user.getProfilePicturePath()));
     }

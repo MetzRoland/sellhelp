@@ -184,17 +184,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchPostsForUser();
   }, [setIsLoading, user?.id]);
 
-  // const setUserData = () => {
-  //   setFormData({
-  //     lastName: user?.lastName,
-  //     firstName: user?.firstName,
-  //     birthDate: user?.birthDate?.toString(),
-  //     cityName: user?.cityName,
-  //     email: user?.email,
-  //     role: getUserRoleLabel(user?.role),
-  //   });
-  // };
-
   useEffect(() => {
     setFormData({
       lastName: user?.lastName,
@@ -324,8 +313,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       setLoadingMessage("Email küldése...");
 
       const response = await privateAxios.get("/user/update/password/send");
-      console.log("From the endpoint: /user/update/password/send");
-      console.log(response);
 
       if (response.status === 200) {
         setSuccess(true);
@@ -344,8 +331,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       setIsLoading(true);
       setLoadingMessage("Kétfaktoros hitelesítés kikapcsolása...");
 
-      const response = await privateAxios.get("/auth/disable2fa");
-      console.log(response.data);
+      await privateAxios.get("/auth/disable2fa");
     } catch (err) {
       console.error(err);
     } finally {

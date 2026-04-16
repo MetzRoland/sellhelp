@@ -53,8 +53,7 @@ function SetupMfa() {
         setQrCode(response.data.qrCode);
         setTempToken(response.data.tempToken);
         setTotpSecret(response.data.totpSecret);
-      } catch (err) {
-        console.error(err);
+      } catch {
         setQrCode(null);
         setTempToken(null);
         setTotpSecret(null);

@@ -79,7 +79,6 @@ function PostsListComponent({
         const response = await privateAxios.get(postFetchingEndpoint);
         const citiesResponse = await publicAxios.get("/api/public/cities");
 
-        console.log(response.data);
         setPosts(response.data);
         setFilteredPosts(response.data);
         setCities(citiesResponse.data);

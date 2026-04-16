@@ -4,8 +4,6 @@ import java.time.Instant;
 
 import org.hibernate.annotations.CurrentTimestamp;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

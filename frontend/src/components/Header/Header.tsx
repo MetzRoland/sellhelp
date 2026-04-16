@@ -13,7 +13,7 @@ function Header() {
   const { setIsLoading, setLoadingMessage } = useLoading();
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  // State for the hamburger menu
+
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
   const profileToggleRef = useRef<HTMLDivElement>(null);

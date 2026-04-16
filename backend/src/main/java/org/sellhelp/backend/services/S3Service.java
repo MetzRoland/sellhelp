@@ -61,8 +61,9 @@ public class S3Service {
     }
 
     public void uploadFile(MultipartFile file) throws IOException {
-        if (file.isEmpty())
-        {throw new IllegalArgumentException("File is empty");}
+        if (file.isEmpty()) {
+            throw new IllegalArgumentException("File is empty");
+        }
 
         s3Client.putObject(PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -238,19 +239,4 @@ public class S3Service {
     public FileDTO createFileDTO(Integer id, String path) {
         return new FileDTO(id, getDownloadURL(path), getDownloadURL(path, true), getFileNameFromKey(path));
     }
-
-    // not used
-    // public String generateUploadUrl(String objectKey) {
-    // PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-    // .bucket(bucketName)
-    // .key(objectKey)
-    // .build();
-    //
-    // PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-    // .putObjectRequest(putObjectRequest)
-    // .signatureDuration(Duration.ofMinutes(15)) // URL valid for 15 min
-    // .build();
-    //
-    // return s3Presigner.presignPutObject(presignRequest).url().toString();
-    // }
 }

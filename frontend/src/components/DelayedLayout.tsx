@@ -1,4 +1,3 @@
-// DelayedLayout.js
 import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import ProccessLoad from './ProcessLoad/ProccessLoad';

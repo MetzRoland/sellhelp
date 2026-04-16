@@ -166,9 +166,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         } else {
           response = await publicAxios.get<Post>(fetchEndpoint + `${id}`);
         }
-        //const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
 
-        console.log(response.data);
         setPost(response.data);
       } catch {
         setPost(null);
@@ -273,8 +271,6 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         { message: comment },
       );
 
-      console.log(response.data);
-
       if(response.status !== 200){
         throw new Error("Hiba a komment mentésekor!");
       }
@@ -282,8 +278,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
       const fetchPostResponse = await privateAxios.get<Post>(
         `/post/posts/${id}`,
       );
-
-      console.log(response.data);
+      
       setPost(fetchPostResponse.data);
     } catch(err) {
       const error = err as AxiosError<{ message?: string; errors?: PostComment }>;
@@ -330,14 +325,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Felhasználó visszavonása...");
 
     try {
-      const response = await privateAxios.get(
+      await privateAxios.get(
         `/post/posts/${postId}/rejectApply`,
       );
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
-
-      console.log(response.data);
     } catch {
       setPost(null);
     } finally {
@@ -365,11 +358,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Jelentkezés...");
 
     try {
-      const response = await privateAxios.post(`/post/posts/${postId}/apply`);
-      console.log(response.data);
+      await privateAxios.post(`/post/posts/${postId}/apply`);
 
-      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
-      setPost(postResponse.data);
+      await privateAxios.get(`/post/posts/${postId}`);
 
       const appliedStatusRespone = await privateAxios.get(
         `/post/posts/${post?.id}/applied-status`,
@@ -386,13 +377,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const changePostStatus = async (targetStatusName: string, postId: number) => {
     try {
-      const response = await privateAxios.patch(
+      await privateAxios.patch(
         `/post/${postId}/changeStatus`,
         {
           targetStatusName: targetStatusName,
         },
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
@@ -423,10 +413,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const rejectApply = async (postId: number) => {
     try {
-      const response = await privateAxios.get(
+      await privateAxios.get(
         `/post/posts/${postId}/rejectApply`,
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
@@ -439,10 +428,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const cancelApplication = async (postId: number) => {
     try {
-      const response = await privateAxios.post(
+      await privateAxios.post(
         `/post/posts/${postId}/cancelApply`,
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);

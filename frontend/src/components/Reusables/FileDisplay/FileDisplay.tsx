@@ -68,7 +68,6 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
         setFiles(response.data);
       }
     } catch {
-      // error handling
       setFiles([]);
     } finally {
       setIsLoading(false);
@@ -123,8 +122,7 @@ function FileDisplay({ type, id, canEdit }: FileDisplayProps) {
     }
     catch (err) {
       const error = err as AxiosError<{ message?: string; }>;
-      // console.error("Error uploading files:", error);
-      // console.log(error?.response?.data?.message);
+
       setFilesError(error?.response?.data?.message || "Fájl feltöltés sikertelen.");
     }
     finally {

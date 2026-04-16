@@ -1,5 +1,3 @@
-// src/tests/components/FullUserProfile.test.tsx
-
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, waitFor, fireEvent } from "@testing-library/react";
 import { MemoryRouter, Route, Routes } from "react-router";
@@ -116,13 +114,10 @@ describe("FullUserProfile component", () => {
 
     if (!editButton) throw new Error("Edit button not found");
 
-    // enable editing
     fireEvent.click(editButton);
 
-    // modify value
     fireEvent.change(lastNameInput, { target: { value: "Nagy" } });
 
-    // save change
     fireEvent.click(editButton);
 
     await waitFor(() => {
@@ -153,13 +148,10 @@ describe("FullUserProfile component", () => {
 
     if (!editButton) throw new Error("Edit button not found");
 
-    // enable editing
     fireEvent.click(editButton);
 
-    // modify value
     fireEvent.change(lastNameInput, { target: { value: "Nagy" } });
 
-    // save change
     fireEvent.click(editButton);
 
     await waitFor(() => {
