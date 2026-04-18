@@ -36,7 +36,7 @@ Az alapötlet egy IT ticketing rendszer logikájára épül, de kifejezetten lak
 
 ## Miért hasznos?
 
-### ⏱Idő- és energiatakarékos
+### Idő és energiatakarékos
 Gyorsan találhatsz segítséget olyan feladatokra, mint:
 - költözés  
 - szerelés  
@@ -156,7 +156,7 @@ SPRING_MAIL_FROM=mail_from
 SPRING_MAIL_SMTP_SSL_TRUST=ssl_trust
 
 # Database configuration
-DATABASE_HOST=your_database_host
+DATABASE_HOST=jdbc:postgresql://database:5432/your_database_name
 DATABASE_USER=your_database_user
 DATABASE_PASSWORD=your_database_password
 
@@ -166,8 +166,8 @@ S3_SECRET_ACCESS_KEY=your_secret_key
 S3_REGION=region
 S3_BUCKET_NAME=your_bucket_name
 
-S3_ENDPOINT=your_s3_endpoint
-S3_SIGNED_URL_DOMAIN=your_signed_domain
+S3_ENDPOINT=http://storage:9000
+S3_SIGNED_URL_DOMAIN=https://storage.sellhelp.org
 S3_AWS=false
 
 # JWT configuration
@@ -197,11 +197,19 @@ MINIO_ROOT_PASSWORD=your_minio_password
 MINIO_DEFAULT_BUCKETS=your_bucket_name
 
 # Backend URL
-VITE_API_BASE_URL=your_backend_url
+VITE_API_BASE_URL=https://api.sellhelp.org
 
 # Frontend URL
-FRONTEND_URL=your_frontend_url
+FRONTEND_URL=https://sellhelp.org
 ```
+
+Hozz létre egy `.env` fájlt a frontend mappában az alabbi konfigurációval:
+
+```env
+VITE_API_BASE_URL=https://api.sellhelp.org
+```
+
+Enélkül nem fog működni a weboldal.
 
 ---
 
