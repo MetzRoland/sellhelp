@@ -232,8 +232,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Poszt törlése...");
 
     try {
-      const response = await privateAxios.delete(baseEndpoint + `${postId}`);
-      console.log(response.data);
+      await privateAxios.delete(baseEndpoint + `${postId}`);
 
       navigate(
         !baseEndpoint.includes("superuser") ? "/myposts" : "/postManagement",
