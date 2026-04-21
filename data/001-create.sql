@@ -344,7 +344,8 @@ CREATE TABLE chats (
     host_id INT,
     guest_id INT,
     CONSTRAINT FK_host_id FOREIGN KEY (host_id) REFERENCES users(id),
-    CONSTRAINT FK_guest_id FOREIGN KEY (guest_id) REFERENCES users(id)
+    CONSTRAINT FK_guest_id FOREIGN KEY (guest_id) REFERENCES users(id),
+	CONSTRAINT chats_host_guest_unique UNIQUE (host_id, guest_id)
 );
 
 CREATE TABLE posts (

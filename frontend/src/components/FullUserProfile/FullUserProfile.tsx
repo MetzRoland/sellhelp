@@ -464,6 +464,12 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
           )}
         </form>
 
+        {user.id !== authUser?.id && !settings && (
+          <button className="btn" type="button" onClick={() => navigator(`/chat/${user.id}`)}>
+            Chatelés a felhasználóval
+          </button>
+        )}
+
         {user.id !== authUser?.id && (
           <>
             <h2 className="profile-posts-content-title">{user.lastName + " " + user.firstName + " posztjai:"}</h2>
