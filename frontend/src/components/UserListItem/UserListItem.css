@@ -53,6 +53,22 @@
   cursor: pointer;
 }
 
+.user-list-item-layout{
+  width: auto;
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+}
+
+.user-chat-message{
+  width: auto;
+}
+
+.my-chat-message {
+  justify-content: flex-end;
+  background-color: #353535;
+}
+
 /* ===================== */
 /* AVATAR                */
 /* ===================== */
@@ -132,14 +148,14 @@
 /* ===================== */
 
 @media (max-width: 680px) {
-  .user-list-item {
+  .user-list-item:not(.user-chat-message):not(.my-chat-message) {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     gap: 1rem;
   }
 
-  .user-list-item > :last-child {
+  .user-list-item:not(.user-chat-message):not(.my-chat-message) > :last-child {
     flex-basis: 100%;
   }
 }

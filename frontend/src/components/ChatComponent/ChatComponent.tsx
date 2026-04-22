@@ -6,14 +6,14 @@ import type { IMessage } from "@stomp/stompjs";
 import { useAuth } from "../../contextProviders/AuthProvider/AuthContext";
 import { privateAxios } from "../../config/axiosConfig";
 import type { User } from "../../contextProviders/AuthProvider/AuthProviderTypes";
+import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
+import UserListItem from "../UserListItem/UserListItem";
+import type { ChatMessage } from "./ChatComponentTypes";
+import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
 
-type ChatMessage = {
-  chatId: number;
-  senderId: number;
-  message: string;
-};
+import "./ChatComponent.css";
 
-const ChatComponent = () => {
+function ChatComponent() {
   const [chatId, setChatId] = useState<number | null>(null);
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
@@ -23,22 +23,21 @@ const ChatComponent = () => {
   const clientRef = useRef<Client | null>(null);
 
   const { user } = useAuth();
-
   const { guestUserId } = useParams();
+
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const user1Id = user?.id;
 
   useEffect(() => {
     const initChat = async () => {
       const res = await privateAxios.post(
-        `/api/chat/get-or-create?&otherUserId=${guestUserId}`
+        `/api/chat/get-or-create?&otherUserId=${guestUserId}`,
       );
 
       const data = res.data;
-      console.log("Chat created:", data);
 
       setChatId(data.id);
-      console.log(data);
 
       if (data.chatMessages) {
         setMessages(data.chatMessages);
@@ -55,15 +54,10 @@ const ChatComponent = () => {
 
     const stompClient = new Client({
       webSocketFactory: () => socket,
-      debug: (str) => console.log(str),
 
       onConnect: () => {
-        console.log("Connected to WS");
-
         stompClient.subscribe(`/topic/chat/${chatId}`, (msg: IMessage) => {
           const body: ChatMessage = JSON.parse(msg.body);
-          console.log(body);
-
           setMessages((prev) => [...prev, body]);
         });
       },
@@ -80,12 +74,31 @@ const ChatComponent = () => {
   useEffect(() => {
     const fetchGuestUser = async () => {
       const response = await privateAxios.get(`/user/users/${guestUserId}`);
-
       setGuestUser(response.data);
-    }
+    };
 
     fetchGuestUser();
   }, [guestUserId]);
+
+  useEffect(() => {
+    const container = messagesEndRef.current?.parentElement;
+    if (!container || messages.length === 0) return;
+
+    const lastMessage = messages[messages.length - 1];
+
+    const isOwnMessage = lastMessage.senderId === user?.id;
+
+    const isNearBottom =
+      container.scrollHeight - container.scrollTop - container.clientHeight <
+      100;
+
+    if (isNearBottom || isOwnMessage) {
+      container.scrollTo({
+        top: container.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages, user?.id]);
 
   const sendMessage = () => {
     if (!clientRef.current || !input.trim() || !chatId) return;
@@ -102,40 +115,58 @@ const ChatComponent = () => {
     setInput("");
   };
 
-  return (
-    <div style={{ padding: 20 }}>
-      <h2>Chat Test</h2>
+  if (!user || !guestUser) {
+    return <div className="message">Betöltés...</div>;
+  }
 
-      <div
-        style={{
-          border: "1px solid gray",
-          height: 300,
-          overflowY: "scroll",
-          padding: 10,
-          marginBottom: 10,
-        }}
-      >
-        {messages.map((m, i) => (
-          <div key={i}>
-            {user?.id === m.senderId ? (
-              <b>Te: {m.message}</b>
-            ) : (
-              <b>{guestUser?.lastName + " " + guestUser?.firstName}: {m.message}</b>
-            )}
-          </div>
-        ))}
+  return (
+    <div className="chat-fullscreen">
+      <div className="chat-header">
+        <ProfilePictureComponent
+          additionalSytleClass="profile-picture-skeleton-img-small"
+          userId={guestUser.id}
+        />
+        <h2>
+          {guestUser.lastName} {guestUser.firstName}
+        </h2>
       </div>
 
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder="Type message..."
-        style={{ width: "70%", marginRight: 10 }}
-      />
+      <div className="chat-messages-container">
+        {messages.map((m, i) => {
+          const isOwn = user?.id === m.senderId;
 
-      <button onClick={sendMessage}>Send</button>
+          return (
+            <UserListItem
+              key={i}
+              userId={isOwn ? user.id : guestUser.id}
+              email={
+                isOwn ? "Te" : `${guestUser.lastName} ${guestUser.firstName}`
+              }
+              message={m.message}
+              disableNavigation
+              isMyChatMessage={isOwn}
+              isChatMessage={true}
+              date={formatDate(m.sentAt)}
+            />
+          );
+        })}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="chat-input-bar">
+        <input
+          className="input-element"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Írj üzenetet..."
+        />
+
+        <button className="setting-btn" onClick={sendMessage}>
+          Küldés
+        </button>
+      </div>
     </div>
   );
-};
+}
 
 export default ChatComponent;

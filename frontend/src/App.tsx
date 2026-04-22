@@ -20,6 +20,7 @@ import FullPostView from "./components/FullPostView/FullPostView";
 import NonSuperUserRouterLayout from "./components/Routes/NonSuperUserRouterLayout";
 import ForgetPasswordEmail from "./components/ForgetPasswordEmail/ForgetPasswordEmail";
 import ChatComponent from "./components/ChatComponent/ChatComponent";
+import ChatsList from "./components/ChatsList/ChatsList";
 
 function App() {
   const location = useLocation();
@@ -56,7 +57,8 @@ function App() {
             <Route path="/posts/new" element={<NewPostComponent />} />
             <Route path="/users" element={<UserList />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
-            <Route path="/chat/:guestUserId" element={<ChatComponent />} />
+            <Route path="/chats" element={<ChatsList />} />
+            <Route path="/chats/:guestUserId" element={<ChatComponent />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>

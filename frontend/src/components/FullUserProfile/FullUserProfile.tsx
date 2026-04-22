@@ -465,14 +465,21 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         </form>
 
         {user.id !== authUser?.id && !settings && (
-          <button className="btn" type="button" onClick={() => navigator(`/chat/${user.id}`)}>
+          <a
+            href={`/chats/${user.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-highlight"
+          >
             Chatelés a felhasználóval
-          </button>
+          </a>
         )}
 
         {user.id !== authUser?.id && (
           <>
-            <h2 className="profile-posts-content-title">{user.lastName + " " + user.firstName + " posztjai:"}</h2>
+            <h2 className="profile-posts-content-title">
+              {user.lastName + " " + user.firstName + " posztjai:"}
+            </h2>
 
             {posts.length === 0 && !isLoading && <p>Nincsenek posztok</p>}
 

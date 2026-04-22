@@ -14,59 +14,61 @@ function UserListItem({
   onActionClick,
   actionText,
   disableNavigation = false,
-  btnDisabled = false
+  btnDisabled = false,
+  isChatMessage = false,
+  isMyChatMessage = false,
+  onClickNavigationLink = `/users/${userId}`
 }: UserListItemProps) {
   const navigate = useNavigate();
 
   const handleContainerClick = () => {
     if (!disableNavigation) {
-      navigate(`/users/${userId}`);
+      navigate(onClickNavigationLink);
     }
   };
 
   return (
-    <div className="user-list-item" onClick={handleContainerClick}>
-      <div className="user-list-avatar">
-        <ProfilePictureComponent
-          additionalSytleClass="profile-picture-skeleton-small"
-          userId={userId}
-        />
-      </div>
-
-      <div className="user-list-content">
-        <div className="user-list-header">
-          <span className="user-list-author">
-            {highlightLabel && (
-              <span className="owner-span">{highlightLabel} </span>
-            )}
-            {email}
-          </span>
-
-          {date && (
-            <span className="user-list-date">
-              {formatDate(date)}
-            </span>
-          )}
+    <div
+      className={`user-list-item ${isChatMessage ? "user-chat-message" : ""} ${isMyChatMessage ? "my-chat-message" : ""}`}
+      onClick={handleContainerClick}
+    >
+      <div className="user-list-item-layout">
+        <div className="user-list-avatar">
+          <ProfilePictureComponent
+            additionalSytleClass="profile-picture-skeleton-small"
+            userId={userId}
+          />
         </div>
 
-        {message && (
-          <p className="user-list-message">{message}</p>
+        <div className="user-list-content">
+          <div className="user-list-header">
+            <span className="user-list-author">
+              {highlightLabel && (
+                <span className="owner-span">{highlightLabel} </span>
+              )}
+              {email}
+            </span>
+
+            {date && <span className="user-list-date">{formatDate(date)}</span>}
+          </div>
+
+          {message && <p className="user-list-message">{message}</p>}
+        </div>
+
+        {actionText && onActionClick && (
+          <button
+            type="button"
+            className="setting-btn"
+            disabled={btnDisabled}
+            onClick={(e) => {
+              e.stopPropagation();
+              onActionClick(e);
+            }}
+          >
+            {actionText}
+          </button>
         )}
       </div>
-
-      {actionText && onActionClick && (
-        <button
-          type="button"
-          className="setting-btn"
-          disabled={btnDisabled}
-          onClick={(e) => {
-            e.stopPropagation();
-            onActionClick(e);
-          }}
-        >
-          {actionText}
-        </button>
-      )}
     </div>
   );
 }

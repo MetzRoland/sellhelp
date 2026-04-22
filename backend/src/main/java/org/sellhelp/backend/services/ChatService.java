@@ -1,6 +1,8 @@
 package org.sellhelp.backend.services;
 
+import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.responses.ChatMessageResponse;
+import org.sellhelp.backend.dtos.responses.ChatResponse;
 import org.sellhelp.backend.entities.Chat;
 import org.sellhelp.backend.entities.ChatFile;
 import org.sellhelp.backend.entities.ChatMessage;
@@ -12,7 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class ChatService {
@@ -21,14 +25,16 @@ public class ChatService {
     private final ChatMessageRepository messageRepository;
     private final S3Service s3Service;
     private final UserRepository userRepository;
+    private final ModelMapper modelMapper;
 
     @Autowired
     public ChatService(ChatRepository chatRepository, ChatMessageRepository messageRepository, S3Service s3Service,
-                       UserRepository userRepository){
+                       UserRepository userRepository, ModelMapper modelMapper){
         this.chatRepository = chatRepository;
         this.messageRepository = messageRepository;
         this.s3Service = s3Service;
         this.userRepository = userRepository;
+        this.modelMapper = modelMapper;
     }
 
     public Chat getOrCreateChat(Integer user1Id, Integer user2Id) {
@@ -143,5 +149,20 @@ public class ChatService {
                                         .toList()
                 )
                 .build();
+    }
+
+    public List<ChatResponse> getAllChats(Integer currentUserId) {
+        return chatRepository.findAll()
+                .stream()
+                .filter(chat -> Objects.equals(chat.getHost().getId(), currentUserId) || Objects.equals(chat.getGuest().getId(), currentUserId))
+                .map(chat -> modelMapper.map(chat, ChatResponse.class))
+                .sorted(Comparator.comparing(
+                        chatResponse -> chatResponse.getChatMessages().stream()
+                                .map(ChatMessageResponse::getSentAt)
+                                .max(Comparator.naturalOrder())
+                                .orElse(null),
+                        Comparator.nullsLast(Comparator.reverseOrder())
+                ))
+                .toList();
     }
 }
