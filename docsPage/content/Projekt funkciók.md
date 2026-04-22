@@ -1,7 +1,6 @@
 ---
 title: "Projekt funkciók"
 ---
-
 # Projekt funkciók
 
 ## 1. Kérések megtekintése
