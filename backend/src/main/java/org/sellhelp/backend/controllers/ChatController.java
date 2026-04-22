@@ -9,6 +9,7 @@ import org.sellhelp.backend.entities.User;
 import org.sellhelp.backend.security.CurrentUser;
 import org.sellhelp.backend.services.ChatService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -56,15 +57,15 @@ public class ChatController {
     @PostMapping("/{chatId}/message-with-files")
     public ChatMessageResponse sendWithFiles(
             @PathVariable Integer chatId,
-            @RequestParam Integer senderId,
-            @RequestParam(required = false) String message,
-            @RequestParam(required = false) List<MultipartFile> files
+            @RequestParam(value = "senderId") Integer senderId,
+            @RequestParam(value = "message", required = false) String message,
+            @RequestParam(value = "files", required = false) List<MultipartFile> files
     ) throws Exception {
 
-        User sender = currentUser.getCurrentlyLoggedUserEntity();
-        sender.setId(senderId);
+//        User sender = currentUser.getCurrentlyLoggedUserEntity();
+//        sender.setId(senderId);
 
-        return chatService.sendMessage(chatId, sender.getId(), message, files);
+        return chatService.sendMessage(chatId, senderId, message, files);
     }
 
     @GetMapping("/{chatId}/messages")

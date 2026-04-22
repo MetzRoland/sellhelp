@@ -25,6 +25,8 @@ function ChatComponent() {
   const { user } = useAuth();
   const { guestUserId } = useParams();
 
+  const [files, setFiles] = useState<File[]>([]);
+
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
 
   const user1Id = user?.id;
@@ -100,10 +102,53 @@ function ChatComponent() {
     }
   }, [messages, user?.id]);
 
-  const sendMessage = () => {
-    if (!clientRef.current || !input.trim() || !chatId) return;
+  const sendMessage = async () => {
+    if (!chatId || (!input.trim() && files.length === 0)) return;
 
-    clientRef.current.publish({
+    // 👉 CASE 1: FILE UPLOAD
+    if (files.length > 0) {
+      const formData = new FormData();
+
+      formData.append("senderId", String(user1Id));
+      formData.append("message", input);
+
+      files.forEach((file) => {
+        formData.append("files", file);
+      });
+
+      for (const pair of formData.entries()) {
+        console.log(pair[0], pair[1]);
+      }
+
+      const res = await privateAxios.post(
+        `/api/chat/${chatId}/message-with-files`,
+        formData
+      );
+
+      console.log(res);
+
+      const newMessage = res.data;
+
+      // update local state
+      setMessages((prev) => [...prev, newMessage]);
+
+      // OPTIONAL: notify others via websocket
+      clientRef.current?.publish({
+        destination: "/app/chat.send",
+        body: JSON.stringify({
+          chatId,
+          senderId: user1Id,
+          message: input,
+        }),
+      });
+
+      setFiles([]);
+      setInput("");
+      return;
+    }
+
+    // 👉 CASE 2: TEXT ONLY (your current logic)
+    clientRef.current?.publish({
       destination: "/app/chat.send",
       body: JSON.stringify({
         chatId,
@@ -154,6 +199,16 @@ function ChatComponent() {
       </div>
 
       <div className="chat-input-bar">
+        <input
+          type="file"
+          multiple
+          onChange={(e) => {
+            if (e.target.files) {
+              setFiles(Array.from(e.target.files));
+            }
+          }}
+        />
+
         <input
           className="input-element"
           value={input}

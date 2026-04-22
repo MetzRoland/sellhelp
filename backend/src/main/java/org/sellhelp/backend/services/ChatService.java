@@ -1,5 +1,6 @@
 package org.sellhelp.backend.services;
 
+import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.responses.ChatMessageResponse;
 import org.sellhelp.backend.dtos.responses.ChatResponse;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 @Service
+@Slf4j
 public class ChatService {
 
     private final ChatRepository chatRepository;
@@ -95,6 +97,7 @@ public class ChatService {
             List<ChatFile> chatFiles = files.stream().map(file -> {
                 try {
                     String key = "chat/" + chatId + "/" + finalMessage.getId() + "/" + file.getOriginalFilename();
+                    log.info(key);
 
                     s3Service.uploadFileWithKey(key, file);
 
