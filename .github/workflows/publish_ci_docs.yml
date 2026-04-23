@@ -38,8 +38,11 @@ jobs:
 
       - name: Load existing GitHub Pages content
         run: |
+          mkdir -p public
           git clone --depth=1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages || true
-          cp -r gh-pages/* public/ || true
+          if [ -d "gh-pages" ]; then
+            cp -r gh-pages/. public/
+          fi
       
             # 4️⃣ Copy reports to timestamped folder
       - name: Prepare GitHub Pages content
