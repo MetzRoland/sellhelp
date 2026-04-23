@@ -1,5 +1,7 @@
 # SellHelp
 
+https://sellhelp.org
+
 Egy helyi közösségekre épülő digitális platform, amely összeköti azokat, akik segítséget / alkalmi munkaerőt keresnek, azokkal, akik szívesen elfogadnának kissebb, alkalmi munkákat plusz jövedelemként.
 
 ## Projekt célja
