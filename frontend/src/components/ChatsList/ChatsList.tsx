@@ -72,40 +72,42 @@ function ChatsList() {
         <h1 className="content-title">Összes chat</h1>
 
         <div className="content-container chat-list-container">
-          <div className="user-list-container">
-            {chats.map((chat) => {
-              const lastMessage =
-                chat.chatMessages?.[chat.chatMessages.length - 1];
+          {chats.length === 0 ? (
+            <p>Nincsenek chatek!</p>
+          ) : (
+            <div className="user-list-container">
+              {chats.map((chat) => {
+                const lastMessage =
+                  chat.chatMessages?.[chat.chatMessages.length - 1];
 
-              console.log(chat);
+                const otherUser = guestUsers.filter(
+                  (guestUser) =>
+                    (guestUser.id === chat.guestId &&
+                      user?.id !== guestUser.id) ||
+                    (guestUser.id === chat.hostId && user?.id !== guestUser.id),
+                )[0];
 
-              const otherUser = guestUsers.filter(
-                (guestUser) =>
-                  (guestUser.id === chat.guestId &&
-                    user?.id !== guestUser.id) ||
-                  (guestUser.id === chat.hostId && user?.id !== guestUser.id),
-              )[0];
-
-              return (
-                <UserListItem
-                  userId={otherUser?.id}
-                  email={
-                    otherUser
-                      ? otherUser?.lastName + " " + otherUser?.firstName
-                      : ""
-                  }
-                  message={lastMessage?.message ?? "Nincs még üzenet!"}
-                  date={
-                    lastMessage?.sentAt ? formatDate(lastMessage?.sentAt) : ""
-                  }
-                  onClickNavigationLink={`/chats/${otherUser?.id}`}
-                  highlightLabel={
-                    lastMessage?.senderId === user?.id ? "Te:" : ""
-                  }
-                />
-              );
-            })}
-          </div>
+                return (
+                  <UserListItem
+                    userId={otherUser?.id}
+                    email={
+                      otherUser
+                        ? otherUser?.lastName + " " + otherUser?.firstName
+                        : ""
+                    }
+                    message={lastMessage?.message ?? "Nincs még üzenet!"}
+                    date={
+                      lastMessage?.sentAt ? formatDate(lastMessage?.sentAt) : ""
+                    }
+                    onClickNavigationLink={`/chats/${otherUser?.id}`}
+                    highlightLabel={
+                      lastMessage?.senderId === user?.id ? "Te:" : ""
+                    }
+                  />
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
 
