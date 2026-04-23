@@ -47,9 +47,9 @@ jobs:
       - name: Generate index
         run: |
           echo "<h1>CI Test Reports</h1>" > public/index.html
-          for dir in public/*/; do
-            [[ "$dir" != "public/index.html" ]] || continue
-            echo "<a href=\"$dir\">$dir</a><br>" >> public/index.html
+          for dir in $(ls -dt public/*/); do
+            name=$(basename "$dir")
+            echo "<a href=\"$name/\">$name</a><br>" >> public/index.html
           done
 
       # 6️⃣ Deploy to GitHub Pages
