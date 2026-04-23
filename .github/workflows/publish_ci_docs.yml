@@ -36,7 +36,12 @@ jobs:
           mvn -B site || true
         continue-on-error: true
 
-      # 4️⃣ Copy reports to timestamped folder
+      - name: Load existing GitHub Pages content
+        run: |
+          git clone --depth=1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages || true
+          cp -r gh-pages/* public/ || true
+      
+            # 4️⃣ Copy reports to timestamped folder
       - name: Prepare GitHub Pages content
         run: |
           TIMESTAMP=$(date +%Y-%m-%d-%H%M)
