@@ -105,7 +105,6 @@ function ChatComponent() {
   const sendMessage = async () => {
     if (!chatId || (!input.trim() && files.length === 0)) return;
 
-    // 👉 CASE 1: FILE UPLOAD
     if (files.length > 0) {
       const formData = new FormData();
 
@@ -129,10 +128,8 @@ function ChatComponent() {
 
       const newMessage = res.data;
 
-      // update local state
       setMessages((prev) => [...prev, newMessage]);
 
-      // OPTIONAL: notify others via websocket
       clientRef.current?.publish({
         destination: "/app/chat.send",
         body: JSON.stringify({
@@ -147,7 +144,6 @@ function ChatComponent() {
       return;
     }
 
-    // 👉 CASE 2: TEXT ONLY (your current logic)
     clientRef.current?.publish({
       destination: "/app/chat.send",
       body: JSON.stringify({
@@ -199,16 +195,6 @@ function ChatComponent() {
       </div>
 
       <div className="chat-input-bar">
-        <input
-          type="file"
-          multiple
-          onChange={(e) => {
-            if (e.target.files) {
-              setFiles(Array.from(e.target.files));
-            }
-          }}
-        />
-
         <input
           className="input-element"
           value={input}

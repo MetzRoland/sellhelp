@@ -32,7 +32,10 @@ function Header() {
 
   const isAdmin = user?.role !== "ROLE_USER";
 
-  const userOptionsLinks = [{ url: "/users", label: "Felhasználók keresése" }];
+  const userOptionsLinks = [
+    { url: "/users", label: "Felhasználók keresése" },
+    { url: "/chats", label: "Összes chat" }
+  ];
 
   const postOptionLinks = [
     { url: "/posts", label: "Posztok böngészése" },
