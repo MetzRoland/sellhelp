@@ -33,8 +33,7 @@ function PostsListComponent({
   const postFilterInputs: PostInputField[] = [
     { name: "postTitle", type: "text", placeholder: "Poszt Cím" },
     { name: "postDescription", type: "text", placeholder: "Poszt leírás" },
-    { name: "reward", type: "text", placeholder: "Poszt munka díj" },
-    { name: "publisherEmail", type: "text", placeholder: "Tulajdonos email" },
+    { name: "reward", type: "text", placeholder: "Minimum munka díj" },
     { name: "postDate", type: "select", placeholder: "Megosztás dátuma" },
     { name: "city", type: "select", placeholder: "Válasszon települést...", userTitle: "Település"},
   ] as const;
@@ -80,7 +79,6 @@ function PostsListComponent({
         const response = await privateAxios.get(postFetchingEndpoint);
         const citiesResponse = await publicAxios.get("/api/public/cities");
 
-        console.log(response.data);
         setPosts(response.data);
         setFilteredPosts(response.data);
         setCities(citiesResponse.data);
@@ -117,8 +115,7 @@ function PostsListComponent({
           .toLowerCase()
           .includes(filterFormData.postDescription.toLowerCase());
 
-      const matchesPostReward =
-        !filterFormData.reward || String(post.reward) === filterFormData.reward;
+      const matchesPostReward = post.reward >= Number(filterFormData.reward);
 
       const matchesCity =
         !filterFormData.city || post.cityName === filterFormData.city;
@@ -170,7 +167,7 @@ function PostsListComponent({
           />
         </div>
 
-        <div className="content-container posts-list-container">
+        <div className="posts-list-container">
           {filteredPosts.length === 0 &&
             !isLoading &&
             loadingMessage === "" && <p>Nincsenek posztok</p>}

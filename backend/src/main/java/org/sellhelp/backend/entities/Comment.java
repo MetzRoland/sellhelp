@@ -33,7 +33,7 @@ public class Comment {
     @JoinColumn(name = "user_id")
     private User commentPublisher;
 
-    @Column(name = "message", nullable = false)
+    @Column(name = "message", nullable = false, length = 2000)
     private String message;
 
     @Column(name = "created_at")

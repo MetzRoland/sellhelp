@@ -64,8 +64,6 @@ class SuperUserServiceTest {
         );
     }
 
-    // ------------------ Ban User ------------------
-
     @Test
     @DisplayName("Admin can ban a user successfully")
     void banUser_success_asAdmin() {
@@ -129,8 +127,6 @@ class SuperUserServiceTest {
         assertThrows(RuntimeException.class, () -> superUserService.banUser(user.getId()));
     }
 
-    // ------------------ Unban User ------------------
-
     @Test
     @DisplayName("Admin can unban a user successfully")
     void unbanUser_success() {
@@ -172,8 +168,6 @@ class SuperUserServiceTest {
 
         assertThrows(RuntimeException.class, () -> superUserService.unbanUser(user.getId()));
     }
-
-    // ------------------ Get User Accounts ------------------
 
     @Test
     @DisplayName("Moderator sees only regular users")

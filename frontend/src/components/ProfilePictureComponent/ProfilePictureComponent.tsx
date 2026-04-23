@@ -51,7 +51,7 @@ function ProfilePictureComponent({ userId, handleOnClick, additionalSytleClass }
         <div className={"profile-picture-skeleton " + additionalSytleClass} />
       ) : (
         <img
-          className="profile-picture-img"
+          className={"profile-picture-img " + additionalSytleClass}
           src={profilePicture.profilePictureUrl || "/images/profile.svg"}
           alt="Profile picture"
           onClick={handleOnClick}

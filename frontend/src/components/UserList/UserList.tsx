@@ -95,8 +95,7 @@ function UserList({ isAdmin = false }: UserListProps) {
 
         setAllUserAccounts(users);
         setUserAccounts(users);
-      } catch (error) {
-        console.error(error);
+      } catch {
         setAllUserAccounts([]);
         setUserAccounts([]);
         setCities([]);
@@ -178,9 +177,7 @@ function UserList({ isAdmin = false }: UserListProps) {
           ),
         );
       }
-    } catch (error) {
-      console.error(error);
-
+    } catch {
       setUserAccounts((prev) =>
         prev.map((user) =>
           user.id === userId ? { ...user, banned: isBanned } : user,

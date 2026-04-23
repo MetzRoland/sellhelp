@@ -19,6 +19,8 @@ import NewPostComponent from "./components/NewPostComponent/NewPostComponent";
 import FullPostView from "./components/FullPostView/FullPostView";
 import NonSuperUserRouterLayout from "./components/Routes/NonSuperUserRouterLayout";
 import ForgetPasswordEmail from "./components/ForgetPasswordEmail/ForgetPasswordEmail";
+import ChatComponent from "./components/ChatComponent/ChatComponent";
+import ChatsList from "./components/ChatsList/ChatsList";
 
 function App() {
   const location = useLocation();
@@ -29,7 +31,7 @@ function App() {
       <Routes location={location}>
         <Route element={<DelayedLayout />}>
           <Route element={<PublicRouterLayout />}>
-            <Route index element={<div>Főoldal</div>} />
+            <Route index element={<PostsListComponent postFetchingEndpoint="/post/posts" title="Új posztok" />} />
             <Route path="/login" element={<Login />} />
             <Route path="/adminLogin" element={<Login isAdminLogin={true} />} />
             <Route path="/register" element={<Register />} />
@@ -55,6 +57,8 @@ function App() {
             <Route path="/posts/new" element={<NewPostComponent />} />
             <Route path="/users" element={<UserList />} />
             <Route path="/resetPassword" element={<ResetPassword />} />
+            <Route path="/chats" element={<ChatsList />} />
+            <Route path="/chats/:guestUserId" element={<ChatComponent />} />
           </Route>
 
           <Route element={<SuperUserRouterLayout />}>

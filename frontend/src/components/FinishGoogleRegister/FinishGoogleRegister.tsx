@@ -70,10 +70,8 @@ function FinishGoogleRegister() {
       });
 
       setSuccess(true);
-    } catch (err) {
-      console.error(err);
+    } catch {
       setSuccess(false);
-      console.log(success);
     }
     finally{
       setLoading(false);

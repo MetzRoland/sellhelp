@@ -2,7 +2,15 @@ import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import NewPostComponent from "../../components/NewPostComponent/NewPostComponent";
 
-type InputType = "text" | "number" | "textarea" | "select" | "email" | "password";
+vi.mock("../../components/Header/Header", () => ({
+  default: () => <div data-testid="header" />,
+}));
+
+vi.mock("../../components/Footer/Footer", () => ({
+  default: () => <div data-testid="footer" />,
+}));
+
+type InputType = "text" | "number" | "textarea" | "select";
 
 type InputField = {
   name: string;
@@ -22,22 +30,14 @@ type InputFormProps = {
   options?: OptionsType;
 };
 
-vi.mock("../../components/Header/Header", () => ({
-  default: () => <div data-testid="header" />,
-}));
-vi.mock("../../components/Footer/Footer", () => ({
-  default: () => <div data-testid="footer" />,
-}));
-
 vi.mock("../../components/Reusables/InputForm/InputForm", () => ({
   default: ({ formData, handleFunction, inputs, options }: InputFormProps) => (
-    <form data-testid="input-form">
+    <div data-testid="input-form">
       {inputs.map((input) => {
-        const labelText = input.placeholder;
         if (input.type === "textarea") {
           return (
             <label key={input.name}>
-              {labelText}
+              {input.placeholder}
               <textarea
                 name={input.name}
                 value={formData[input.name]}
@@ -45,15 +45,18 @@ vi.mock("../../components/Reusables/InputForm/InputForm", () => ({
               />
             </label>
           );
-        } else if (input.type === "select") {
+        }
+
+        if (input.type === "select") {
           return (
             <label key={input.name}>
-              {labelText}
+              {input.placeholder}
               <select
                 name={input.name}
                 value={formData[input.name]}
                 onChange={handleFunction}
               >
+                <option value="">--</option>
                 {options?.[input.name]?.map((opt) => (
                   <option key={opt.id} value={opt.value}>
                     {opt.label}
@@ -62,21 +65,21 @@ vi.mock("../../components/Reusables/InputForm/InputForm", () => ({
               </select>
             </label>
           );
-        } else {
-          return (
-            <label key={input.name}>
-              {labelText}
-              <input
-                type={input.type}
-                name={input.name}
-                value={formData[input.name]}
-                onChange={handleFunction}
-              />
-            </label>
-          );
         }
+
+        return (
+          <label key={input.name}>
+            {input.placeholder}
+            <input
+              type={input.type}
+              name={input.name}
+              value={formData[input.name]}
+              onChange={handleFunction}
+            />
+          </label>
+        );
       })}
-    </form>
+    </div>
   ),
 }));
 
@@ -96,7 +99,7 @@ vi.mock(
       setIsLoading: setIsLoadingMock,
       setLoadingMessage: setLoadingMessageMock,
     }),
-  }),
+  })
 );
 
 vi.mock("../../config/axiosConfig", () => ({
@@ -106,10 +109,12 @@ vi.mock("../../config/axiosConfig", () => ({
 
 import { privateAxios, publicAxios } from "../../config/axiosConfig";
 
+
 const mockCities = [
   { id: 1, cityName: "Budapest" },
   { id: 2, cityName: "Debrecen" },
 ];
+
 
 describe("NewPostComponent", () => {
   beforeEach(() => {
@@ -124,11 +129,10 @@ describe("NewPostComponent", () => {
     expect(screen.getByTestId("header")).toBeInTheDocument();
     expect(screen.getByTestId("footer")).toBeInTheDocument();
 
-    const inputForm = await screen.findByTestId("input-form");
-    expect(inputForm).toBeInTheDocument();
+    expect(await screen.findByTestId("input-form")).toBeInTheDocument();
   });
 
-  it("fetches cities and updates input options", async () => {
+  it("fetches cities and updates select options", async () => {
     vi.mocked(publicAxios.get).mockResolvedValueOnce({ data: mockCities });
 
     render(<NewPostComponent />);
@@ -137,10 +141,8 @@ describe("NewPostComponent", () => {
       expect(publicAxios.get).toHaveBeenCalledWith("/api/public/cities");
     });
 
-    const inputForm = await screen.findByTestId("input-form");
-
-    expect(inputForm.textContent).toContain("Budapest");
-    expect(inputForm.textContent).toContain("Debrecen");
+    expect(await screen.findByText("Budapest")).toBeInTheDocument();
+    expect(screen.getByText("Debrecen")).toBeInTheDocument();
   });
 
   it("handles input change", async () => {
@@ -148,11 +150,11 @@ describe("NewPostComponent", () => {
 
     render(<NewPostComponent />);
 
-    const titleInput = await screen.findByRole("textbox", { name: /A poszt címe/i });
+    const input = await screen.findByLabelText(/A poszt címe/i);
 
-    fireEvent.change(titleInput, { target: { value: "My Test Post" } });
+    fireEvent.change(input, { target: { value: "My Test Post" } });
 
-    expect(titleInput).toHaveValue("My Test Post");
+    expect(input).toHaveValue("My Test Post");
   });
 
   it("submits form successfully", async () => {
@@ -160,6 +162,8 @@ describe("NewPostComponent", () => {
     vi.mocked(privateAxios.post).mockResolvedValueOnce({ data: { id: 1 } });
 
     render(<NewPostComponent />);
+
+    await screen.findByTestId("input-form");
 
     const button = screen.getByRole("button", {
       name: /Poszt létrehozása/i,
@@ -176,24 +180,29 @@ describe("NewPostComponent", () => {
       });
     });
 
-    expect(navigateMock).toHaveBeenCalledWith("/myposts");
+    expect(navigateMock).toHaveBeenCalledWith("/posts/1");
   });
 
   it("handles API error correctly", async () => {
     vi.mocked(publicAxios.get).mockResolvedValueOnce({ data: mockCities });
 
     vi.mocked(privateAxios.post).mockRejectedValueOnce({
-      response: { data: { message: "Error occurred", errors: { title: "Required" } } },
+      response: {
+        data: {
+          message: "Error occurred",
+          errors: { title: "Required" },
+        },
+      },
     });
 
     render(<NewPostComponent />);
 
-    const button = screen.getByRole("button", {
-      name: /Poszt létrehozása/i,
-    });
-    fireEvent.click(button);
+    await screen.findByTestId("input-form");
 
-    const errorMessage = await screen.findByText("Error occurred");
-    expect(errorMessage).toBeInTheDocument();
+    fireEvent.click(
+      screen.getByRole("button", { name: /Poszt létrehozása/i })
+    );
+
+    expect(await screen.findByText("Error occurred")).toBeInTheDocument();
   });
 });

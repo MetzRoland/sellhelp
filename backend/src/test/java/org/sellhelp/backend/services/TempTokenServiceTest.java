@@ -15,8 +15,6 @@ class TempTokenServiceTest {
         tempTokenService = new TempTokenService();
     }
 
-    // ------------------ Create & Validate Token ------------------
-
     @Test
     @DisplayName("Creating a token should store it and allow validation")
     void create_shouldReturnTokenAndStoreIt() {
@@ -37,8 +35,6 @@ class TempTokenServiceTest {
                 "Unknown token should not be valid");
     }
 
-    // ------------------ Remove Token ------------------
-
     @Test
     @DisplayName("Removing a token should invalidate it")
     void removeToken_shouldInvalidateToken() {
@@ -53,8 +49,6 @@ class TempTokenServiceTest {
         assertNull(tempTokenService.getEmailByTempToken(token),
                 "Email retrieved from removed token should be null");
     }
-
-    // ------------------ Get Email By Token ------------------
 
     @Test
     @DisplayName("Retrieving email for unknown token should return null")

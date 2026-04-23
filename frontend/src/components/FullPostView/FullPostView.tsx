@@ -20,6 +20,7 @@ import type { FullPostViewProps } from "./FullPostViewTypes";
 import { formatDate } from "../Reusables/HelperFunctions/HelperFunctions";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 import { getPostStatusName } from "../Reusables/HelperFunctions/HelperFunctions";
+import type { PostCommentValidationErrors, PostComment } from "./FullPostViewTypes";
 
 import "./FullPostView.css";
 
@@ -74,10 +75,13 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     {} as Record<string, boolean>,
   );
 
-  const [newPostError, setNewPostError] = useState("");
+  const [fullPostError, setFullPostError] = useState("");
 
   const [validationErrors, setValidationErrors] =
     useState<NewPostValidationErrors>({});
+
+  const [commentValidationErrors, setCommentValidationErrors] =
+    useState<PostCommentValidationErrors>({});
 
   const isOwner = user && post && post.publisher.id === user.id;
   const isPrivileged =
@@ -146,7 +150,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     }));
 
     setValidationErrors({});
-    setNewPostError("");
+    setFullPostError("");
   };
 
   useEffect(() => {
@@ -162,9 +166,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         } else {
           response = await publicAxios.get<Post>(fetchEndpoint + `${id}`);
         }
-        //const response = await privateAxios.get<Post>(fetchEndpoint + `${id}`);
 
-        console.log(response.data);
         setPost(response.data);
       } catch {
         setPost(null);
@@ -205,7 +207,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         if (response.status === 200) {
           //setSuccess(true);
           setPost((prev) => (prev ? ({ ...prev, ...payload } as Post) : prev));
-          setNewPostError("");
+          setFullPostError("");
           setValidationErrors({});
         }
       } catch (err) {
@@ -216,7 +218,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
         //setSuccess(false);
         setValidationErrors(error.response?.data?.errors ?? {});
-        setNewPostError(
+        setFullPostError(
           error.response?.data?.message ?? "Sikertelen frissítés!",
         );
       } finally {
@@ -230,8 +232,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Poszt törlése...");
 
     try {
-      const response = await privateAxios.delete(baseEndpoint + `${postId}`);
-      console.log(response.data);
+      await privateAxios.delete(baseEndpoint + `${postId}`);
 
       navigate(
         !baseEndpoint.includes("superuser") ? "/myposts" : "/postManagement",
@@ -242,7 +243,7 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         errors?: NewPostForm;
       }>;
 
-      setNewPostError(error.response?.data?.message ?? "Sikertelen törlés!");
+      setFullPostError(error.response?.data?.message ?? "Sikertelen törlés!");
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -254,6 +255,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
   ) => {
     const { value } = e.target;
 
+    setCommentValidationErrors({});
+    setFullPostError("");
     setComment(value);
   };
 
@@ -267,16 +270,20 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
         { message: comment },
       );
 
-      console.log(response.data);
+      if(response.status !== 200){
+        throw new Error("Hiba a komment mentésekor!");
+      }
 
       const fetchPostResponse = await privateAxios.get<Post>(
         `/post/posts/${id}`,
       );
-
-      console.log(response.data);
+      
       setPost(fetchPostResponse.data);
-    } catch {
-      setPost(null);
+    } catch(err) {
+      const error = err as AxiosError<{ message?: string; errors?: PostComment }>;
+
+      setCommentValidationErrors(error.response?.data.errors ?? {});
+      setFullPostError(error.response?.data.message ?? "Hiba a komment mentésekor!");
     } finally {
       setIsLoading(false);
       setLoadingMessage("");
@@ -317,14 +324,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Felhasználó visszavonása...");
 
     try {
-      const response = await privateAxios.get(
+      await privateAxios.get(
         `/post/posts/${postId}/rejectApply`,
       );
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
-
-      console.log(response.data);
     } catch {
       setPost(null);
     } finally {
@@ -352,11 +357,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
     setLoadingMessage("Jelentkezés...");
 
     try {
-      const response = await privateAxios.post(`/post/posts/${postId}/apply`);
-      console.log(response.data);
+      await privateAxios.post(`/post/posts/${postId}/apply`);
 
-      const postResponse = await privateAxios.get(`/post/posts/${postId}`);
-      setPost(postResponse.data);
+      await privateAxios.get(`/post/posts/${postId}`);
 
       const appliedStatusRespone = await privateAxios.get(
         `/post/posts/${post?.id}/applied-status`,
@@ -373,13 +376,12 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const changePostStatus = async (targetStatusName: string, postId: number) => {
     try {
-      const response = await privateAxios.patch(
+      await privateAxios.patch(
         `/post/${postId}/changeStatus`,
         {
           targetStatusName: targetStatusName,
         },
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
@@ -410,10 +412,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const rejectApply = async (postId: number) => {
     try {
-      const response = await privateAxios.get(
+      await privateAxios.get(
         `/post/posts/${postId}/rejectApply`,
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
@@ -426,10 +427,9 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
 
   const cancelApplication = async (postId: number) => {
     try {
-      const response = await privateAxios.post(
+      await privateAxios.post(
         `/post/posts/${postId}/cancelApply`,
       );
-      console.log(response.data);
 
       const postResponse = await privateAxios.get(`/post/posts/${postId}`);
       setPost(postResponse.data);
@@ -544,6 +544,8 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
                   onChange={handleCommentInputChange}
                   disabled={isClosed}
                 ></textarea>
+
+                <span className="message error error-span">{commentValidationErrors.message}</span>
 
                 <button
                   type="button"
@@ -661,14 +663,14 @@ function FullPostView({ fetchEndpoint = "/post/posts/" }: FullPostViewProps) {
             )}
           </div>
 
-          {newPostError && (
-            <p className="message error error-process-status">{newPostError}</p>
-          )}
-
           {!isAuthenticated && (
             <Link className="btn btn-highlight" to="/login">
               Jelentkezéshez jelentkezz be
             </Link>
+          )}
+
+          {fullPostError && (
+            <p className="message error error-process-status">{fullPostError}</p>
           )}
         </div>
       </div>

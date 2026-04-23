@@ -28,7 +28,7 @@ public class UserSecret {
     @Column(name = "is_mfa", nullable = false)
     private boolean isMfa;
 
-    @Column(name = "totp_secret")
+    @Column(name = "totp_secret", length = 60)
     private String totpSecret;
 
     @JsonIgnore

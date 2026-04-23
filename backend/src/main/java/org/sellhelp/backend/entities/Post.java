@@ -22,10 +22,10 @@ public class Post {
     @Column(name = "id")
     private Integer id;
 
-    @Column(name = "title", nullable = false)
+    @Column(name = "title", nullable = false, length = 100)
     private String title;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description", nullable = false, length = 2000)
     private String description;
 
     @Column(name = "reward", nullable = false)

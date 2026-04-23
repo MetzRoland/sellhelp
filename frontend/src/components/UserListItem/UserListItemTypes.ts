@@ -8,4 +8,7 @@ export interface UserListItemProps {
   actionText?: string;
   disableNavigation?: boolean;
   btnDisabled?: boolean;
+  isChatMessage?: boolean;
+  isMyChatMessage?: boolean;
+  onClickNavigationLink?: string;
 };

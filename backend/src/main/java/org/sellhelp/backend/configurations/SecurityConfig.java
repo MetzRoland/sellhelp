@@ -78,7 +78,8 @@ public class SecurityConfig {
                         "/auth/verify-totp",
                         "/auth/login/refresh",
                         "/auth/updateForgotPassword",
-                        "/auth/forgotPasswordEmail")
+                        "/auth/forgotPasswordEmail",
+                        "/ws-chat")
                 .csrf(AbstractHttpConfigurer::disable)
                 .httpBasic(AbstractHttpConfigurer::disable)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
@@ -104,6 +105,8 @@ public class SecurityConfig {
                         ).hasAnyRole("ADMIN", "MODERATOR", "USER")
                         .requestMatchers("/user/**").hasRole("USER")
                         .requestMatchers("/post/**").hasRole("USER")
+                        .requestMatchers("/api/chat/**").hasRole("USER")
+                        .requestMatchers("/ws-chat/**").hasRole("USER")
                         .requestMatchers("/superuser/**").hasAnyRole("ADMIN", "MODERATOR")
                         .anyRequest().authenticated()
                 )

@@ -1,7 +1,6 @@
 ---
 title: "Funkcionális terv"
 ---
-
 ## Regisztráció
 ### Guest login
 csak megtekintés, nem lehet elvállalni posztot

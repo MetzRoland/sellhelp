@@ -1,4 +1,3 @@
-// src/tests/components/SetupMfa.test.tsx
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { MemoryRouter } from "react-router";
@@ -135,10 +134,6 @@ describe("SetupMfa component", () => {
         totpCode: "123456",
       });
     });
-
-    // await waitFor(() => {
-    //   expect(mockNavigate).toHaveBeenCalledWith("/home/settings");
-    // });
   });
 
   it("displays API error message on failed submit", async () => {

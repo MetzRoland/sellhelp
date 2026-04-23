@@ -13,7 +13,7 @@ function Header() {
   const { setIsLoading, setLoadingMessage } = useLoading();
 
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  // State for the hamburger menu
+
   const [isHamburgerOpen, setIsHamburgerOpen] = useState(false);
 
   const profileToggleRef = useRef<HTMLDivElement>(null);
@@ -32,7 +32,10 @@ function Header() {
 
   const isAdmin = user?.role !== "ROLE_USER";
 
-  const userOptionsLinks = [{ url: "/users", label: "Felhasználók keresése" }];
+  const userOptionsLinks = [
+    { url: "/users", label: "Felhasználók keresése" },
+    { url: "/chats", label: "Összes chat" }
+  ];
 
   const postOptionLinks = [
     { url: "/posts", label: "Posztok böngészése" },

@@ -1,7 +1,6 @@
 package org.sellhelp.backend.services;
 
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.sellhelp.backend.dtos.requests.*;
@@ -11,7 +10,6 @@ import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.enums.UserRole;
 import org.sellhelp.backend.exceptions.*;
 import org.sellhelp.backend.repositories.CityRepository;
-import org.sellhelp.backend.repositories.NotificationRepository;
 import org.sellhelp.backend.repositories.RoleRepository;
 import org.sellhelp.backend.repositories.UserRepository;
 import org.sellhelp.backend.security.CurrentUser;
@@ -30,7 +28,6 @@ import org.springframework.security.oauth2.client.authentication.OAuth2Authentic
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Service

@@ -21,5 +21,3 @@ export const refreshAxios = axios.create({
   baseURL: baseUrl,
   withCredentials: true,
 });
-
-console.log(baseUrl);

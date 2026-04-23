@@ -36,7 +36,15 @@ jobs:
           mvn -B site || true
         continue-on-error: true
 
-      # 4️⃣ Copy reports to timestamped folder
+      - name: Load existing GitHub Pages content
+        run: |
+          mkdir -p public
+          git clone --depth=1 --branch gh-pages https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }} gh-pages || true
+          if [ -d "gh-pages" ]; then
+            cp -r gh-pages/. public/
+          fi
+      
+            # 4️⃣ Copy reports to timestamped folder
       - name: Prepare GitHub Pages content
         run: |
           TIMESTAMP=$(date +%Y-%m-%d-%H%M)
@@ -47,10 +55,14 @@ jobs:
       - name: Generate index
         run: |
           echo "<h1>CI Test Reports</h1>" > public/index.html
-          for dir in public/*/; do
-            [[ "$dir" != "public/index.html" ]] || continue
-            echo "<a href=\"$dir\">$dir</a><br>" >> public/index.html
+          echo "<ul>" >> public/index.html
+      
+          for dir in $(ls -1 public); do
+            [ -d "public/$dir" ] || continue
+            echo "<li><a href=\"$dir/\">$dir</a></li>" >> public/index.html
           done
+      
+          echo "</ul>" >> public/index.html
 
       # 6️⃣ Deploy to GitHub Pages
       - name: Deploy to GitHub Pages

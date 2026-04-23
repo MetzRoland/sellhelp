@@ -11,8 +11,6 @@ services:
 
   frontend:
     image: frontend:latest
-    ports:
-      - 5173:5173
     depends_on:
      - sellhelp
     env_file: '.env-docker'

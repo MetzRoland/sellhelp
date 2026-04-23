@@ -102,8 +102,6 @@ function ResetPassword({ forgotPassword }: ResetPasswordProps) {
       setResetPasswordError(
         error.response?.data?.message ?? "Sikertelen jelszómódosítás!",
       );
-
-      console.log(error.response?.data?.message);
     } finally {
       setIsLoading(false);
     }

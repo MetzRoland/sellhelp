@@ -73,8 +73,6 @@ class PostServiceTest {
         post.setJobApplications(new ArrayList<>());
     }
 
-    // ------------------ Create Post ------------------
-
     @Test
     @DisplayName("Create post successfully")
     void createPost_success() {
@@ -105,8 +103,6 @@ class PostServiceTest {
         assertThrows(UserNotFoundException.class,
                 () -> postService.createPost(dto));
     }
-
-    // ------------------ Update Post ------------------
 
     @Test
     @DisplayName("Update post data successfully")
@@ -139,8 +135,6 @@ class PostServiceTest {
                 () -> postService.updatePostData(new UpdatePostDTO(), 1));
     }
 
-    // ------------------ Delete Post ------------------
-
     @Test
     @DisplayName("Delete post successfully")
     void deletePost_success() {
@@ -152,8 +146,6 @@ class PostServiceTest {
 
         verify(postRepository).delete(post);
     }
-
-    // ------------------ Get Available Posts ------------------
 
     @Test
     @DisplayName("Get available posts returns only new posts")
@@ -168,8 +160,6 @@ class PostServiceTest {
 
         assertEquals(1, result.size());
     }
-
-    // ------------------ Apply to Post ------------------
 
     @Test
     @DisplayName("Apply to a post successfully")
@@ -208,8 +198,6 @@ class PostServiceTest {
                 () -> postService.applyToPost(1));
     }
 
-    // ------------------ Close Post ------------------
-
     @Test
     @DisplayName("Close post successfully")
     void closePost_success() {
@@ -226,8 +214,6 @@ class PostServiceTest {
         assertEquals("closed", post.getPostStatus().getStatusName());
         verify(postRepository).save(post);
     }
-
-    // ------------------ Check Applied Status ------------------
 
     @Test
     @DisplayName("Check applied status returns true when user has applied")

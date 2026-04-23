@@ -18,6 +18,8 @@ import { type City } from "../Register/RegisterTypes";
 import type { UserUpdateFormFields } from "./FullUserProfileTypes";
 import FileDisplay from "../Reusables/FileDisplay/FileDisplay";
 import ProfilePictureComponent from "../ProfilePictureComponent/ProfilePictureComponent";
+import type { Post } from "../PostsListComponent/PostsListComponentTypes";
+import PostView from "../PostView/PostView";
 
 import "./FullUserProfile.css";
 
@@ -32,6 +34,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
   const [user, setUser] = useState<User | null>(null);
   const { setIsLoading, setLoadingMessage, isLoading } = useLoading();
   const [cities, setCities] = useState<City[]>([]);
+  const [posts, setPosts] = useState<Post[]>([]);
 
   const navigator = useNavigate();
 
@@ -165,16 +168,21 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
     fetchCities();
   }, [setIsLoading, settings]);
 
-  // const setUserData = () => {
-  //   setFormData({
-  //     lastName: user?.lastName,
-  //     firstName: user?.firstName,
-  //     birthDate: user?.birthDate?.toString(),
-  //     cityName: user?.cityName,
-  //     email: user?.email,
-  //     role: getUserRoleLabel(user?.role),
-  //   });
-  // };
+  useEffect(() => {
+    const fetchPostsForUser = async () => {
+      try {
+        setIsLoading(true);
+        const response = await publicAxios.get<Post[]>("/post/posts");
+        setPosts(
+          response.data.filter((post) => post.publisher?.id === user?.id),
+        );
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchPostsForUser();
+  }, [setIsLoading, user?.id]);
 
   useEffect(() => {
     setFormData({
@@ -305,8 +313,6 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       setLoadingMessage("Email küldése...");
 
       const response = await privateAxios.get("/user/update/password/send");
-      console.log("From the endpoint: /user/update/password/send");
-      console.log(response);
 
       if (response.status === 200) {
         setSuccess(true);
@@ -325,8 +331,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
       setIsLoading(true);
       setLoadingMessage("Kétfaktoros hitelesítés kikapcsolása...");
 
-      const response = await privateAxios.get("/auth/disable2fa");
-      console.log(response.data);
+      await privateAxios.get("/auth/disable2fa");
     } catch (err) {
       console.error(err);
     } finally {
@@ -433,7 +438,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             options={{ cityName: cityOptions }}
           />
 
-          {(user.banned && isAuthenticated) && (
+          {user.banned && isAuthenticated && (
             <p className="message error">A felhasználót bannolták!</p>
           )}
 
@@ -458,6 +463,41 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
             />
           )}
         </form>
+
+        {user.id !== authUser?.id && !settings && (
+          <a
+            href={`/chats/${user.id}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="btn btn-highlight"
+          >
+            Chatelés a felhasználóval
+          </a>
+        )}
+
+        {user.id !== authUser?.id && (
+          <>
+            <h2 className="profile-posts-content-title">
+              {user.lastName + " " + user.firstName + " posztjai:"}
+            </h2>
+
+            {posts.length === 0 && !isLoading && <p>Nincsenek posztok</p>}
+
+            <div className="posts-list-container">
+              {posts.map((post) => {
+                return (
+                  <PostView
+                    key={post.id}
+                    post={post}
+                    handleOnClick={() => {
+                      navigator("/posts/" + `${post.id}`);
+                    }}
+                  />
+                );
+              })}
+            </div>
+          </>
+        )}
       </div>
       <Footer />
     </>

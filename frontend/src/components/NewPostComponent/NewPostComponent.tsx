@@ -81,7 +81,6 @@ function NewPostComponent() {
 
     try {
       const response = await privateAxios.post("/post/new", formData);
-      console.log(response.data);
 
       navigate(`/posts/${response.data.id}`);
     } catch (err) {
@@ -89,8 +88,6 @@ function NewPostComponent() {
         message?: string;
         errors?: NewPostForm;
       }>;
-
-      console.log("");
 
       setValidationErrors(error.response?.data?.errors ?? {});
 

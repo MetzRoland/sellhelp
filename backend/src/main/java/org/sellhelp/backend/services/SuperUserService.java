@@ -6,7 +6,6 @@ import org.sellhelp.backend.dtos.responses.OwnedPostResponseDTO;
 import org.sellhelp.backend.dtos.responses.UserDTO;
 import org.sellhelp.backend.entities.Post;
 import org.sellhelp.backend.entities.User;
-import org.sellhelp.backend.enums.AuthProvider;
 import org.sellhelp.backend.exceptions.UserNotFoundException;
 import org.sellhelp.backend.repositories.PostRepository;
 import org.sellhelp.backend.repositories.UserRepository;
