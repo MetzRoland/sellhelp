@@ -174,7 +174,7 @@ function FullUserProfile({ settings }: FullUserProfileProps) {
         setIsLoading(true);
         const response = await publicAxios.get<Post[]>("/post/posts");
         setPosts(
-          response.data.filter((post) => post.publisher.id === user?.id),
+          response.data.filter((post) => post.publisher?.id === user?.id),
         );
       } finally {
         setIsLoading(false);
